@@ -1,2 +1,3 @@
-# codetango
+# CodeTango
+
 Codenames Stock Market Index
