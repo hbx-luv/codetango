@@ -17,6 +17,7 @@ export class WordListsService {
     return this.afs.collection('wordlists').add({name, words});
   }
 
+  // Warning - this is a complete replacement update
   updateWordList(id: string, words: Partial<WordList>): Promise<void> {
     return this.afs.collection('wordlists').doc(id).update(words);
   }
