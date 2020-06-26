@@ -25,14 +25,14 @@
       display: flex;
       justify-content: center;
 
-      input {
+      .create-input {
         height: 62px;
         width: 350px;
         padding: 5px 10px;
         font-size: 1.3em;
-        border: 1px solid #ddd;
         border-right: none;
         letter-spacing: .1em;
+        border: 1px solid #ddd;
       }
 
       .create-button {
@@ -40,9 +40,9 @@
         width: 120px;
         padding: 5px 10px;
         background: #e1f4d0;
-        border: 1px solid #ddd;
         font-size: 1em;
         vertical-align: top;
+        border: 1px solid #ddd;
       }
     }
   }

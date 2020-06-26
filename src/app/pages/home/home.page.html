@@ -6,13 +6,13 @@
         Play Codenames online across multiple devices on a shared board. To create a new game or join an existing game, enter a game identifier and click 'GO'.
       </p>
       <div class="input-container">
-        <input class="create-input" [(ngModel)]="roomName">
+        <ion-input class="create-input" [(ngModel)]="roomName"></ion-input>
         <button class="create-button" (click)="createRoom()" [disabled]="!roomName">
           {{ buttonAction }}
         </button>
       </div>
 
-      <div class="word-lists">
+      <!-- <div class="word-lists">
         <h2>Select a word list:</h2>
         <ion-chip *ngFor="let list of lists | async">
           <ion-label
@@ -22,7 +22,7 @@
             {{ list.name }}
           </ion-label>
         </ion-chip>
-      </div>
+      </div> -->
     </div>
   </div>
 </ion-content>
