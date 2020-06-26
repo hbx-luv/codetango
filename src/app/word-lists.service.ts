@@ -14,4 +14,8 @@ export class WordListsService {
   createWordList(name: string, words: string[]): Promise<DocumentReference> {
     return this.afs.collection('wordlists').add({name, words});
   }
+
+  updateWordList(id: string, words: string[]) {
+    return this.afs.collection('wordlists').doc(id).update({words});
+  }
 }
