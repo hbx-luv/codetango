@@ -11,5 +11,13 @@
       </div>
 
     </div>
+
+    <ion-button (click)="goToGame()">
+      Go to game
+    </ion-button>
+
+    <p *ngFor="let list of lists | async">
+      {{ list.name }}
+    </p>
   </div>
 </ion-content>
