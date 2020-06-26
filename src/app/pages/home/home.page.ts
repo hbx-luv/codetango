@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {WordList} from 'types';
 
-import {WordListsService} from '../word-lists.service';
+import {WordListsService} from '../../services/word-lists.service';
 
 @Component({
   selector: 'app-home',
@@ -24,8 +24,8 @@ export class HomePage {
     this.wordListsService.createWordList('MATT', ['THIS', 'IS', 'DANK']);
   }
 
-  createGame() {
-    // TODO: actually create a game
-    this.router.navigate(['game']);
+  createRoom() {
+    // TODO: actually create a room
+    this.router.navigate(['room']);
   }
 }
