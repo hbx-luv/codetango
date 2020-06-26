@@ -11,7 +11,7 @@
 
     <!-- we're in a lobby waiting for players -->
     <ng-container *ngIf="room.status === 'PREGAME'; else gameInProgress">
-      Ryan's code here for pregame stuff
+      <app-teams></app-teams>
     </ng-container>
 
     <!-- there is a game in progress -->

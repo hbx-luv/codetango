@@ -5,12 +5,14 @@ import {GameBoardComponent} from './game-board/game-board.component';
 import {GameComponent} from './game/game.component';
 import {CluesComponent} from './clues/clues.component';
 import {FormsModule} from '@angular/forms';
+import {TeamsComponent} from "./teams/teams.component";
 
 @NgModule({
   declarations: [
     GameBoardComponent,
     GameComponent,
-    CluesComponent
+    CluesComponent,
+    TeamsComponent
   ],
   imports: [
     IonicModule,
@@ -20,7 +22,8 @@ import {FormsModule} from '@angular/forms';
   exports: [
     GameBoardComponent,
     GameComponent,
-    CluesComponent
+    CluesComponent,
+    TeamsComponent
   ]
 })
 export class ComponentsModule {

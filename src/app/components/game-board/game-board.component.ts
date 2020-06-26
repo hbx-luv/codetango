@@ -51,7 +51,6 @@ export class GameBoardComponent {
     else {
       gameStatus = userOnBlueTeam === true ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
     }
-    console.log(gameStatus)
     return gameStatus;
   }
 
