@@ -38,6 +38,14 @@ export interface Team {
   elo: number;
 }
 
+// The clues that make up a game
+export interface Clue {
+  word: string;
+  guessCount: number;
+  createdAt: number;
+  team: GameStatus;
+}
+
 export interface Room {
   name: string;
   status: RoomStatus;
