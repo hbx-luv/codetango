@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
+import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
 import {RoomStatus, WordList} from 'types';
 
@@ -20,6 +21,7 @@ export class HomePage {
   constructor(
       private readonly roomService: RoomService,
       private readonly wordListsService: WordListsService,
+      public readonly authService: AuthService,
       private readonly router: Router,
   ) {
     this.lists = this.wordListsService.getWordLists().pipe(tap(wordLists => {
@@ -29,24 +31,25 @@ export class HomePage {
     }));
   }
 
-  get buttonAction(): string {
-    // TODO: maybe someday show 'Create' or 'Join' as they change the text in
-    // the input box
-    return 'GO';
-  }
-
   selectWordList(list: WordList) {
     this.selectedWordList = list;
   }
 
   async createRoom() {
-    const id = await this.roomService.createRoom({
-      name: this.roomName,
-      status: RoomStatus.PREGAME,
-      timer: 120,
-      firstTurnTimer: 180,
-      enforceTimer: false
-    });
-    this.router.navigate(['room', id]);
+    if (this.roomName) {
+      if (!this.authService.authenticated) {
+        await this.authService.loginWithGoogle();
+      }
+
+      const id = await this.roomService.createRoom({
+        name: this.roomName,
+        status: RoomStatus.PREGAME,
+        timer: 120,
+        firstTurnTimer: 180,
+        enforceTimer: false,
+        userIds: []
+      });
+      this.router.navigate(['room', id]);
+    }
   }
 }

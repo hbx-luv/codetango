@@ -31,6 +31,15 @@ export class CluesComponent implements OnInit {
     });
   }
 
+  getColor() {
+    switch (this.game.status) {
+      case GameStatus.BLUES_TURN:
+        return 'blue:';
+      case GameStatus.REDS_TURN:
+        return 'red';
+    }
+  }
+
   currentTeam() {
     switch (this.game.status) {
       case GameStatus.BLUES_TURN:
@@ -63,7 +72,13 @@ export class CluesComponent implements OnInit {
     return this.afs
         .collection<Game>('games')
         .doc(this.game.id)
-        .collection<Clue>('clues')
+        .collection<Clue>(
+          'clues',
+          ref => {
+            return ref
+                .orderBy('createdAt', 'desc');
+          }
+        )
         .valueChanges()
         .pipe(tap(clues => {
           this.clues = clues;
