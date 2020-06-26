@@ -19,7 +19,7 @@ export class GameComponent {
 
   get playingInGame(): boolean {
     // TODO: also check that the user is actually playing the game
-    return true //this.authService.authenticated;
+    return this.authService.authenticated;
   }
 
   get spymaster(): boolean {
