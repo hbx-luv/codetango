@@ -1,15 +1,15 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>
-      CodeTango
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true">
+  <div id="home-container">
+    <div class="new-game-container">
+      <h1 class="title">CODETANGO</h1>
+      <p class="description">
+        Play Codenames online across multiple devices on a shared board. To create a new game or join an existing game, enter a game identifier and click 'GO'.
+      </p>
+      <div class="input-container">
+        <input class="create-input">
+        <button class="create-button">Create Game</button>
+      </div>
 
-  <div id="container">
-    <p>Write dank code here</p>
-    <ion-button (click)="createWords()">Create!</ion-button>
+    </div>
   </div>
 </ion-content>
