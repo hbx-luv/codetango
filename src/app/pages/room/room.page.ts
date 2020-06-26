@@ -1,18 +1,21 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Observable} from 'rxjs';
+import {Observable, ReplaySubject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 import {GameService} from 'src/app/services/game.service';
 import {RoomService} from 'src/app/services/room.service';
-import {Game, Room} from 'types';
+import {Game, Room, RoomStatus} from 'types';
 
 @Component({
   selector: 'app-room',
   templateUrl: './room.page.html',
   styleUrls: ['./room.page.scss'],
 })
-export class RoomPage {
+export class RoomPage implements OnDestroy {
+  private destroyed = new ReplaySubject<never>();
+
   roomId: string;
-  room$: Observable<Room>;
+  room: Room;
   currentGame$: Observable<Game>;
 
   constructor(
@@ -21,7 +24,27 @@ export class RoomPage {
       private readonly route: ActivatedRoute,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
-    this.room$ = this.roomService.getRoom(this.roomId);
     this.currentGame$ = this.gameService.getCurrentGame(this.roomId);
+
+    this.roomService.getRoom(this.roomId)
+        .pipe(takeUntil(this.destroyed))
+        .subscribe(room => {
+          this.room = room;
+        });
+  }
+
+  get pregaming(): boolean {
+    return this.room && this.room.status === RoomStatus.PREGAME;
+  }
+
+  get gameInProgress(): boolean {
+    return this.room && [
+      RoomStatus.GAME_ENDED,
+      RoomStatus.GAME_IN_PROGRESS,
+    ].includes(this.room.status);
+  }
+
+  ngOnDestroy() {
+    this.destroyed.next();
   }
 }

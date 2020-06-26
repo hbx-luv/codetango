@@ -1,25 +1,34 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title *ngIf="room$ | async as room">
-      {{ room.name }}
+    <ion-title>
+      {{ room?.name }}
     </ion-title>
+    <ion-buttons slot="end">
+      <app-game-join-button></app-game-join-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ng-container *ngIf="room$ | async as room">
+  <ng-container *ngIf="room; else loading">
 
     <!-- we're in a lobby waiting for players -->
-    <ng-container *ngIf="room.status === 'PREGAME'; else gameInProgress">
+    <ng-container *ngIf="pregaming">
       <app-teams [room]="room"></app-teams>
     </ng-container>
 
     <!-- there is a game in progress -->
-    <ng-template #gameInProgress>
+    <ng-container *ngIf="gameInProgress">
       <ng-container *ngIf="currentGame$ | async as game">
         <app-game [room]="room" [game]="game"></app-game>
       </ng-container>
-    </ng-template>
+    </ng-container>
 
   </ng-container>
+
+  <ng-template #loading>
+    <div class="spinner-container">
+      <ion-spinner></ion-spinner>
+    </div>
+  </ng-template>
 </ion-content>
