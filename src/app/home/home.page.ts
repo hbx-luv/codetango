@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
+import {WordListsService} from '../word-lists.service';
 
 @Component({
   selector: 'app-home',
@@ -6,7 +7,11 @@ import { Component } from '@angular/core';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
+  constructor(
+      private readonly wordListsService: WordListsService,
+  ) {}
 
-  constructor() {}
-
+  createWords() {
+    this.wordListsService.createWordList('MATT', ['THIS', 'IS', 'DANK']);
+  }
 }
