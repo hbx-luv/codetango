@@ -1,7 +1,7 @@
 <p>
-  <ion-grid>
-    <ion-row *ngFor="let row in chunkedWords">
-      <ion-col *ngFor="let word in row">
+  <ion-grid id="grid-container">
+    <ion-row *ngFor="let row of chunkedWords">
+      <ion-col *ngFor="let word of row">
           <div>{{ word }}</div>
       </ion-col>
     </ion-row>
