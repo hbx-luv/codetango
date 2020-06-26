@@ -8,5 +8,6 @@
   <ng-container *ngIf="room$ | async as room">
     {{ room.name }}
     <app-game [room]="room"></app-game>
+    <app-clues></app-clues>
   </ng-container>
 </ion-content>

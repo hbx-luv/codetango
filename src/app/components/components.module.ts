@@ -3,19 +3,24 @@ import {NgModule} from '@angular/core';
 import {IonicModule} from '@ionic/angular';
 import {GameBoardComponent} from './game-board/game-board.component';
 import {GameComponent} from './game/game.component';
+import {CluesComponent} from './clues/clues.component';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
     GameBoardComponent,
-    GameComponent
+    GameComponent,
+    CluesComponent
   ],
   imports: [
     IonicModule,
     CommonModule,
+    FormsModule,
   ],
   exports: [
     GameBoardComponent,
-    GameComponent
+    GameComponent,
+    CluesComponent
   ]
 })
 export class ComponentsModule {
