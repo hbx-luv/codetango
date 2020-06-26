@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {Observable} from 'rxjs';
 import {GameService} from 'src/app/services/game.service';
-import {Room} from 'types';
+import {Game, Room} from 'types';
 
 @Component({
   selector: 'app-game',
@@ -9,8 +10,13 @@ import {Room} from 'types';
 })
 export class GameComponent {
   @Input() room: Room;
+  game$: Observable<Game>;
 
   constructor(
       private readonly gameService: GameService,
-  ) {}
+  ) {
+    // TODO: get real room id from route
+    const roomId = 'testRoom';
+    this.game$ = this.gameService.getCurrentGame(roomId);
+  }
 }

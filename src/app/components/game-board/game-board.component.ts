@@ -1,20 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {Tile, TileRole} from '../../../../types';
+import {Component, Input} from '@angular/core';
+import {GameService} from 'src/app/services/game.service';
+
+import {Game, Tile, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-game-board',
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss'],
 })
-export class GameBoardComponent implements OnInit {
+export class GameBoardComponent {
+  @Input() game: Game;
 
-  chunkedWords = [];
-
-  constructor() { }
-
-  ngOnInit() {
-    this.mockTile();
-  }
+  constructor(
+      private readonly gameService: GameService,
+  ) {}
 
   getColor(tile: Tile): string {
     if (!tile.selected) {
@@ -26,7 +25,7 @@ export class GameBoardComponent implements OnInit {
         case TileRole.CIVILIAN:
           return 'light';
         case TileRole.BLUE:
-          return 'default';
+          return 'primary';
         case TileRole.RED:
           return 'danger';
       }
@@ -36,19 +35,11 @@ export class GameBoardComponent implements OnInit {
   selectTile(tile: Tile, username: string) {
     tile.selected = true;
     tile.selectedBy = username;
+    // TODO persist to DB
   }
-  mockTile() {
-    const tileArr = []
-    for (let i = 0; i < 25; i++) {
-      tileArr.push(
-      {
-        word: 'A',
-        role:  i < 12 ? TileRole.CIVILIAN : TileRole.ASSASSIN,
-        selected: false,
-        selectedBy: 'ryry'
-      });
-    }
-    this.chunkedWords = this.chunk(tileArr, 5);
+
+  get chunkedWords(): Array<Tile> {
+    return this.chunk(this.game.tiles, 5);
   }
 
   chunk(arr: Tile[], size: number): Array<Tile> {
@@ -58,5 +49,4 @@ export class GameBoardComponent implements OnInit {
     }
     return chunkedArray;
   }
-
 }
