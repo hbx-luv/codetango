@@ -34,13 +34,16 @@ export class RoomPage implements OnDestroy {
   }
 
   get pregaming(): boolean {
-    return this.room && this.room.status === RoomStatus.PREGAME;
+    return this.room && [
+      RoomStatus.PREGAME,
+      RoomStatus.ASSIGNING_ROLES,
+    ].includes(this.room.status);
   }
 
   get gameInProgress(): boolean {
     return this.room && [
-      RoomStatus.GAME_ENDED,
       RoomStatus.GAME_IN_PROGRESS,
+      RoomStatus.GAME_ENDED,
     ].includes(this.room.status);
   }
 

@@ -1,30 +1,31 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
-import {GameService} from '../../services/game.service';
 import * as _ from 'lodash';
-import {RoomService} from '../../services/room.service';
 import {Observable} from 'rxjs';
 
+import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
+import {GameService} from '../../services/game.service';
+import {RoomService} from '../../services/room.service';
+
 @Component({
-  selector: 'app-teams',
+  selector: 'app-pregame',
   templateUrl: './pregame.component.html',
   styleUrls: ['./pregame.component.scss'],
 })
 export class PregameComponent implements OnInit {
   @Input() user: User;
   @Input() room: Room;
+  @Input() game: Game;
   currentGame$: Observable<Game>;
   teams: Team[];
   constructedGame: Partial<Game>;
 
   constructor(
       private readonly gameService: GameService,
-      private readonly roomService: RoomService
-  ) { }
+      private readonly roomService: RoomService) {}
 
   ngOnInit() {}
 
-  async assignUsersToRandomTeams() {
+  assignUsersToRandomTeams() {
     const redTeamUsers = [];
     const blueTeamUsers = [];
     const roomSize = this.room.userIds.length;
@@ -38,27 +39,18 @@ export class PregameComponent implements OnInit {
       }
     }
 
-    const redTeam = {
-      color: TileRole.RED,
-      userIds: redTeamUsers
-    };
-    const blueTeam = {
-      color: TileRole.BLUE,
-      userIds: blueTeamUsers
-    };
-
-    await this.roomService.updateRoom(this.room.id, {status: RoomStatus.ASSIGNING_ROLES});
-    this.constructedGame = {
+    const redTeam = {color: TileRole.RED, userIds: redTeamUsers};
+    const blueTeam = {color: TileRole.BLUE, userIds: blueTeamUsers};
+    this.roomService.updateRoom(this.room.id, {status: RoomStatus.ASSIGNING_ROLES});
+    this.gameService.createGame({
       createdAt: Date.now(),
       blueTeam,
       redTeam,
       roomId: this.room.id
-    };
-    console.log(this.constructedGame);
-    console.log(this.room);
+    });
   }
-  startGame() {
-    this.gameService.createGame(this.constructedGame);
+  assignRedSpymaster(userId: string) {
+    this.gameService.updateGame(this.game.id, {redTeam: {spymaster: userId} });
   }
 
   // assignUserToInProgressGame() {

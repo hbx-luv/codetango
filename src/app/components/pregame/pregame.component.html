@@ -15,41 +15,28 @@
     </ion-button>
   </ion-list>
 </div>
-<div *ngIf="room && room.status === 'ASSIGNING_ROLES'">
+<div *ngIf="room && room.status === 'ASSIGNING_ROLES' && game">
   <h1>Assign A Spymaster</h1>
-  <ion-list>
+  <ion-list class="red-team">
     <ion-list-header>
       <ion-label>
         <h2>Red Team</h2>
       </ion-label>
     </ion-list-header>
-    <ion-item *ngFor="let redUser of constructedGame.redTeam.userIds">
+    <ion-item *ngFor="let redUser of game.redTeam.userIds">
       <app-users [userId]="redUser"></app-users>
+      <button (click)="assignSpymaster(redUser)"></button>
     </ion-item>
   </ion-list>
+  <br/>
   <ion-list>
     <ion-list-header>
       <ion-label>
         <h2>Blue Team</h2>
       </ion-label>
     </ion-list-header>
-    <ion-item *ngFor="let redUser of constructedGame.blueTeam.userIds">
+    <ion-item *ngFor="let redUser of game.blueTeam.userIds">
       <app-users [userId]="redUser"></app-users>
     </ion-item>
   </ion-list>
 </div>
-<!--<div *ngIf="room && room.status !== 'PREGAME">-->
-<!--  <ion-list>-->
-<!--    <ion-list-header>-->
-<!--      <ion-label>-->
-<!--        <h1>Red Team</h1>-->
-<!--      </ion-label>-->
-<!--    </ion-list-header>-->
-<!--    <ion-item *ngFor="let userId of room.userIds">-->
-<!--      <app-users [userId]="userId"></app-users>-->
-<!--    </ion-item>-->
-<!--    <ion-button (click)="assignUsersToRandomTeams()">-->
-<!--      Assign Teams-->
-<!--    </ion-button>-->
-<!--  </ion-list>-->
-<!--</div>-->
