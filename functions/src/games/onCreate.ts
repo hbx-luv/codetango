@@ -22,8 +22,12 @@ export const onCreateGame =
           const blueTeamNumberOfTiles =
               tiles.filter(tile => tile.role === TileRole.BLUE);
           if (blueTeamNumberOfTiles.length === 9) {
+            game.blueAgents = 9;
+            game.redAgents = 8;
             game.status = GameStatus.BLUES_TURN;
           } else {
+            game.blueAgents = 8;
+            game.redAgents = 9;
             game.status = GameStatus.REDS_TURN;
           }
 
