@@ -16,7 +16,7 @@ export class GameBoardComponent implements OnInit {
     this.getWordList();
   }
 
-  getColor(tile: Tile) {
+  getColor(tile: Tile): string {
     if (!tile.selected) {
       return 'medium';
     } else {
@@ -33,6 +33,11 @@ export class GameBoardComponent implements OnInit {
     }
   }
 
+  selectTile(tile: Tile, username: string) {
+    tile.selected = true;
+    tile.selectedBy = username;
+  }
+
   getWordList() {
     const test = 'A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y';
     const testArr = test.split(',');
@@ -44,7 +49,7 @@ export class GameBoardComponent implements OnInit {
 
   checkWord() {}
 
-  chunk(arr, size) {
+  chunk(arr: Tile[], size: number): Array<Tile> {
     const chunkedArray = [];
     for (let i = 0; i < arr.length; i += size) {
       chunkedArray.push(arr.slice(i, i + size));
