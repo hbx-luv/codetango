@@ -1,17 +1,17 @@
 // the different types of roles a tile represents
 export enum TileRole {
-  RED,
-  BLUE,
-  CIVILIAN,
-  ASSASSIN,
+  RED = 'RED',
+  BLUE = 'BLUE',
+  CIVILIAN = 'CIVILIAN',
+  ASSASSIN = 'ASSASSIN',
 }
 
 // the various states that the game can be in
 export enum GameStatus {
-  REDS_TURN,
-  BLUES_TURN,
-  RED_WON,
-  BLUE_WON,
+  REDS_TURN = 'REDS_TURN',
+  BLUES_TURN = 'BLUES_TURN',
+  RED_WON = 'RED_WON',
+  BLUE_WON = 'BLUE_WON',
 }
 
 // the word/image to display on the board as well as information about
