@@ -1,8 +1,6 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {Game, Tile, TileRole} from "../../../types";
-
-// import {CoordinateMap, Game, Move, Outcome, Piece} from '../../../../types';
+import {Game, GameStatus, Tile, TileRole} from "../../../types";
 
 try {
   admin.initializeApp();
@@ -108,13 +106,19 @@ export const onCreateGame =
     .onCreate(async (snapshot, _context) => {
       // Add the random stuff to this game
       const gameReference = snapshot.ref;
-      // const gameSnapShot = await gameReference!.get();
-      // const game = gameSnapShot.data() as Game;
+      const gameSnapShot = await gameReference!.get();
+      const game = gameSnapShot.data() as Game;
 
       // Add 25 random cards to the game
       const tiles = generateNewGameTiles();
-      // game.tiles = generateNewGameTiles();
+      game.tiles = tiles;
+      const blueTeamNumberOfTiles = tiles.filter(tile => tile.role === TileRole.BLUE);
+      if (blueTeamNumberOfTiles.length === 9) {
+        game.status = GameStatus.BLUES_TURN;
+      } else {
+        game.status = GameStatus.REDS_TURN;
+      }
 
-      gameReference.update({tiles});
+      gameReference.update(game);
 
     });
