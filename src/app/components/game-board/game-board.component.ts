@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 
 import {Game, GameStatus, Tile, TileRole, User} from '../../../../types';
@@ -14,6 +15,7 @@ export class GameBoardComponent {
   @Input() readonly: boolean;
 
   constructor(
+      private readonly authService: AuthService,
       private readonly gameService: GameService,
   ) {}
 
@@ -36,7 +38,7 @@ export class GameBoardComponent {
 
   selectTile(tile: Tile) {
     tile.selected = true;
-    tile.selectedBy = this.user.name;
+    tile.selectedBy = this.authService.currentUserId;
     this.gameService.updateGame(
         this.game.id,
         {tiles: this.game.tiles, status: this.getGameStatus(tile)});
