@@ -1,3 +1,9 @@
 <p>
-  game-board works!
+  <ion-grid>
+    <ion-row *ngFor="let row in chunkedWords">
+      <ion-col *ngFor="let word in row">
+          <div>{{ word }}</div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </p>
