@@ -22,7 +22,7 @@ export class CluesComponent implements OnInit {
   clues = [];
 
   get currentClue() {
-    return this.clues[0];
+    return this.clues.filter(clue => clue.team === this.currentTeam())[0];
   }
 
   ngOnInit() {
@@ -31,11 +31,19 @@ export class CluesComponent implements OnInit {
     });
   }
 
-  getColor() {
-    switch (this.game.status) {
-      case GameStatus.BLUES_TURN:
-        return 'blue:';
-      case GameStatus.REDS_TURN:
+  getColor(clue) {
+    let team;
+
+    if (!clue) {
+      team = this.currentTeam();
+    } else {
+      team = clue.team;
+    }
+
+    switch (team) {
+      case 'BLUE CLUE':
+        return 'blue';
+      case 'RED CLUE':
         return 'red';
     }
   }
@@ -43,7 +51,7 @@ export class CluesComponent implements OnInit {
   currentTeam() {
     switch (this.game.status) {
       case GameStatus.BLUES_TURN:
-        return 'BLUE CLUE:';
+        return 'BLUE CLUE';
       case GameStatus.REDS_TURN:
         return 'RED CLUE';
       default:
