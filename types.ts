@@ -16,8 +16,7 @@ export enum GameStatus {
 
 // the various states thew room can be in
 export enum RoomStatus {
-  WAITING_FOR_PLAYERS = 'WAITING_FOR_PLAYERS',
-  PICK_SPYMASTER = 'PICK_SPYMASTER',
+  PREGAME = 'PREGAME',
   GAME_IN_PROGRESS = 'GAME_IN_PROGRESS',
   GAME_ENDED = 'GAME_ENDED'
 }

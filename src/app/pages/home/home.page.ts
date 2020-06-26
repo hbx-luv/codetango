@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {RoomService} from 'src/app/services/room.service';
-import {WordList} from 'types';
+import {RoomStatus, WordList} from 'types';
 
 import {WordListsService} from '../../services/word-lists.service';
 
@@ -42,6 +42,7 @@ export class HomePage {
   async createRoom() {
     const id = await this.roomService.createRoom({
       name: this.roomName,
+      status: RoomStatus.PREGAME,
       timer: 120,
       firstTurnTimer: 180,
       enforceTimer: false

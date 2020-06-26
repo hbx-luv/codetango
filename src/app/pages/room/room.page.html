@@ -8,7 +8,17 @@
 
 <ion-content>
   <ng-container *ngIf="room$ | async as room">
-    <app-game [room]="room"></app-game>
-    <app-clues></app-clues>
+
+    <!-- we're in a lobby waiting for players -->
+    <ng-container *ngIf="room.status === 'PREGAME'; else gameInProgress">
+      Ryan's code here for pregame stuff
+    </ng-container>
+
+    <!-- there is a game in progress -->
+    <ng-template #gameInProgress>
+      <app-game [room]="room"></app-game>
+      <app-clues></app-clues>
+    </ng-template>
+
   </ng-container>
 </ion-content>
