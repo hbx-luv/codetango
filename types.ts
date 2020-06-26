@@ -88,6 +88,7 @@ export interface User {
   email: string;
   photoURL?: string;
   elo: number;  // needs to default, 1200?
+  id?: string;
 }
 
 // /wordlists

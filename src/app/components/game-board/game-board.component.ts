@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {GameService} from 'src/app/services/game.service';
 
-import {Game, Tile, TileRole} from '../../../../types';
+import {Game, GameStatus, Tile, TileRole, User} from '../../../../types';
 
 @Component({
   selector: 'app-game-board',
@@ -10,6 +10,7 @@ import {Game, Tile, TileRole} from '../../../../types';
 })
 export class GameBoardComponent {
   @Input() game: Game;
+  @Input() user: User;
 
   constructor(
       private readonly gameService: GameService,
@@ -32,11 +33,26 @@ export class GameBoardComponent {
     }
   }
 
-  selectTile(tile: Tile, username: string) {
+  selectTile(tile: Tile) {
     tile.selected = true;
-    // tile.selectedBy = username;
-    // TODO: use the real ID dammit
-    this.gameService.updateGame('testGame', {tiles: this.game.tiles});
+    tile.selectedBy = this.user.name;
+    this.gameService.updateGame(this.game.id, {
+      tiles: this.game.tiles,
+      status: this.getGameStatus(tile)
+    });
+  }
+
+  getGameStatus(tile: Tile) {
+    let gameStatus;
+    const userOnBlueTeam = this.game.blueTeam.userIds.includes(this.user.id);
+    if (tile.role === TileRole.ASSASSIN) {
+      gameStatus = userOnBlueTeam === true ? GameStatus.RED_WON : GameStatus.BLUE_WON;
+    }
+    else {
+      gameStatus = userOnBlueTeam === true ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
+    }
+    console.log(gameStatus)
+    return gameStatus;
   }
 
   get chunkedWords(): Array<Tile> {
