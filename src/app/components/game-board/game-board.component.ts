@@ -7,14 +7,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class GameBoardComponent implements OnInit {
 
-  chunkedWords = []
+  chunkedWords = [];
 
   constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.getWordList();
+  }
 
   getWordList() {
-    const test = 'A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y'
+    const test = 'A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y';
     const testArr = test.split(',');
     this.chunkedWords = this.chunk(testArr, 5);
     // TODO - Actually get live words
