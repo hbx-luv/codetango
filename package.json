@@ -4,15 +4,17 @@
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {
+    "serve": "ionic serve",
+    "update": "git pull && npm i && cd functions && npm i && cd ..",
+    "deploy": "npm run update && ionic build && firebase deploy",
+    "deploy-hosting": "npm run update && ionic build && firebase deploy --only hosting",
+
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "update": "git pull && npm i && cd functions && npm i && cd ..",
-    "deploy": "npm run update && ionic build && firebase deploy",
-    "deploy-hosting": "npm run update && ionic build && firebase deploy --only hosting"
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {

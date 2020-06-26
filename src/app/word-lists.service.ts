@@ -1,5 +1,7 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
+import {Observable} from 'rxjs';
+import {WordList} from 'types';
 
 @Injectable({providedIn: 'root'})
 export class WordListsService {
@@ -7,15 +9,15 @@ export class WordListsService {
       private afs: AngularFirestore,
   ) {}
 
-  getWordLists() {
-    return this.afs.collection('wordlists').valueChanges();
+  getWordLists(): Observable<WordList[]> {
+    return this.afs.collection<WordList>('wordlists').valueChanges();
   }
 
   createWordList(name: string, words: string[]): Promise<DocumentReference> {
     return this.afs.collection('wordlists').add({name, words});
   }
 
-  updateWordList(id: string, words: string[]) {
-    return this.afs.collection('wordlists').doc(id).update({words});
+  updateWordList(id: string, words: Partial<WordList>): Promise<void> {
+    return this.afs.collection('wordlists').doc(id).update(words);
   }
 }
