@@ -1,18 +1,8 @@
-<div>
-  <ion-list *ngFor="let user of currentUsers">
-    {{user.}}
+<!-- If the game isn't in progress, show all users *ngIf="blueTeamUsers.length === 0 || redTeamUsers.length === 0"-->
+<div *ngIf="room">
+  <ion-list >
+    <ion-item *ngFor="let userId of room.userIds">
+      <app-users [userId]="userId"></app-users>
+    </ion-item>
   </ion-list>
 </div>
-
-
-
-
-<ion-row *ngFor="let row of chunkedWords">
-  <ion-col *ngFor="let tile of row">
-    <div class="word-container">
-      <ion-button [color]="getColor(tile)" class="word" (click)="selectTile(tile)">
-        {{ tile.word }}
-      </ion-button>
-    </div>
-  </ion-col>
-</ion-row>

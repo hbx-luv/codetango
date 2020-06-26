@@ -13,24 +13,18 @@ export class TeamsComponent implements OnInit {
   @Input() user: User;
   @Input() room: Room;
   @Input() currentGame: Game;
-  currentUsers: string[];
-  users: User[];
 
   constructor(
-      private readonly gameService: GameService,
-      private readonly roomService: RoomService
+      private readonly gameService: GameService
   ) { }
 
-  ngOnInit() {
-    this.currentUsers = this.room.userIds;
-
-  }
+  ngOnInit() {}
 
   assignUsersToRandomTeams() {
     const redTeamUsers = [];
     const blueTeamUsers = [];
-    const roomSize = this.currentUsers.length;
-    const randomizedUsers = _.shuffle(this.currentUsers);
+    const roomSize = this.room.userIds.length;
+    const randomizedUsers = _.shuffle(this.room.userIds.length);
 
     for (let i = 0; i < roomSize; i++) {
       if (i % 2 === 0) {
@@ -55,7 +49,7 @@ export class TeamsComponent implements OnInit {
     return [redTeam, blueTeam];
   }
 
-  assignTeams() {
+  assignUserToInProgressGame() {
     const userAlreadyOnBlue = this.currentGame.blueTeam.userIds.includes(this.user.id);
     const userAlreadyOnRed = this.currentGame.redTeam.userIds.includes(this.user.id);
 
@@ -72,7 +66,6 @@ export class TeamsComponent implements OnInit {
       this.gameService.updateGame(this.currentGame.id, this.currentGame);
     }
   }
-  seeIf
   addUserToBlueTeam() {
     this.currentGame.blueTeam.userIds.push(this.user.id);
   }

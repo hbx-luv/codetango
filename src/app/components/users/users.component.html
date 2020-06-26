@@ -1,0 +1,8 @@
+<div *ngIf="user$ | async as user">
+    <ion-chip>
+        <ion-avatar>
+            <img src="{{user.photoURL}}">
+        </ion-avatar>
+        <ion-label>{{user.name}}</ion-label>
+    </ion-chip>
+</div>
