@@ -1,0 +1,26 @@
+<p>
+  <ion-item>
+    <ion-label for="clue-input"> Clue: </ion-label>
+    <ion-input name="clue-input"
+               type="text"
+               placeholder="Enter your damn clue"
+               [(ngModel)]="clue">
+    </ion-input>
+  </ion-item>
+  <ion-item >
+    <ion-label for="clue-count-input"> Clue Count: </ion-label>
+    <ion-input name="clue-count-input"
+               type="number"
+               placeholder="Enter the amount"
+               [(ngModel)]="clueCount">
+    </ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-button name="give-clue-button"
+                (click)="submitClue()"
+                color="primary"
+                [disabled]="!clueCount || !clue">
+      Submit
+    </ion-button>
+  </ion-item>
+</p>
