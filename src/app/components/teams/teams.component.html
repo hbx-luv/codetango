@@ -1,3 +1,18 @@
-<p>
-  teams works!
-</p>
+<div>
+  <ion-list *ngFor="let user of currentUsers">
+    {{user.}}
+  </ion-list>
+</div>
+
+
+
+
+<ion-row *ngFor="let row of chunkedWords">
+  <ion-col *ngFor="let tile of row">
+    <div class="word-container">
+      <ion-button [color]="getColor(tile)" class="word" (click)="selectTile(tile)">
+        {{ tile.word }}
+      </ion-button>
+    </div>
+  </ion-col>
+</ion-row>

@@ -1,6 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Game, GameStatus, Room, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
+import * as _ from 'lodash';
+import {RoomService} from '../../services/room.service';
 
 @Component({
   selector: 'app-teams',
@@ -11,13 +13,46 @@ export class TeamsComponent implements OnInit {
   @Input() user: User;
   @Input() room: Room;
   @Input() currentGame: Game;
+  currentUsers: string[];
+  users: User[];
 
   constructor(
       private readonly gameService: GameService,
+      private readonly roomService: RoomService
   ) { }
 
   ngOnInit() {
-    this.assignTeams();
+    this.currentUsers = this.room.userIds;
+
+  }
+
+  assignUsersToRandomTeams() {
+    const redTeamUsers = [];
+    const blueTeamUsers = [];
+    const roomSize = this.currentUsers.length;
+    const randomizedUsers = _.shuffle(this.currentUsers);
+
+    for (let i = 0; i < roomSize; i++) {
+      if (i % 2 === 0) {
+        redTeamUsers.push(randomizedUsers[i]);
+      } else {
+        blueTeamUsers.push(randomizedUsers[i]);
+      }
+    }
+
+    const redTeam = {
+      color: 'red',
+      spymaster: null,
+      userIds: redTeamUsers,
+      elo: null
+    };
+    const blueTeam = {
+      color: 'blue',
+      spymaster: null,
+      userIds: blueTeamUsers,
+      elo: null
+    };
+    return [redTeam, blueTeam];
   }
 
   assignTeams() {
@@ -37,6 +72,7 @@ export class TeamsComponent implements OnInit {
       this.gameService.updateGame(this.currentGame.id, this.currentGame);
     }
   }
+  seeIf
   addUserToBlueTeam() {
     this.currentGame.blueTeam.userIds.push(this.user.id);
   }
