@@ -12,12 +12,12 @@
 <ion-content>
   <ng-container *ngIf="room; else loading">
 
-    <!-- we're in a lobby waiting for players -->
+    <!-- we're in a lobby waiting for players and assigning teams -->
     <ng-container *ngIf="pregaming">
-      <app-teams [room]="room"></app-teams>
+      <app-pregame [room]="room"></app-teams>
     </ng-container>
 
-    <!-- there is a game in progress -->
+    <!-- there is a game in progress or it just ended -->
     <ng-container *ngIf="gameInProgress">
       <ng-container *ngIf="currentGame$ | async as game">
         <app-game [room]="room" [game]="game"></app-game>

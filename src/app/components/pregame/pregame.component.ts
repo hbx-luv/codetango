@@ -1,12 +1,13 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
-import {GameService} from '../../services/game.service';
 import * as _ from 'lodash';
-import {RoomService} from '../../services/room.service';
 import {Observable} from 'rxjs';
 
+import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
+import {GameService} from '../../services/game.service';
+import {RoomService} from '../../services/room.service';
+
 @Component({
-  selector: 'app-teams',
+  selector: 'app-pregame',
   templateUrl: './pregame.component.html',
   styleUrls: ['./pregame.component.scss'],
 })
@@ -19,8 +20,7 @@ export class PregameComponent implements OnInit {
 
   constructor(
       private readonly gameService: GameService,
-      private readonly roomService: RoomService
-  ) { }
+      private readonly roomService: RoomService) {}
 
   ngOnInit() {}
 
@@ -38,30 +38,23 @@ export class PregameComponent implements OnInit {
       }
     }
 
-    const redTeam = {
-      color: TileRole.RED,
-      userIds: redTeamUsers
-    };
-    const blueTeam = {
-      color: TileRole.BLUE,
-      userIds: blueTeamUsers
-    };
+    const redTeam = {color: TileRole.RED, userIds: redTeamUsers};
+    const blueTeam = {color: TileRole.BLUE, userIds: blueTeamUsers};
 
-    this.roomService.updateRoom(this.room.id, { status: RoomStatus.ASSIGNING_ROLES });
-    this.constructedGame = {
-      createdAt: Date.now(),
-      blueTeam,
-      redTeam,
-      roomId: this.room.id
-    };
+    this.roomService.updateRoom(
+        this.room.id, {status: RoomStatus.ASSIGNING_ROLES});
+    this.constructedGame =
+        {createdAt: Date.now(), blueTeam, redTeam, roomId: this.room.id};
   }
   startGame() {
     this.gameService.createGame(this.constructedGame);
   }
 
   assignUserToInProgressGame() {
-    const userAlreadyOnBlue = this.currentGame.blueTeam.userIds.includes(this.user.id);
-    const userAlreadyOnRed = this.currentGame.redTeam.userIds.includes(this.user.id);
+    const userAlreadyOnBlue =
+        this.currentGame.blueTeam.userIds.includes(this.user.id);
+    const userAlreadyOnRed =
+        this.currentGame.redTeam.userIds.includes(this.user.id);
 
     const redTeamCount = this.currentGame.redTeam.userIds.length;
     const blueTeamCount = this.currentGame.blueTeam.userIds.length;
