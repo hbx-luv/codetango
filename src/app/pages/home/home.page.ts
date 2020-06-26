@@ -40,13 +40,15 @@ export class HomePage {
   }
 
   async createRoom() {
-    const id = await this.roomService.createRoom({
-      name: this.roomName,
-      status: RoomStatus.PREGAME,
-      timer: 120,
-      firstTurnTimer: 180,
-      enforceTimer: false
-    });
-    this.router.navigate(['room', id]);
+    if (this.roomName) {
+      const id = await this.roomService.createRoom({
+        name: this.roomName,
+        status: RoomStatus.PREGAME,
+        timer: 120,
+        firstTurnTimer: 180,
+        enforceTimer: false
+      });
+      this.router.navigate(['room', id]);
+    }
   }
 }
