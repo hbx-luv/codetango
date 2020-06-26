@@ -1,4 +1,5 @@
 <!-- If the game isn't in progress, show all users *ngIf="blueTeamUsers.length === 0 || redTeamUsers.length === 0"-->
+{{ room?.status }}
 <div *ngIf="room && room.status === 'PREGAME'">
   <ion-list>
     <ion-list-header>
