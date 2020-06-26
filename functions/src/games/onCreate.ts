@@ -8,6 +8,8 @@ try {
   console.log(e);
 }
 
+const db = admin.firestore();
+
 export const onCreateGame =
     functions.firestore.document('games/{gameId}')
         .onCreate(async (snapshot, _context) => {
@@ -17,7 +19,7 @@ export const onCreateGame =
           const game = gameSnapShot.data() as Game;
 
           // Add 25 random cards to the game
-          const tiles = generateNewGameTiles();
+          const tiles = await generateNewGameTiles();
           game.tiles = tiles;
           const blueTeamNumberOfTiles =
               tiles.filter(tile => tile.role === TileRole.BLUE);
@@ -93,22 +95,35 @@ function assignRandomTileTeams():
   }
 }
 
-function getTwentyFiveWords(): string[] {
-  // Fetch words from the word list
-  // if we have previous words, avoid those words somehow
-
-  const hardcodedfornow = [
-    'AFRICA', 'AGENT',     'AIR',      'ALIEN',     'ALPS',
-    'AMAZON', 'AMBULANCE', 'AMERICA',  'ANGEL',     'ANTARCTICA',
-    'APPLE',  'ARM',       'ATLANTIS', 'AUSTRALIA', 'AZTEC',
-    'BACK',   'BALL',      'BAND',     'BANK',      'BAR',
-    'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
-  ];
-  return hardcodedfornow;
+async function getTwentyFiveWords(): Promise<string[]> {
+  const defaultWordList = await db.collection('wordlists').doc('default').get();
+  if (defaultWordList.exists) {
+    console.log('defaultWords exists');
+    const newWordsForGame = [] as string[];
+    for (let i = 0; i < 25; i++) {
+      const words = defaultWordList.data()['words'];
+      const randomIndex = Math.floor(Math.random() * words.length);
+      const word = words.splice(randomIndex);
+      newWordsForGame.push(word)
+      // TODO: avoid word reuse from current game
+    }
+    console.log('newWordsForGame has ' + newWordsForGame.length + ' words.');
+    return newWordsForGame;
+  } else {
+    console.log('defaultWords did not exist')
+    const hardcodedfornow = [
+      'AFRICA', 'AGENT', 'AIR', 'ALIEN', 'ALPS',
+      'AMAZON', 'AMBULANCE', 'AMERICA', 'ANGEL', 'ANTARCTICA',
+      'APPLE', 'ARM', 'ATLANTIS', 'AUSTRALIA', 'AZTEC',
+      'BACK', 'BALL', 'BAND', 'BANK', 'BAR',
+      'BARK', 'BAT', 'BATTERY', 'BEACH', 'BEAR'
+    ];
+    return hardcodedfornow;
+  }
 }
 
-function generateNewGameTiles(): Tile[] {
-  const words = getTwentyFiveWords()
+async function generateNewGameTiles(): Promise<Tile[]> {
+  const words = await getTwentyFiveWords()
   const tiles = words.map(word => {
     return {
       word, role: TileRole.CIVILIAN, selected: false

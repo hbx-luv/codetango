@@ -19,7 +19,7 @@ export enum RoomStatus {
   WAITING_FOR_PLAYERS = 'WAITING_FOR_PLAYERS',
   PICK_SPYMASTER = 'PICK_SPYMASTER',
   GAME_IN_PROGRESS = 'GAME_IN_PROGRESS',
-  GAME_ENDED = 'GAME_ENDED'
+  GAME_ENDED = 'GAME_ENDED',
 }
 
 // the word/image to display on the board as well as information about
