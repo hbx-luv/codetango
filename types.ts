@@ -62,6 +62,7 @@ export interface Game {
   blueAgents: number;  // remaining blue agents
   redAgents: number;   // remaining red agents
   status: GameStatus;
+  roomId: string;
 
   // client fields
   id?: string;
