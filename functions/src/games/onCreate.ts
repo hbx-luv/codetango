@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {Game, GameStatus, Tile, TileRole} from '../../../types';
+import {Game, GameStatus, Tile, TileRole, WordList} from '../../../types';
 
 try {
   admin.initializeApp();
@@ -96,14 +96,15 @@ function assignRandomTileTeams():
 }
 
 async function getTwentyFiveWords(): Promise<string[]> {
-  const defaultWordList = await db.collection('wordlists').doc('default').get();
-  if (defaultWordList.exists) {
+  const defaultWordListSnapshot = await db.collection('wordlists').doc('default').get();
+  if (defaultWordListSnapshot.exists && defaultWordListSnapshot.data()) {
     console.log('defaultWords exists');
     const newWordsForGame = [] as string[];
     for (let i = 0; i < 25; i++) {
-      const words = defaultWordList.data()['words'];
+      const wordList = defaultWordListSnapshot.data() as WordList;
+      const words = wordList.words;
       const randomIndex = Math.floor(Math.random() * words.length);
-      const word = words.splice(randomIndex);
+      const word = words.splice(randomIndex)[0];
       newWordsForGame.push(word)
       // TODO: avoid word reuse from current game
     }
