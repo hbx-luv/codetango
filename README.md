@@ -38,5 +38,8 @@ Deploy functions seperately:
 Or just deploy the `helloWorld` function:  
 `firebase deploy --only functions:helloWorld`  
 
-App is hosted at:
+App is hosted at:  
 https://codetango.web.app/
+
+Here's the `helloWorld` function:  
+https://us-central1-codetango.cloudfunctions.net/helloWorld
