@@ -3,7 +3,7 @@ export enum TileRole {
   RED,
   BLUE,
   CIVILIAN,
-  ASSASSIN
+  ASSASSIN,
 }
 
 // the various states that the game can be in
@@ -11,7 +11,7 @@ export enum GameStatus {
   REDS_TURN,
   BLUES_TURN,
   RED_WON,
-  BLUE_WON
+  BLUE_WON,
 }
 
 // the word/image to display on the board as well as information about
