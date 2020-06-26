@@ -42,6 +42,9 @@ More options through interactive CLI:
 
 You need to run `ionic build` in the root of the project to get the static webapp built for deployment in `www/`. At that point you can just `firebase deploy --only hosting` to deploy just that content. Here are some aliases in the `package.json` and other quick commands:
 
+To run any of the following commands, you'll need to be logged into the Firebase CLI:  
+`firebase login`
+
 Deploy everything in one go:  
 `npm run deploy`
 
