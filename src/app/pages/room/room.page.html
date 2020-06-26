@@ -16,8 +16,10 @@
 
     <!-- there is a game in progress -->
     <ng-template #gameInProgress>
-      <app-game [room]="room"></app-game>
-      <app-clues></app-clues>
+      <ng-container *ngIf="currentGame$ | async as game">
+        <app-game [room]="room" [game]="game"></app-game>
+        <app-clues></app-clues>
+      </ng-container>
     </ng-template>
 
   </ng-container>

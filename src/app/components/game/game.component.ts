@@ -10,13 +10,7 @@ import {Game, Room} from 'types';
 })
 export class GameComponent {
   @Input() room: Room;
-  game$: Observable<Game>;
+  @Input() game: Game;
 
-  constructor(
-      private readonly gameService: GameService,
-  ) {
-    // TODO: get real room id from route
-    const roomId = 'testRoom';
-    this.game$ = this.gameService.getCurrentGame(roomId);
-  }
+  constructor() {}
 }
