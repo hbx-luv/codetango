@@ -49,7 +49,7 @@ export class GameBoardComponent implements OnInit {
 
   checkWord() {}
 
-  chunk(arr: Tile[], size: number): Array<Tile> {
+  chunk(arr: any[], size: number): Array<Tile> {
     const chunkedArray = [];
     for (let i = 0; i < arr.length; i += size) {
       chunkedArray.push(arr.slice(i, i + size));
