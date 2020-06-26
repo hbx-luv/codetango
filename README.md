@@ -4,8 +4,8 @@ Codenames Stock Market Index
 
 ### Dev setup
 
-Install the Ionic CLI and the Firebase CLI:  
-`npm install -g @ionic/cli firebase-tools`
+Install the Ionic CLI, Angular CLI, and the Firebase CLI:  
+`npm install -g @ionic/cli @angular/cli firebase-tools`
 
 Install all the dependencies:  
 `npm run update` 
