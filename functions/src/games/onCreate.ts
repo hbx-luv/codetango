@@ -21,18 +21,14 @@ export const onCreateGame =
           // Add 25 random cards to the game
           const tiles = await generateNewGameTiles();
           game.tiles = tiles;
-          const blueTeamNumberOfTiles =
-              tiles.filter(tile => tile.role === TileRole.BLUE);
-          if (blueTeamNumberOfTiles.length === 9) {
-            game.blueAgents = 9;
-            game.redAgents = 8;
-            game.status = GameStatus.BLUES_TURN;
-          } else {
-            game.blueAgents = 8;
-            game.redAgents = 9;
-            game.status = GameStatus.REDS_TURN;
-          }
+          const blueTeamTiles =
+            tiles.filter(tile => tile.role === TileRole.BLUE);
+          const redTeamTiles =
+            tiles.filter(tile => tile.role === TileRole.RED);
 
+          game.blueAgents = blueTeamTiles.length;
+          game.redAgents = redTeamTiles.length;
+          game.status = blueTeamTiles.length > redTeamTiles.length ? GameStatus.BLUES_TURN : GameStatus.REDS_TURN;
           game.createdAt = new Date().getTime();
 
           return gameReference.update(game);
