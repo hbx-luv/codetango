@@ -34,8 +34,9 @@ export class GameBoardComponent {
 
   selectTile(tile: Tile, username: string) {
     tile.selected = true;
-    tile.selectedBy = username;
-    // TODO persist to DB
+    // tile.selectedBy = username;
+    // TODO: use the real ID dammit
+    this.gameService.updateGame('testGame', {tiles: this.game.tiles});
   }
 
   get chunkedWords(): Array<Tile> {
