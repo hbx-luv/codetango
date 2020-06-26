@@ -1,19 +1,40 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {Game, GameStatus, Tile, TileRole} from "../../../types";
+import {Game, GameStatus, Tile, TileRole} from '../../../types';
 
 try {
   admin.initializeApp();
 } catch (e) {
   console.log(e);
 }
-const db = admin.firestore();
 
+export const onCreateGame =
+    functions.firestore.document('games/{gameId}')
+        .onCreate(async (snapshot, _context) => {
+          // Add the random stuff to this game
+          const gameReference = snapshot.ref;
+          const gameSnapShot = await gameReference!.get();
+          const game = gameSnapShot.data() as Game;
 
-function assignRandomTileTeams(): {red: number[], blue: number[], assassin: number} {
-  let assignedNumbers = [] as number[];
-  let firstTeam = [] as number [];
-  let secondTeam = [] as number [];
+          // Add 25 random cards to the game
+          const tiles = generateNewGameTiles();
+          game.tiles = tiles;
+          const blueTeamNumberOfTiles =
+              tiles.filter(tile => tile.role === TileRole.BLUE);
+          if (blueTeamNumberOfTiles.length === 9) {
+            game.status = GameStatus.BLUES_TURN;
+          } else {
+            game.status = GameStatus.REDS_TURN;
+          }
+
+          return gameReference.update(game);
+        });
+
+function assignRandomTileTeams():
+    {red: number[], blue: number[], assassin: number} {
+  const assignedNumbers: number[] = [];
+  const firstTeam = [];
+  const secondTeam = [];
 
   // the team with 9
   for (let i = 0; i < 9; i++) {
@@ -62,9 +83,7 @@ function assignRandomTileTeams(): {red: number[], blue: number[], assassin: numb
   }
 
   return {
-    blue,
-    red,
-    assassin
+    blue, red, assassin
   }
 }
 
@@ -72,53 +91,29 @@ function getTwentyFiveWords(): string[] {
   // Fetch words from the word list
   // if we have previous words, avoid those words somehow
 
-  const hardcodedfornow = ['AFRICA', 'AGENT', 'AIR', 'ALIEN', 'ALPS', 'AMAZON', 'AMBULANCE', 'AMERICA', 'ANGEL', 'ANTARCTICA', 'APPLE', 'ARM', 'ATLANTIS', 'AUSTRALIA', 'AZTEC', 'BACK', 'BALL', 'BAND', 'BANK', 'BAR', 'BARK', 'BAT', 'BATTERY', 'BEACH', 'BEAR'];
+  const hardcodedfornow = [
+    'AFRICA', 'AGENT',     'AIR',      'ALIEN',     'ALPS',
+    'AMAZON', 'AMBULANCE', 'AMERICA',  'ANGEL',     'ANTARCTICA',
+    'APPLE',  'ARM',       'ATLANTIS', 'AUSTRALIA', 'AZTEC',
+    'BACK',   'BALL',      'BAND',     'BANK',      'BAR',
+    'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
+  ];
   return hardcodedfornow;
 }
 
 function generateNewGameTiles(): Tile[] {
   const words = getTwentyFiveWords()
-  const tiles = words.map( word => {
+  const tiles = words.map(word => {
     return {
-      word,
-      role: TileRole.CIVILIAN,
-      selected: false
+      word, role: TileRole.CIVILIAN, selected: false
     }
   });
 
   // Assign random teams to the tiles
   const tileTeams = assignRandomTileTeams();
-  tileTeams.red.forEach(red => {
-    tiles[red].role = TileRole.RED
-  });
-  tileTeams.blue.forEach(blue => {
-    tiles[blue].role = TileRole.BLUE
-  });
+  tileTeams.red.forEach(red => {tiles[red].role = TileRole.RED});
+  tileTeams.blue.forEach(blue => {tiles[blue].role = TileRole.BLUE});
   tiles[tileTeams.assassin].role = TileRole.ASSASSIN;
 
   return tiles;
 }
-
-
-
-export const onCreateGame =
-  functions.firestore.document('games/{gameId}')
-    .onCreate(async (snapshot, _context) => {
-      // Add the random stuff to this game
-      const gameReference = snapshot.ref;
-      const gameSnapShot = await gameReference!.get();
-      const game = gameSnapShot.data() as Game;
-
-      // Add 25 random cards to the game
-      const tiles = generateNewGameTiles();
-      game.tiles = tiles;
-      const blueTeamNumberOfTiles = tiles.filter(tile => tile.role === TileRole.BLUE);
-      if (blueTeamNumberOfTiles.length === 9) {
-        game.status = GameStatus.BLUES_TURN;
-      } else {
-        game.status = GameStatus.REDS_TURN;
-      }
-
-      gameReference.update(game);
-
-    });
