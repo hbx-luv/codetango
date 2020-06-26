@@ -62,6 +62,7 @@ export interface Game {
   blueAgents: number;  // remaining blue agents
   redAgents: number;   // remaining red agents
   status: GameStatus;
+  id?: string;
 }
 
 // /games/{id}/turns
@@ -78,6 +79,7 @@ export interface User {
   email: string;
   photoURL?: string;
   elo: number;  // needs to default, 1200?
+  id?: string;
 }
 
 // /wordlists
