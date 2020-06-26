@@ -28,6 +28,10 @@ export class RoomService {
     return id;
   }
 
+  updateRoom(id: string, room: Partial<Room>) {
+    return this.afs.collection('rooms').doc(id).update(room);
+  }
+
   getRoom(id: string): Observable<Room> {
     return this.afs.collection('rooms').doc<Room>(id).snapshotChanges().pipe(
         map(room => {
