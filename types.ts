@@ -62,6 +62,9 @@ export interface Game {
   blueAgents: number;  // remaining blue agents
   redAgents: number;   // remaining red agents
   status: GameStatus;
+
+  // client fields
+  id?: string;
 }
 
 // /games/{id}/turns

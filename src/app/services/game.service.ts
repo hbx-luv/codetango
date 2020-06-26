@@ -27,9 +27,14 @@ export class GameService {
                   .orderBy('createdAt')
                   .limit(1);
             })
-        .valueChanges()
+        .snapshotChanges()
         .pipe(map(games => {
-          return games.length ? games[0] : null;
+          if (!games || !games.length) {
+            return null;
+          }
+
+          const {doc} = games[0].payload;
+          return {id: doc.id, ...doc.data()};
         }));
   }
 }
