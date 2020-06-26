@@ -12,6 +12,7 @@ import {WordListsService} from '../../services/word-lists.service';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
+  roomName: string;
   lists: Observable<WordList[]>;
   selectedWordList: WordList;
 
@@ -24,6 +25,12 @@ export class HomePage {
         this.selectedWordList = wordLists[0];
       }
     }));
+  }
+
+  get buttonAction(): string {
+    // TODO: maybe someday show 'Create' or 'Join' as they change the text in
+    // the input box
+    return 'Go';
   }
 
   selectWordList(list: WordList) {

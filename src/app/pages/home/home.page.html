@@ -6,22 +6,23 @@
         Play Codenames online across multiple devices on a shared board. To create a new game or join an existing game, enter a game identifier and click 'GO'.
       </p>
       <div class="input-container">
-        <input class="create-input">
-        <button class="create-button" (click)="createRoom()">Create Room</button>
+        <input class="create-input" [(ngModel)]="roomName">
+        <button class="create-button" (click)="createRoom()" [disabled]="!roomName">
+          {{ buttonAction }}
+        </button>
       </div>
 
-    </div>
-
-    <div class="word-lists">
-      <h2>Select a word list:</h2>
-      <ion-chip *ngFor="let list of lists | async">
-        <ion-label
-          [color]="list.name === selectedWordList.name ? 'primary' : ''"
-          (click)="selectWordList(list)"
-        >
-          {{ list.name }}
-        </ion-label>
-      </ion-chip>
+      <div class="word-lists">
+        <h2>Select a word list:</h2>
+        <ion-chip *ngFor="let list of lists | async">
+          <ion-label
+            [color]="list.name === selectedWordList.name ? 'primary' : ''"
+            (click)="selectWordList(list)"
+          >
+            {{ list.name }}
+          </ion-label>
+        </ion-chip>
+      </div>
     </div>
   </div>
 </ion-content>
