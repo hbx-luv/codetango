@@ -104,7 +104,7 @@ async function getTwentyFiveWords(): Promise<string[]> {
       const wordList = defaultWordListSnapshot.data() as WordList;
       const words = wordList.words;
       const randomIndex = Math.floor(Math.random() * words.length);
-      const word = words.splice(randomIndex)[0];
+      const word = words.splice(randomIndex, 1)[0];
       newWordsForGame.push(word)
       // TODO: avoid word reuse from current game
     }
