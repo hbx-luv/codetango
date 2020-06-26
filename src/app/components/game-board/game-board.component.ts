@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {Tile, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-game-board',
@@ -15,6 +16,23 @@ export class GameBoardComponent implements OnInit {
     this.getWordList();
   }
 
+  getColor(tile: Tile) {
+    if (!tile.selected) {
+      return 'medium';
+    } else {
+      switch (tile.role) {
+        case TileRole.ASSASSIN:
+          return 'dark';
+        case TileRole.CIVILIAN:
+          return 'light';
+        case TileRole.BLUE:
+          return 'default';
+        case TileRole.RED:
+          return 'danger';
+      }
+    }
+  }
+
   getWordList() {
     const test = 'A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y';
     const testArr = test.split(',');
@@ -23,6 +41,8 @@ export class GameBoardComponent implements OnInit {
     // 1. Get 25 words and check if not in previous game
     // 2. Use chunk() method below to chunk into groups of 5 and set it to var with chunkedWords = chunk(arrayOf25, 5)
   }
+
+  checkWord() {}
 
   chunk(arr, size) {
     const chunkedArray = [];
