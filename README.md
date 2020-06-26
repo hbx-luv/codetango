@@ -16,10 +16,10 @@ Serve the project:
 Ionic Framework docs:  
 https://ionicframework.com/docs/components
 
-Firebase Console:
+Firebase Console:  
 https://console.firebase.google.com/u/0/project/codetango
 
-Firestore Docs:
+Firestore Docs:  
 https://firebase.google.com/docs/firestore
 
 ### Deploy
