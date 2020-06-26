@@ -17,6 +17,7 @@ export enum GameStatus {
 // the various states thew room can be in
 export enum RoomStatus {
   PREGAME = 'PREGAME',
+  ASSIGNING_ROLES = 'ASSIGNING_ROLES',
   GAME_IN_PROGRESS = 'GAME_IN_PROGRESS',
   GAME_ENDED = 'GAME_ENDED',
 }
@@ -32,10 +33,9 @@ export interface Tile {
 
 // The players that make up a team
 export interface Team {
-  color: 'red'|'blue';
-  spymaster: string;
+  color: TileRole;
   userIds: string[];
-  elo: number;
+  spymaster?: string;
 }
 
 // The clues that make up a game

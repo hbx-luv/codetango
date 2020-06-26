@@ -7,7 +7,7 @@ import {CluesComponent} from './clues/clues.component';
 import {GameBoardComponent} from './game-board/game-board.component';
 import {GameJoinButtonComponent} from './game-join-button/game-join-button.component';
 import {GameComponent} from './game/game.component';
-import {TeamsComponent} from './teams/teams.component';
+import {PregameComponent} from './pregame/pregame.component';
 import {UsersComponent} from './users/users.component';
 
 @NgModule({
@@ -15,9 +15,10 @@ import {UsersComponent} from './users/users.component';
     GameBoardComponent,
     GameComponent,
     CluesComponent,
-    TeamsComponent,
     UsersComponent,
     GameJoinButtonComponent,
+    PregameComponent,
+    UsersComponent,
   ],
   imports: [
     IonicModule,
@@ -28,9 +29,10 @@ import {UsersComponent} from './users/users.component';
     GameBoardComponent,
     GameComponent,
     CluesComponent,
-    TeamsComponent,
     UsersComponent,
     GameJoinButtonComponent,
+    PregameComponent,
+    UsersComponent,
   ]
 })
 export class ComponentsModule {

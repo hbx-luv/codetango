@@ -1,21 +1,23 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Game, GameStatus, Room, User} from '../../../../types';
+import {Game, GameStatus, Room, RoomStatus, Team, Tile, TileRole, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import * as _ from 'lodash';
 import {RoomService} from '../../services/room.service';
 
 @Component({
   selector: 'app-teams',
-  templateUrl: './teams.component.html',
-  styleUrls: ['./teams.component.scss'],
+  templateUrl: './pregame.component.html',
+  styleUrls: ['./pregame.component.scss'],
 })
-export class TeamsComponent implements OnInit {
+export class PregameComponent implements OnInit {
   @Input() user: User;
   @Input() room: Room;
   @Input() currentGame: Game;
+  teams: Team[];
 
   constructor(
-      private readonly gameService: GameService
+      private readonly gameService: GameService,
+      private readonly roomService: RoomService
   ) { }
 
   ngOnInit() {}
@@ -24,7 +26,7 @@ export class TeamsComponent implements OnInit {
     const redTeamUsers = [];
     const blueTeamUsers = [];
     const roomSize = this.room.userIds.length;
-    const randomizedUsers = _.shuffle(this.room.userIds.length);
+    const randomizedUsers = _.shuffle(this.room.userIds);
 
     for (let i = 0; i < roomSize; i++) {
       if (i % 2 === 0) {
@@ -35,18 +37,21 @@ export class TeamsComponent implements OnInit {
     }
 
     const redTeam = {
-      color: 'red',
-      spymaster: null,
-      userIds: redTeamUsers,
-      elo: null
+      color: TileRole.RED,
+      userIds: redTeamUsers
     };
     const blueTeam = {
-      color: 'blue',
-      spymaster: null,
-      userIds: blueTeamUsers,
-      elo: null
+      color: TileRole.BLUE,
+      userIds: blueTeamUsers
     };
-    return [redTeam, blueTeam];
+
+    this.roomService.updateRoom(this.room.id, { status: RoomStatus.ASSIGNING_ROLES });
+    this.gameService.createGame({
+      createdAt: Date.now(),
+      blueTeam,
+      redTeam,
+      roomId: this.room.id
+    });
   }
 
   assignUserToInProgressGame() {

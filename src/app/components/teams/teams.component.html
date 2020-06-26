@@ -1,8 +1,0 @@
-<!-- If the game isn't in progress, show all users *ngIf="blueTeamUsers.length === 0 || redTeamUsers.length === 0"-->
-<div *ngIf="room">
-  <ion-list >
-    <ion-item *ngFor="let userId of room.userIds">
-      <app-users [userId]="userId"></app-users>
-    </ion-item>
-  </ion-list>
-</div>

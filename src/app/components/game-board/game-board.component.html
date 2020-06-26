@@ -1,4 +1,4 @@
-<ion-grid id="grid-container">
+<ion-grid id="grid-container" *ngIf="game.tiles">
   <ion-row *ngFor="let row of chunkedWords">
     <ion-col *ngFor="let tile of row">
       <div class="word-container">
