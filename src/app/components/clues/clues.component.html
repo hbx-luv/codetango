@@ -1,4 +1,5 @@
 <p>
+  <ion-title>{{currentTeam()}}: {{currentClue.word}} {{currentClue.guessCount}}</ion-title>
   <ion-item>
     <ion-label for="clue-input"> Clue: </ion-label>
     <ion-input name="clue-input"
@@ -7,7 +8,7 @@
                [(ngModel)]="clue">
     </ion-input>
   </ion-item>
-  <ion-item >
+  <ion-item>
     <ion-label for="clue-count-input"> Clue Count: </ion-label>
     <ion-input name="clue-count-input"
                type="number"
@@ -23,4 +24,15 @@
       Submit
     </ion-button>
   </ion-item>
+
+  <ion-title>
+    Word History
+  </ion-title>
+  <ion-list>
+    <ion-item *ngFor="let clue of clues">
+      <ion-label>{{clue.team}}</ion-label>
+      <ion-label>{{clue.word}}</ion-label>
+      <ion-label>{{clue.guessCount}}</ion-label>
+    </ion-item>
+  </ion-list>
 </p>
