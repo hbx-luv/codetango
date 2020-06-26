@@ -99,3 +99,26 @@ export interface WordList {
   name: string;
   words: string[];
 }
+
+export interface Player {
+  name: string;
+  stats: {
+    currentStreak: number;
+    dailyChange: number;
+    elo: number;
+    gamesPlayed: number;
+    gamesWon: number;
+    lastPlayed: number;
+  };
+}
+
+// Snapshot in time of a player's Elo
+export interface EloHistoryDocument {
+  elo: number;
+  gameId: number;
+  gamesPlayed: number;
+  gamesWon: number;
+  id: number; // player's id
+  provisional: boolean;
+  timestamp: number;
+}
