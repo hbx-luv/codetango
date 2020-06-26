@@ -3,8 +3,8 @@
     <ion-row *ngFor="let row of chunkedWords">
       <ion-col *ngFor="let tile of row">
           <div class="word-container">
-              <ion-button [attr.newColor]="getColor(tile)" class="word" (click)="selectTile(tile)">
-                {{ tile }}
+              <ion-button [color]="getColor(tile)" class="word" (click)="selectTile(tile)">
+                {{ tile.word }}
               </ion-button>
           </div>
       </ion-col>

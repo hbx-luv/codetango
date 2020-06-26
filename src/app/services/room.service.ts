@@ -9,7 +9,7 @@ export class RoomService {
       private readonly afs: AngularFirestore,
   ) {}
 
-  getRoom(id: string): Observable<Room> {
+  public getRoom(id: string): Observable<Room> {
     return this.afs.collection('rooms').doc<Room>(id).valueChanges();
   }
 }
