@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
+import {RoomService} from 'src/app/services/room.service';
 import {WordList} from 'types';
 
 import {WordListsService} from '../../services/word-lists.service';
@@ -17,6 +18,7 @@ export class HomePage {
   selectedWordList: WordList;
 
   constructor(
+      private readonly roomService: RoomService,
       private readonly wordListsService: WordListsService,
       private readonly router: Router,
   ) {
@@ -37,8 +39,13 @@ export class HomePage {
     this.selectedWordList = list;
   }
 
-  createRoom() {
-    // TODO: actually create a room
-    this.router.navigate(['room']);
+  async createRoom() {
+    const id = await this.roomService.createRoom({
+      name: this.roomName,
+      timer: 120,
+      firstTurnTimer: 180,
+      enforceTimer: false
+    });
+    this.router.navigate(['room', id]);
   }
 }

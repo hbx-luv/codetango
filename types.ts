@@ -14,6 +14,11 @@ export enum GameStatus {
   BLUE_WON = 'BLUE_WON',
 }
 
+// the various states thew room can be in
+export enum GameStatus {
+  JOIN_TEAMS = 'JOIN_TEAMS'
+}
+
 // the word/image to display on the board as well as information about
 // the team/role it's tied to and whether or not it has been selected
 export interface Tile {
@@ -33,9 +38,6 @@ export interface Team {
 
 export interface Room {
   name: string;
-
-  // id of the current game
-  currentGame: string;
 
   // optional fields:
 
