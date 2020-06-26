@@ -14,6 +14,29 @@
     </ion-button>
   </ion-list>
 </div>
+<div *ngIf="room && room.status === 'ASSIGNING_ROLES'">
+  <h1>Assign A Spymaster</h1>
+  <ion-list>
+    <ion-list-header>
+      <ion-label>
+        <h2>Red Team</h2>
+      </ion-label>
+    </ion-list-header>
+    <ion-item *ngFor="let redUser of constructedGame.redTeam.userIds">
+      <app-users [userId]="redUser"></app-users>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>
+      <ion-label>
+        <h2>Blue Team</h2>
+      </ion-label>
+    </ion-list-header>
+    <ion-item *ngFor="let redUser of constructedGame.blueTeam.userIds">
+      <app-users [userId]="redUser"></app-users>
+    </ion-item>
+  </ion-list>
+</div>
 <!--<div *ngIf="room && room.status !== 'PREGAME">-->
 <!--  <ion-list>-->
 <!--    <ion-list-header>-->

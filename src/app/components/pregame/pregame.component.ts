@@ -1,8 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Game, GameStatus, Room, RoomStatus, Team, Tile, TileRole, User} from '../../../../types';
+import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import * as _ from 'lodash';
 import {RoomService} from '../../services/room.service';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-teams',
@@ -12,8 +13,9 @@ import {RoomService} from '../../services/room.service';
 export class PregameComponent implements OnInit {
   @Input() user: User;
   @Input() room: Room;
-  @Input() currentGame: Game;
+  currentGame$: Observable<Game>;
   teams: Team[];
+  constructedGame: Partial<Game>;
 
   constructor(
       private readonly gameService: GameService,
@@ -46,12 +48,15 @@ export class PregameComponent implements OnInit {
     };
 
     this.roomService.updateRoom(this.room.id, { status: RoomStatus.ASSIGNING_ROLES });
-    this.gameService.createGame({
+    this.constructedGame = {
       createdAt: Date.now(),
       blueTeam,
       redTeam,
       roomId: this.room.id
-    });
+    };
+  }
+  startGame() {
+    this.gameService.createGame(this.constructedGame);
   }
 
   assignUserToInProgressGame() {
