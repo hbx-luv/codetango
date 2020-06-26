@@ -1,5 +1,8 @@
 <p>
-  <ion-title>{{currentTeam()}}: {{currentClue.word}} {{currentClue.guessCount}}</ion-title>
+  <ion-title *ngIf="currentClue"
+             [class]="getColor()">
+    {{currentTeam()}}: {{currentClue.word}} {{currentClue.guessCount}}
+  </ion-title>
   <ion-item>
     <ion-label for="clue-input"> Clue: </ion-label>
     <ion-input name="clue-input"
@@ -29,7 +32,7 @@
     Word History
   </ion-title>
   <ion-list>
-    <ion-item *ngFor="let clue of clues">
+    <ion-item *ngFor="let clue of clues" [class]="getColor()">
       <ion-label>{{clue.team}}</ion-label>
       <ion-label>{{clue.word}}</ion-label>
       <ion-label>{{clue.guessCount}}</ion-label>

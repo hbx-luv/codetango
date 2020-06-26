@@ -5,7 +5,7 @@ import {GameBoardComponent} from './game-board/game-board.component';
 import {GameComponent} from './game/game.component';
 import {CluesComponent} from './clues/clues.component';
 import {FormsModule} from '@angular/forms';
-import {TeamsComponent} from "./teams/teams.component";
+import {TeamsComponent} from './teams/teams.component';
 
 @NgModule({
   declarations: [

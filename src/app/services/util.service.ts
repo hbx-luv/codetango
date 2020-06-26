@@ -19,7 +19,7 @@ export class UtilService {
   copyToClipboard(text) {
     if (document.queryCommandSupported &&
         document.queryCommandSupported('copy')) {
-      var textarea = document.createElement('textarea');
+      const textarea = document.createElement('textarea');
       textarea.textContent = text;
       // Prevent scrolling to bottom of page in MS Edge.
       textarea.style.position = 'fixed';
