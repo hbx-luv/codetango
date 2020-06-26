@@ -71,7 +71,7 @@ function assignRandomTileTeams():
   const assassin = randomAssassinNumber;
 
   // Which team goes first?
-  const randomNumber = Math.floor(Math.random() * 1);
+  const randomNumber = Math.floor(Math.random() * 2);
   let blue = [];
   let red = [];
   if (randomNumber === 0) {
