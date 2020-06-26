@@ -12,8 +12,16 @@
 
     </div>
 
-    <p *ngFor="let list of lists | async">
-      {{ list.name }}
-    </p>
+    <div class="word-lists">
+      <h2>Select a word list:</h2>
+      <ion-chip *ngFor="let list of lists | async">
+        <ion-label
+          [color]="list.name === selectedWordList.name ? 'primary' : ''"
+          (click)="selectWordList(list)"
+        >
+          {{ list.name }}
+        </ion-label>
+      </ion-chip>
+    </div>
   </div>
 </ion-content>
