@@ -18,7 +18,7 @@ export enum GameStatus {
 export enum RoomStatus {
   PREGAME = 'PREGAME',
   GAME_IN_PROGRESS = 'GAME_IN_PROGRESS',
-  GAME_ENDED = 'GAME_ENDED'
+  GAME_ENDED = 'GAME_ENDED',
 }
 
 // the word/image to display on the board as well as information about
