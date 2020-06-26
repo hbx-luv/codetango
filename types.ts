@@ -31,16 +31,11 @@ export interface Team {
   elo: number;
 }
 
-// Stored at /games
-export interface Game {
-  createdAt: number;
-  completedAt?: number;  // optional, set when one team wins
-  tiles: Tile[];         // the tiles on the board
-  blueTeam: Team;
-  redTeam: Team;
-  blueAgents: number;  // remaining blue agents
-  redAgents: number;   // remaining red agents
-  status: GameStatus;
+export interface Room {
+  name: string;
+
+  // id of the current game
+  currentGame: string;
 
   // optional fields:
 
@@ -55,6 +50,18 @@ export interface Game {
   // for example, 5 total minutes for the blue spymaster to give a hint
   // and for the players to guess
   enforceTimer?: boolean;
+}
+
+// Stored at /games
+export interface Game {
+  createdAt: number;
+  completedAt?: number;  // optional, set when one team wins
+  tiles: Tile[];         // the tiles on the board
+  blueTeam: Team;
+  redTeam: Team;
+  blueAgents: number;  // remaining blue agents
+  redAgents: number;   // remaining red agents
+  status: GameStatus;
 }
 
 // /games/{id}/turns
