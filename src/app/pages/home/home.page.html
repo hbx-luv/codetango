@@ -3,14 +3,18 @@
     <div class="new-game-container">
       <h1 class="title">CODETANGO</h1>
       <p class="description">
+        <!-- {{ authService.authenticated }} -->
         Play Codenames online across multiple devices on a shared board. To create a new game or join an existing game, enter a game identifier and click 'GO'.
       </p>
       <div class="input-container">
         <ion-input class="create-input" [(ngModel)]="roomName" (keyup.enter)="createRoom()"></ion-input>
         <button class="create-button" (click)="createRoom()" [disabled]="!roomName">
-          {{ buttonAction }}
+          GO
         </button>
       </div>
     </div>
+    <ion-button (click)="authService.logout()" *ngIf="authService.authenticated">
+      Log out
+    </ion-button>
   </div>
 </ion-content>

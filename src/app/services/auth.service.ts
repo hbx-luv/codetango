@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {AngularFirestore} from '@angular/fire/firestore';
 import * as firebase from 'firebase';
-import {Observable} from 'rxjs';
 import {User} from 'types';
 
 import {UtilService} from './util.service';
@@ -10,22 +9,39 @@ import {UtilService} from './util.service';
 @Injectable({providedIn: 'root'})
 export class AuthService {
   authState: firebase.User|null = null;
+  auth: firebase.auth.Auth;
 
   constructor(
       private afAuth: AngularFireAuth,
       private afs: AngularFirestore,
       private utilService: UtilService,
-  ) {}
+  ) {
+    this.afAuth.onAuthStateChanged(user => {
+      console.log(user);
+    });
+
+    this.auth = firebase.auth();
+  }
 
   // Returns current user data
-  get currentUser(): Observable<firebase.User> {
-    return this.afAuth.authState;
+  get authenticated(): boolean {
+    return this.auth.currentUser !== null;
+  }
+
+  // Returns current user data
+  get currentUser(): firebase.User|null {
+    return this.auth.currentUser;
+  }
+
+  // Returns current user ID
+  get currentUserId(): string {
+    return this.auth.currentUser ? this.auth.currentUser.uid : '';
   }
 
   /**
-   * Authenticate with Google Login
+   * Authenticate with Google Login and return uid
    */
-  async loginWithGoogle(): Promise<void> {
+  async loginWithGoogle(): Promise<string> {
     const provider = new firebase.auth.GoogleAuthProvider();
     const userCredential = await this.afAuth.signInWithPopup(provider).catch(
         this.errorHandler.bind(this));
@@ -34,6 +50,7 @@ export class AuthService {
     if (userCredential && userCredential.user !== null) {
       this.updateUserData(userCredential.user);
     }
+    return userCredential.user.uid;
   }
 
   /**
