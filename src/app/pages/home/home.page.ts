@@ -49,6 +49,8 @@ export class HomePage {
         enforceTimer: false,
         userIds: []
       });
+
+      this.roomService.joinRoom(id);
       this.router.navigate(['room', id]);
     }
   }

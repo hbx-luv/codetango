@@ -4,7 +4,10 @@
       {{ room?.name }}
     </ion-title>
     <ion-buttons slot="end">
-      <app-game-join-button></app-game-join-button>
+      <app-game-join-button
+        *ngIf="!gameInProgress"
+        [room]="room">
+      </app-game-join-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>

@@ -1,15 +1,17 @@
 import {Injectable} from '@angular/core';
-import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
+import {AngularFirestore} from '@angular/fire/firestore';
 import {firestore} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Room} from 'types';
+import {AuthService} from './auth.service';
 
 @Injectable({providedIn: 'root'})
 export class RoomService {
   private db: firestore.Firestore;
 
   constructor(
+      private readonly authService: AuthService,
       private readonly afs: AngularFirestore,
   ) {
     this.db = firestore();
@@ -37,6 +39,12 @@ export class RoomService {
         map(room => {
           return {id: room.payload.id, ...room.payload.data()};
         }));
+  }
+
+  joinRoom(id: string) {
+    return this.afs.collection('rooms').doc(id).update({
+      userIds: firestore.FieldValue.arrayUnion(this.authService.currentUserId)
+    });
   }
 
   /**
