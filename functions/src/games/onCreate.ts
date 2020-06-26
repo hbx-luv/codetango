@@ -13,7 +13,7 @@ export const onCreateGame =
         .onCreate(async (snapshot, _context) => {
           // Add the random stuff to this game
           const gameReference = snapshot.ref;
-          const gameSnapShot = await gameReference!.get();
+          const gameSnapShot = await gameReference.get();
           const game = gameSnapShot.data() as Game;
 
           // Add 25 random cards to the game
@@ -71,7 +71,7 @@ function assignRandomTileTeams():
   const assassin = randomAssassinNumber;
 
   // Which team goes first?
-  let randomNumber = Math.floor(Math.random() * 1);
+  const randomNumber = Math.floor(Math.random() * 1);
   let blue = [];
   let red = [];
   if (randomNumber === 0) {
