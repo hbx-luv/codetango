@@ -41,3 +41,5 @@ async function calculatePlayerStats(userId: string, wonGame: Boolean) {
     }
     usersSnapshot.update(statUpdate)
 }
+
+//test
