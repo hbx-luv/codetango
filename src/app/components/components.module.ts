@@ -5,7 +5,7 @@ import {GameBoardComponent} from './game-board/game-board.component';
 import {GameComponent} from './game/game.component';
 import {CluesComponent} from './clues/clues.component';
 import {FormsModule} from '@angular/forms';
-import {TeamsComponent} from './teams/teams.component';
+import {PregameComponent} from './pregame/pregame.component';
 import {UsersComponent} from './users/users.component';
 
 @NgModule({
@@ -13,7 +13,7 @@ import {UsersComponent} from './users/users.component';
     GameBoardComponent,
     GameComponent,
     CluesComponent,
-    TeamsComponent,
+    PregameComponent,
     UsersComponent
   ],
   imports: [
@@ -25,7 +25,7 @@ import {UsersComponent} from './users/users.component';
     GameBoardComponent,
     GameComponent,
     CluesComponent,
-    TeamsComponent,
+    PregameComponent,
     UsersComponent
   ]
 })
