@@ -9,7 +9,7 @@ import {Room} from 'types';
   styleUrls: ['./room.page.scss'],
 })
 export class RoomPage {
-  room$: Observable<Room>
+  room$: Observable<Room>;
 
   constructor(
       private readonly roomService: RoomService,
