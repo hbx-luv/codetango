@@ -1,15 +1,19 @@
 #grid-container {
   margin-left: auto;
   margin-right: auto;
-  max-width: 1600px;
-}
+  max-width: 1000px;
 
-.word-container {
-  .word {
-    min-height: 75px;
-    display: block;
+  .word-container {
+    .word {
+      min-height: 75px;
+      display: block;
+    }
+
+    // better warning color
+    --ion-color-warning: #ede2cc;
   }
 
-  // better warning color
-  --ion-color-warning: #ede2cc;
+  ion-button.disabled {
+    pointer-events: none;
+  }
 }

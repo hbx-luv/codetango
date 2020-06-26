@@ -11,6 +11,7 @@ import {Game, GameStatus, Tile, TileRole, User} from '../../../../types';
 export class GameBoardComponent {
   @Input() game: Game;
   @Input() user: User;
+  @Input() readonly: boolean;
 
   constructor(
       private readonly gameService: GameService,
@@ -36,20 +37,20 @@ export class GameBoardComponent {
   selectTile(tile: Tile) {
     tile.selected = true;
     tile.selectedBy = this.user.name;
-    this.gameService.updateGame(this.game.id, {
-      tiles: this.game.tiles,
-      status: this.getGameStatus(tile)
-    });
+    this.gameService.updateGame(
+        this.game.id,
+        {tiles: this.game.tiles, status: this.getGameStatus(tile)});
   }
 
   getGameStatus(tile: Tile) {
     let gameStatus;
     const userOnBlueTeam = this.game.blueTeam.userIds.includes(this.user.id);
     if (tile.role === TileRole.ASSASSIN) {
-      gameStatus = userOnBlueTeam === true ? GameStatus.RED_WON : GameStatus.BLUE_WON;
-    }
-    else {
-      gameStatus = userOnBlueTeam === true ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
+      gameStatus =
+          userOnBlueTeam === true ? GameStatus.RED_WON : GameStatus.BLUE_WON;
+    } else {
+      gameStatus = userOnBlueTeam === true ? GameStatus.REDS_TURN :
+                                             GameStatus.BLUES_TURN;
     }
     return gameStatus;
   }

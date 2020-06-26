@@ -1,2 +1,2 @@
-<app-game-board [game]="game"></app-game-board>
-<app-clues [game]="game"></app-clues>
+<app-game-board [game]="game" [readonly]="!playingInGame"></app-game-board>
+<app-clues [game]="game" *ngIf="spymaster"></app-clues>
