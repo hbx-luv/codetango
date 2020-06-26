@@ -57,6 +57,9 @@ export interface Room {
   // for example, 5 total minutes for the blue spymaster to give a hint
   // and for the players to guess
   enforceTimer?: boolean;
+
+  // client fields
+  id?: string;
 }
 
 // Stored at /games

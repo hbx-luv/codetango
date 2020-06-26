@@ -1,12 +1,13 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Room</ion-title>
+    <ion-title *ngIf="room$ | async as room">
+      {{ room.name }}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ng-container *ngIf="room$ | async as room">
-    {{ room.name }}
     <app-game [room]="room"></app-game>
     <app-clues></app-clues>
   </ng-container>

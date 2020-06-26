@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
 import {firestore} from 'firebase';
 import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {Room} from 'types';
 
 @Injectable({providedIn: 'root'})
@@ -28,7 +29,10 @@ export class RoomService {
   }
 
   getRoom(id: string): Observable<Room> {
-    return this.afs.collection('rooms').doc<Room>(id).valueChanges();
+    return this.afs.collection('rooms').doc<Room>(id).snapshotChanges().pipe(
+        map(room => {
+          return {id: room.payload.id, ...room.payload.data()};
+        }));
   }
 
   /**
