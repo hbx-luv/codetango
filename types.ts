@@ -42,6 +42,7 @@ export interface Team {
 export interface Room {
   name: string;
   status: RoomStatus;
+  userIds: string[];  // users currently in the room
 
   // optional fields:
 
