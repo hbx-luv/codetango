@@ -17,13 +17,13 @@ export class GameBoardComponent {
 
   getColor(tile: Tile): string {
     if (!tile.selected) {
-      return 'medium';
+      return 'light';
     } else {
       switch (tile.role) {
         case TileRole.ASSASSIN:
           return 'dark';
         case TileRole.CIVILIAN:
-          return 'light';
+          return 'warning';
         case TileRole.BLUE:
           return 'primary';
         case TileRole.RED:
