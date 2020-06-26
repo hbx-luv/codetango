@@ -15,8 +15,11 @@ export enum GameStatus {
 }
 
 // the various states thew room can be in
-export enum GameStatus {
-  JOIN_TEAMS = 'JOIN_TEAMS'
+export enum RoomStatus {
+  WAITING_FOR_PLAYERS = 'WAITING_FOR_PLAYERS',
+  PICK_SPYMASTER = 'PICK_SPYMASTER',
+  GAME_IN_PROGRESS = 'GAME_IN_PROGRESS',
+  GAME_ENDED = 'GAME_ENDED'
 }
 
 // the word/image to display on the board as well as information about
@@ -38,6 +41,7 @@ export interface Team {
 
 export interface Room {
   name: string;
+  status: RoomStatus;
 
   // optional fields:
 
