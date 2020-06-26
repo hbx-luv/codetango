@@ -1,6 +1,10 @@
-<ion-item>
-    <ion-title>{{game.status}}</ion-title>
+<ion-row class="ion-justify-content-between">
+    <span>{{game.status}}</span>
+    <div>
+        <span [style]="{color: 'red'}" class="ion-padding-end">Red: {{game.redAgents}}</span>
+        <span [style]="{color: 'lightskyblue'}">Blue: {{game.blueAgents}}</span>
+    </div>
     <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()">End Turn</ion-button>
-</ion-item>
+</ion-row>
 <app-game-board [game]="game" [readonly]="!playingInGame"></app-game-board>
 <app-clues [game]="game" *ngIf="spymaster"></app-clues>
