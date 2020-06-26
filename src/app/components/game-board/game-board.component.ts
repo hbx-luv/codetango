@@ -46,7 +46,7 @@ export class GameBoardComponent {
 
   getGameStatus(tile: Tile) {
     let gameStatus;
-    const userOnBlueTeam = this.game.blueTeam.userIds.includes(this.user.id);
+    const userOnBlueTeam = this.game.blueTeam.userIds.includes(this.authService.currentUserId);
     if (tile.role === TileRole.ASSASSIN) {
       gameStatus =
           userOnBlueTeam === true ? GameStatus.RED_WON : GameStatus.BLUE_WON;
