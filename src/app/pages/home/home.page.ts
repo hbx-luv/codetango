@@ -30,7 +30,7 @@ export class HomePage {
   get buttonAction(): string {
     // TODO: maybe someday show 'Create' or 'Join' as they change the text in
     // the input box
-    return 'Go';
+    return 'GO';
   }
 
   selectWordList(list: WordList) {
