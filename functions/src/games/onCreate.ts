@@ -31,6 +31,8 @@ export const onCreateGame =
             game.status = GameStatus.REDS_TURN;
           }
 
+          game.createdAt = new Date().getMilliseconds();
+
           return gameReference.update(game);
         });
 
