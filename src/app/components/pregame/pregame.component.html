@@ -25,7 +25,8 @@
     </ion-list-header>
     <ion-item *ngFor="let redUser of game.redTeam.userIds">
       <app-users [userId]="redUser"></app-users>
-      <button (click)="assignSpymaster(redUser)"></button>
+      <ion-button *ngIf="game.redTeam.spymaster !== redUser" (click)="assignRedSpymaster(redUser)">Make Spymaster</ion-button>
+      <div *ngIf="game.redTeam.spymaster === redUser">🕵️</div>
     </ion-item>
   </ion-list>
   <br/>
@@ -35,8 +36,13 @@
         <h2>Blue Team</h2>
       </ion-label>
     </ion-list-header>
-    <ion-item *ngFor="let redUser of game.blueTeam.userIds">
-      <app-users [userId]="redUser"></app-users>
+    <ion-item *ngFor="let blueUser of game.blueTeam.userIds">
+      <app-users [userId]="blueUser"></app-users>
+      <ion-button *ngIf="game.blueTeam.spymaster !== blueUser" (click)="assignBlueSpymaster(blueUser)">Make Spymaster</ion-button>
+      <div *ngIf="game.blueTeam.spymaster === blueUser">🕵️</div>
     </ion-item>
   </ion-list>
+  <div *ngIf="game.redTeam.spymaster && game.blueTeam.spymaster">
+    <ion-button (click)="startGame()">Start Game</ion-button>
+  </div>
 </div>

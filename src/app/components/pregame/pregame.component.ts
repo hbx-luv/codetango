@@ -12,7 +12,6 @@ import {RoomService} from '../../services/room.service';
   styleUrls: ['./pregame.component.scss'],
 })
 export class PregameComponent implements OnInit {
-  @Input() user: User;
   @Input() room: Room;
   @Input() game: Game;
   currentGame$: Observable<Game>;
@@ -50,7 +49,16 @@ export class PregameComponent implements OnInit {
     });
   }
   assignRedSpymaster(userId: string) {
-    this.gameService.updateGame(this.game.id, {redTeam: {spymaster: userId} });
+    this.game.redTeam.spymaster = userId;
+    this.gameService.updateGame(this.game.id, {redTeam: this.game.redTeam});
+  }
+
+  assignBlueSpymaster(userId: string) {
+    this.game.blueTeam.spymaster = userId;
+    this.gameService.updateGame(this.game.id, {blueTeam: this.game.blueTeam});
+  }
+  startGame() {
+    this.roomService.updateRoom(this.room.id, {status: RoomStatus.GAME_IN_PROGRESS});
   }
 
   // assignUserToInProgressGame() {
