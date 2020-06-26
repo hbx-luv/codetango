@@ -24,7 +24,8 @@ export class HomePage {
     this.wordListsService.createWordList('MATT', ['THIS', 'IS', 'DANK']);
   }
 
-  goToGame() {
+  createGame() {
+    // TODO: actually create a game
     this.router.navigate(['game']);
   }
 }

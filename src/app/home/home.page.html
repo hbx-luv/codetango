@@ -7,14 +7,10 @@
       </p>
       <div class="input-container">
         <input class="create-input">
-        <button class="create-button">Create Game</button>
+        <button class="create-button" (click)="createGame()">Create Game</button>
       </div>
 
     </div>
-
-    <ion-button (click)="goToGame()">
-      Go to game
-    </ion-button>
 
     <p *ngFor="let list of lists | async">
       {{ list.name }}
