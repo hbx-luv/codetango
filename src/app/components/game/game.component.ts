@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {Game, GameStatus, Room} from 'types';
@@ -14,18 +15,25 @@ export class GameComponent {
 
   constructor(
       private readonly authService: AuthService,
-      private readonly gameService: GameService
+      private readonly gameService: GameService,
   ) {}
 
-  get playingInGame(): boolean {
-    // TODO: also check that the user is actually playing the game
-    return this.authService.authenticated;
+  get readonly(): boolean {
+    return !this.game || !!this.game.completedAt || !this.myTurn;
+  }
+
+  get myTurn(): boolean {
+    const {currentUserId} = this.authService;
+    return get(this.game, 'redTeam.userIds').includes(currentUserId) &&
+        get(this.game, 'status') === GameStatus.REDS_TURN ||
+        get(this.game, 'blueTeam.userIds').includes(currentUserId) &&
+        get(this.game, 'status') === GameStatus.BLUES_TURN;
   }
 
   get spymaster(): boolean {
-    // TODO: also check that the user is actually playing the game and is the
-    // spymaster role
-    return this.playingInGame;
+    const {currentUserId} = this.authService;
+    return get(this.game, 'redTeam.spymaster') === currentUserId ||
+        get(this.game, 'blueTeam.spymaster') === currentUserId;
   }
 
   endCurrentTeamsTurn() {
@@ -35,8 +43,6 @@ export class GameComponent {
       turnToSet = GameStatus.BLUES_TURN;
     }
 
-    this.gameService.updateGame(this.game.id, {
-      status: turnToSet
-    });
+    this.gameService.updateGame(this.game.id, {status: turnToSet});
   }
 }

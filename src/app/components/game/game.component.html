@@ -4,7 +4,7 @@
         <span [style]="{color: 'red'}" class="ion-padding-end">Red: {{game.redAgents}}</span>
         <span [style]="{color: 'lightskyblue'}">Blue: {{game.blueAgents}}</span>
     </div>
-    <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()">End Turn</ion-button>
+    <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="readonly">End Turn</ion-button>
 </ion-row>
-<app-game-board [game]="game" [readonly]="game?.completedAt || !playingInGame"></app-game-board>
+<app-game-board [game]="game" [readonly]="readonly"></app-game-board>
 <app-clues [game]="game" *ngIf="spymaster"></app-clues>
