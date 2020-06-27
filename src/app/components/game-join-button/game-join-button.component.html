@@ -1,2 +1,15 @@
 <ion-button (click)="login()" *ngIf="showLogin">Login</ion-button>
 <ion-button (click)="join()" *ngIf="showJoin">Join</ion-button>
+
+<ion-button
+  color="primary"
+  (click)="joinTeam('BLUE')"
+  *ngIf="showJoinTeamButtons"
+>
+  Join
+</ion-button>
+<ion-button
+  (click)="joinTeam('RED')"
+  color="danger"
+  *ngIf="showJoinTeamButtons"
+>Join</ion-button>

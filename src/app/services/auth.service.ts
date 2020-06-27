@@ -156,7 +156,7 @@ export class AuthService {
    * You can never fully log out of the mobile app, logging out just spawns a
    * new anonymous account
    */
-  async logout(): Promise<void> {
+  public async logout(): Promise<void> {
     this.authState = null;
     await this.afAuth.signOut();
   }

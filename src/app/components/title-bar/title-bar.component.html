@@ -1,6 +1,6 @@
 <ion-toolbar>
   <ion-title>
-    {{ room?.name }}
+    {{ room?.name }} ({{game?.id}})
   </ion-title>
   <div
     slot="secondary"
@@ -9,6 +9,7 @@
     [class.blue]="displayedGameStatus === 'Blue\'s Turn'"
   >{{displayedGameStatus}}</div>
   <div
+    class="title-bar-end"
     *ngIf="gameInProgress"
     slot="end"
   >
@@ -17,13 +18,23 @@
       [class.blue]="loggedInUserTeam === 'BLUE'"
     >&nbsp;&nbsp;&nbsp;&nbsp;</span>
     <span
+      class="ion-padding"
       *ngIf="loggedInUserTeam"
-    > {{loggedInUserDisplayName}}</span>
+    >{{loggedInUserDisplayName}}</span>
+    <ion-button
+      *ngIf="loggedInUser"
+      (click)="logout()"
+      color="medium"
+    >
+      logout
+    </ion-button>
   </div>
   <ion-buttons slot="end">
     <app-game-join-button
-      *ngIf="!gameInProgress"
-      [room]="room">
+      *ngIf="showJoinGameButton"
+      [room]="room"
+      [game]="game"
+    >
     </app-game-join-button>
   </ion-buttons>
 </ion-toolbar>

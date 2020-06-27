@@ -18,6 +18,26 @@ export class GameService {
     return this.afs.collection('games').doc(id).update(game);
   }
 
+  public removePlayerRedTeam(game: Partial<Game>, userIdToRemove: string) {
+    const newRedTeamUsers = game.redTeam.userIds.filter(players => players !== userIdToRemove);
+    game.redTeam.userIds = newRedTeamUsers;
+
+    return this.afs.collection('games').doc(game.id)
+      .update({
+              redTeam: game.redTeam
+            });
+  }
+
+  public removePlayerBlueTeam(game: Partial<Game>, userIdToRemove: string) {
+    const newBlueTeamUserIds = game.blueTeam.userIds.filter(players => players !== userIdToRemove);
+    game.redTeam.userIds = newBlueTeamUserIds;
+
+    return this.afs.collection('games').doc(game.id)
+      .update({
+        blueTeam: game.blueTeam
+      });
+  }
+
   getCurrentGame(roomId: string): Observable<Game|null> {
     return this.afs
         .collection<Game>(
