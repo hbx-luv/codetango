@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
+import {firestore} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Game} from 'types';
@@ -18,24 +19,12 @@ export class GameService {
     return this.afs.collection('games').doc(id).update(game);
   }
 
-  public removePlayerRedTeam(game: Partial<Game>, userIdToRemove: string) {
-    const newRedTeamUsers = game.redTeam.userIds.filter(players => players !== userIdToRemove);
-    game.redTeam.userIds = newRedTeamUsers;
-
-    return this.afs.collection('games').doc(game.id)
-      .update({
-              redTeam: game.redTeam
-            });
-  }
-
-  public removePlayerBlueTeam(game: Partial<Game>, userIdToRemove: string) {
-    const newBlueTeamUserIds = game.blueTeam.userIds.filter(players => players !== userIdToRemove);
-    game.redTeam.userIds = newBlueTeamUserIds;
-
-    return this.afs.collection('games').doc(game.id)
-      .update({
-        blueTeam: game.blueTeam
-      });
+  public removePlayerFromGame(gameId: string, userIdToRemove: string) {
+    console.log(gameId, userIdToRemove);
+    return this.afs.collection('games').doc(gameId).update({
+      'redTeam.userIds': firestore.FieldValue.arrayRemove(userIdToRemove),
+      'blueTeam.userIds': firestore.FieldValue.arrayRemove(userIdToRemove),
+    });
   }
 
   getCurrentGame(roomId: string): Observable<Game|null> {

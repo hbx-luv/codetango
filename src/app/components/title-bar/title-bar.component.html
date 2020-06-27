@@ -1,32 +1,19 @@
-<ion-toolbar>
+<ion-toolbar [color]="toolbarColor">
   <ion-title>
-    {{ room?.name }} ({{game?.id}})
+    {{ title }}
   </ion-title>
-  <div
-    slot="secondary"
-    class="gameStatus"
-    [class.red]="displayedGameStatus === 'Red\'s Turn'"
-    [class.blue]="displayedGameStatus === 'Blue\'s Turn'"
-  >{{displayedGameStatus}}</div>
   <div
     class="title-bar-end"
     *ngIf="gameInProgress"
     slot="end"
   >
-    <span
-      [class.red]="loggedInUserTeam === 'RED'"
-      [class.blue]="loggedInUserTeam === 'BLUE'"
-    >&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    <span
-      class="ion-padding"
-      *ngIf="loggedInUserTeam"
-    >{{loggedInUserDisplayName}}</span>
+    <app-users [userId]="authService.currentUserId"></app-users>
     <ion-button
-      *ngIf="loggedInUser"
-      (click)="logout()"
+      *ngIf="authService.authenticated"
+      (click)="leave()"
       color="medium"
     >
-      logout
+      Leave
     </ion-button>
   </div>
   <ion-buttons slot="end">

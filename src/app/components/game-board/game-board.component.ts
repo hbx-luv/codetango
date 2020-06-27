@@ -36,7 +36,8 @@ export class GameBoardComponent {
     }
   }
 
-  selectTile(tile: Tile) {
+  selectTile(tile: Tile, index: number) {
+    console.log(index);
     tile.selected = true;
     tile.selectedBy = this.authService.currentUserId;
 
@@ -74,17 +75,5 @@ export class GameBoardComponent {
 
   isGameOver(tile: Tile, game: Game) {
     return tile.role === TileRole.ASSASSIN;
-  }
-
-  get chunkedWords(): Array<Tile> {
-    return this.chunk(this.game.tiles, 5);
-  }
-
-  chunk(arr: Tile[], size: number): Array<Tile> {
-    const chunkedArray = [];
-    for (let i = 0; i < arr.length; i += size) {
-      chunkedArray.push(arr.slice(i, i + size));
-    }
-    return chunkedArray;
   }
 }

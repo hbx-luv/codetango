@@ -1,7 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
+
 import {Game, GameStatus, Room, RoomStatus} from '../../../../types';
 import {AuthService} from '../../services/auth.service';
-import * as firebase from 'firebase';
 import {GameService} from '../../services/game.service';
 
 @Component({
@@ -9,16 +9,31 @@ import {GameService} from '../../services/game.service';
   templateUrl: './title-bar.component.html',
   styleUrls: ['./title-bar.component.scss'],
 })
-export class TitleBarComponent implements OnInit {
+export class TitleBarComponent {
   @Input() room: Room;
   @Input() game: Game;
 
   constructor(
-    private readonly authService: AuthService,
-    private readonly gameService: GameService,
-  ) { }
+      readonly authService: AuthService,
+      private readonly gameService: GameService,
+  ) {}
 
-  ngOnInit() {}
+  get toolbarColor(): string {
+    if (this.gameInProgress) {
+      switch (this.game.status) {
+        case GameStatus.BLUES_TURN:
+        case GameStatus.BLUE_WON:
+          return 'primary';
+        case GameStatus.REDS_TURN:
+        case GameStatus.RED_WON:
+          return 'danger';
+        default:
+          return 'light';
+      }
+    }
+
+    return 'light';
+  }
 
   get showJoinGameButton(): boolean {
     if (!this.gameInProgress) {
@@ -31,39 +46,27 @@ export class TitleBarComponent implements OnInit {
   }
 
   get gameInProgress(): boolean {
-    return this.room && [
+    return this.room && this.game && [
       RoomStatus.GAME_IN_PROGRESS,
       RoomStatus.GAME_ENDED,
     ].includes(this.room.status);
   }
 
-  get loggedInUser(): firebase.User {
-    if (this.authService.authenticated) {
-      return this.authService.currentUser;
-    }
-  }
   get loggedInUserIsSpyMaster(): boolean {
-    const userId = this.loggedInUser.uid;
-    return this.game && (this.game.redTeam.spymaster === userId || this.game.blueTeam.spymaster === userId);
-  }
-
-  get loggedInUserDisplayName(): string {
-    if (this.loggedInUserIsSpyMaster) {
-      return `🕵 ${this.loggedInUser.displayName}`;
-    }
-    return this.loggedInUser.displayName;
+    return this.game &&
+        (this.game.redTeam.spymaster === this.authService.currentUserId ||
+         this.game.blueTeam.spymaster === this.authService.currentUserId);
   }
 
   get loggedInUserTeam(): string {
-    if (this.loggedInUser) {
-      const currentUserId = this.loggedInUser.uid;
+    if (this.authService.authenticated) {
       if (!this.game) {
         return null;
       }
-      if (this.game.blueTeam.userIds.includes(currentUserId)){
+      if (this.game.blueTeam.userIds.includes(this.authService.currentUserId)) {
         return 'BLUE';
       }
-      if (this.game.redTeam.userIds.includes(currentUserId)){
+      if (this.game.redTeam.userIds.includes(this.authService.currentUserId)) {
         return 'RED';
       }
     }
@@ -73,34 +76,40 @@ export class TitleBarComponent implements OnInit {
 
   get showJoin(): boolean {
     return this.authService.authenticated && this.room &&
-      !this.room.userIds.includes(this.authService.currentUserId);
+        !this.room.userIds.includes(this.authService.currentUserId);
   }
 
-  get displayedGameStatus(): string {
-    if (this.game) {
-      switch (this.game.status) {
-        case GameStatus.BLUES_TURN:
-          return `Blue's Turn`;
-        case GameStatus.REDS_TURN:
-          return `Red's Turn`;
-        case GameStatus.BLUE_WON:
-          return 'BLUE WON';
-        case GameStatus.RED_WON:
-          return 'RED WON';
-      }
-      return this.game.status;
+  get title(): string {
+    if (!this.room) return 'Loading...';
+
+    switch (this.room.status) {
+      case RoomStatus.PREGAME:
+        return this.room.name;
+      case RoomStatus.ASSIGNING_ROLES:
+        return 'Pick Spymasters';
+      default:
+        if (this.game) {
+          switch (this.game.status) {
+            case GameStatus.BLUES_TURN:
+              return `Blue's Turn`;
+            case GameStatus.REDS_TURN:
+              return `Red's Turn`;
+            case GameStatus.BLUE_WON:
+              return 'Blue Wins!';
+            case GameStatus.RED_WON:
+              return 'Red Wins!';
+            default:
+              return '';
+          }
+        }
     }
-    return null;
+
+    // fallback to the room name
+    return this.room.name;
   }
 
-  logout() {
-    if (this.loggedInUserTeam === 'RED') {
-      this.gameService.removePlayerRedTeam(this.game, this.authService.currentUserId);
-    } else if (this.loggedInUserTeam === 'BLUE') {
-      this.gameService.removePlayerBlueTeam(this.game, this.authService.currentUserId);
-    }
-    this.gameService.updateGame(this.game.id, this.game);
-    this.authService.logout();
+  leave() {
+    this.gameService.removePlayerFromGame(
+        this.game.id, this.authService.currentUserId);
   }
-
 }

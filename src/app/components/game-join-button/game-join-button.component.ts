@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
-import {Game, Room} from 'types';
+import {Game, Room, RoomStatus} from 'types';
 import {GameService} from '../../services/game.service';
 
 @Component({
@@ -48,11 +48,13 @@ export class GameJoinButtonComponent {
   get showJoinTeamButtons(): boolean {
     const currentUserId = this.authService.currentUserId;
     const loggedInAndInRoom = this.authService.authenticated && this.room &&
-      this.room.userIds.includes(currentUserId);
+        this.room.userIds.includes(currentUserId);
 
-    const isOnTeam = this.game && (this.game.redTeam.userIds.includes(currentUserId) ||
-      this.game.blueTeam.userIds.includes(currentUserId));
+    const isOnTeam = this.game &&
+        (this.game.redTeam.userIds.includes(currentUserId) ||
+         this.game.blueTeam.userIds.includes(currentUserId));
 
-    return loggedInAndInRoom && !isOnTeam;
+    return loggedInAndInRoom && !isOnTeam &&
+        this.room.status === RoomStatus.GAME_IN_PROGRESS;
   }
 }
