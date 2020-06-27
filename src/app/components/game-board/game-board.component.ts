@@ -63,17 +63,21 @@ export class GameBoardComponent {
   }
 
   getGameStatus(tile: Tile) {
-    let gameStatus;
     const userOnBlueTeam =
         this.game.blueTeam.userIds.includes(this.authService.currentUserId);
-    if (tile.role === TileRole.ASSASSIN) {
-      gameStatus =
-          userOnBlueTeam === true ? GameStatus.RED_WON : GameStatus.BLUE_WON;
-    } else {
-      gameStatus = userOnBlueTeam === true ? GameStatus.REDS_TURN :
-                                             GameStatus.BLUES_TURN;
+
+    switch (tile.role) {
+      case TileRole.ASSASSIN:
+        return userOnBlueTeam ? GameStatus.RED_WON : GameStatus.BLUE_WON;
+      case TileRole.CIVILIAN:
+        return userOnBlueTeam ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
+      case TileRole.BLUE:
+        return GameStatus.BLUES_TURN;
+      case TileRole.RED:
+        return GameStatus.REDS_TURN;
+      default:
+        throw 'What the fuck is this?!';
     }
-    return gameStatus;
   }
 
   isGameOver(tile: Tile, game: Game) {
