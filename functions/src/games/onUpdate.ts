@@ -14,7 +14,7 @@ export const onUpdateGame =
             if (preGameUpdate.status !== postGameUpdate.status && (
                 postGameUpdate.status === GameStatus.BLUE_WON || postGameUpdate.status === GameStatus.RED_WON
             )) {
-                console.log(postGameUpdate.status)
+                console.log("GAME OVER:" + postGameUpdate.status)
                 //Process Endgame analytics
                 postGameUpdate.blueTeam.userIds.forEach(user => calculatePlayerStats(user, postGameUpdate.status === GameStatus.BLUE_WON))
                 postGameUpdate.redTeam.userIds.forEach(user => calculatePlayerStats(user, postGameUpdate.status === GameStatus.RED_WON))
@@ -23,8 +23,8 @@ export const onUpdateGame =
         });
 
 async function calculatePlayerStats(userId: string, wonGame: Boolean) {
-    const usersSnapshot = await db.collection('users').doc(userId);
-
+    const userSnapshot = await db.collection('users').doc(userId);
+    console.log(userSnapshot)
     let statUpdate;
     if (wonGame) {
         statUpdate = { stats: {
@@ -38,7 +38,7 @@ async function calculatePlayerStats(userId: string, wonGame: Boolean) {
             gamesPlayed: admin.firestore.FieldValue.increment(1)
         } };
     }
-    usersSnapshot.update(statUpdate)
+    userSnapshot.update(statUpdate)
 }
 
 //test
