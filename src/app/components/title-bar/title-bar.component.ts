@@ -1,10 +1,7 @@
 import {Component, Input} from '@angular/core';
-import {Router} from '@angular/router';
-import {RoomService} from 'src/app/services/room.service';
 
 import {Game, GameStatus, Room, RoomStatus} from '../../../../types';
 import {AuthService} from '../../services/auth.service';
-import {GameService} from '../../services/game.service';
 
 @Component({
   selector: 'app-title-bar',
@@ -17,9 +14,6 @@ export class TitleBarComponent {
 
   constructor(
       readonly authService: AuthService,
-      private readonly roomService: RoomService,
-      private readonly gameService: GameService,
-      private readonly router: Router,
   ) {}
 
   get toolbarColor(): string {
@@ -110,17 +104,5 @@ export class TitleBarComponent {
 
     // fallback to the room name
     return this.room.name;
-  }
-
-  leave() {
-    this.roomService.removePlayerFromRoom(
-        this.room.id,
-        this.authService.currentUserId,
-    );
-    this.gameService.removePlayerFromGame(
-        this.game.id,
-        this.authService.currentUserId,
-    );
-    this.router.navigate(['home']);
   }
 }

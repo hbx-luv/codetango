@@ -4,17 +4,12 @@
   </ion-title>
   <div
     class="title-bar-end"
-    *ngIf="gameInProgress"
     slot="end"
   >
-    <app-users [userId]="authService.currentUserId"></app-users>
-    <ion-button
+    <app-users
       *ngIf="authService.authenticated"
-      (click)="leave()"
-      color="medium"
-    >
-      Leave
-    </ion-button>
+      [userId]="authService.currentUserId">
+    </app-users>
   </div>
   <ion-buttons slot="end">
     <app-game-join-button

@@ -1,2 +1,20 @@
-<ion-button (click)="login()" *ngIf="showLogin">Login</ion-button>
-<ion-button (click)="join()" *ngIf="showJoin">Join</ion-button>
+<ng-container *ngIf="room">
+  <!-- if the user isn't logged in, their opnly action is to log in -->
+  <ion-button
+    (click)="login()"
+    *ngIf="showLogin">
+    Login
+  </ion-button>
+  <!-- if a user is logged in, they can join -->
+  <ion-button
+    (click)="join()"
+    *ngIf="showJoin">
+    Join
+  </ion-button>
+  <!-- or leave if they're already in the room -->
+  <ion-button
+    (click)="leave()"
+    *ngIf="showLeave">
+    Leave
+  </ion-button>
+</ng-container>

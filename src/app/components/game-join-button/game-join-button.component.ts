@@ -1,7 +1,9 @@
 import {Component, Input} from '@angular/core';
+import {Router} from '@angular/router';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
-import {Game, Room, RoomStatus} from 'types';
+import {Game, Room} from 'types';
+
 import {GameService} from '../../services/game.service';
 
 @Component({
@@ -17,15 +19,27 @@ export class GameJoinButtonComponent {
       private readonly authService: AuthService,
       private readonly roomService: RoomService,
       private readonly gameService: GameService,
+      private readonly router: Router,
   ) {}
 
+  get loggedIn(): boolean {
+    return this.room && this.authService.authenticated;
+  }
+
   get showLogin(): boolean {
-    return this.room && !this.authService.authenticated;
+    return !this.loggedIn;
+  }
+
+  get userIsInRoom(): boolean {
+    return this.room.userIds.includes(this.authService.currentUserId);
   }
 
   get showJoin(): boolean {
-    return this.authService.authenticated && this.room &&
-        !this.room.userIds.includes(this.authService.currentUserId);
+    return this.loggedIn && !this.userIsInRoom;
+  }
+
+  get showLeave(): boolean {
+    return this.loggedIn && this.userIsInRoom;
   }
 
   login() {
@@ -36,12 +50,15 @@ export class GameJoinButtonComponent {
     this.roomService.joinRoom(this.room.id);
   }
 
-  joinTeam(team: string) {
-    if (team === 'RED') {
-      this.game.redTeam.userIds.push(this.authService.currentUserId);
-    } else if (team === 'BLUE') {
-      this.game.blueTeam.userIds.push(this.authService.currentUserId);
-    }
-    this.gameService.updateGame(this.game.id, this.game);
+  leave() {
+    this.roomService.removePlayerFromRoom(
+        this.room.id,
+        this.authService.currentUserId,
+    );
+    this.gameService.removePlayerFromGame(
+        this.game.id,
+        this.authService.currentUserId,
+    );
+    this.router.navigate(['home']);
   }
 }
