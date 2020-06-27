@@ -4,7 +4,10 @@
     <div class="spy">
       <span *ngIf="game.blueTeam.spymaster === member">🕵</span>
     </div>
-    <app-users [userId]="member"></app-users>
+    <app-users
+      [userId]="member"
+      (click)="userClicked(member, 'blueTeam')">
+    </app-users>
   </div>
   <ion-button
     size="small"
@@ -17,7 +20,10 @@
     <div class="spy">
       <span *ngIf="game.redTeam.spymaster === member">🕵</span>
     </div>
-    <app-users [userId]="member"></app-users>
+    <app-users
+      [userId]="member"
+      (click)="userClicked(member, 'redTeam')">
+    </app-users>
   </div>
   <ion-button
     size="small"

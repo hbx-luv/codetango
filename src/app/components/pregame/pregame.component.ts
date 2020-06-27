@@ -38,59 +38,31 @@ export class PregameComponent implements OnInit {
       }
     }
 
-    const redTeam = {color: TileRole.RED, userIds: redTeamUsers};
-    const blueTeam = {color: TileRole.BLUE, userIds: blueTeamUsers};
-    this.roomService.updateRoom(this.room.id, {status: RoomStatus.ASSIGNING_ROLES});
+    // kick off the game creation
     this.gameService.createGame({
       createdAt: Date.now(),
-      blueTeam,
-      redTeam,
-      roomId: this.room.id
+      blueTeam: {
+        color: TileRole.BLUE,
+        userIds: blueTeamUsers,
+        spymaster: blueTeamUsers[0],
+      },
+      redTeam: {
+        color: TileRole.RED,
+        userIds: redTeamUsers,
+        spymaster: redTeamUsers[0],
+      },
+      roomId: this.room.id,
+    });
+
+    // move the room to the next state
+    this.roomService.updateRoom(this.room.id, {
+      status: RoomStatus.ASSIGNING_ROLES,
     });
   }
-  assignRedSpymaster(userId: string) {
-    this.game.redTeam.spymaster = userId;
-    this.gameService.updateGame(this.game.id, {redTeam: this.game.redTeam});
-  }
 
-  assignBlueSpymaster(userId: string) {
-    this.game.blueTeam.spymaster = userId;
-    this.gameService.updateGame(this.game.id, {blueTeam: this.game.blueTeam});
-  }
   startGame() {
-    this.roomService.updateRoom(this.room.id, {status: RoomStatus.GAME_IN_PROGRESS});
+    this.roomService.updateRoom(this.room.id, {
+      status: RoomStatus.GAME_IN_PROGRESS,
+    });
   }
-
-  // assignUserToInProgressGame() {
-  //   const userAlreadyOnBlue = this.currentGame.blueTeam.userIds.includes(this.user.id);
-  //   const userAlreadyOnRed = this.currentGame.redTeam.userIds.includes(this.user.id);
-  //
-  //   const redTeamCount = this.currentGame.redTeam.userIds.length;
-  //   const blueTeamCount = this.currentGame.blueTeam.userIds.length;
-  //   if (!userAlreadyOnRed && !userAlreadyOnBlue) {
-  //     if (redTeamCount < blueTeamCount) {
-  //       this.addUserToRedTeam();
-  //     } else if (blueTeamCount < redTeamCount) {
-  //       this.addUserToBlueTeam();
-  //     } else {
-  //       this.addUserToRandomTeam();
-  //     }
-  //     this.gameService.updateGame(this.currentGame.id, this.currentGame);
-  //   }
-  // }
-  // addUserToBlueTeam() {
-  //   this.currentGame.blueTeam.userIds.push(this.user.id);
-  // }
-  // addUserToRedTeam() {
-  //   this.currentGame.redTeam.userIds.push(this.user.id);
-  // }
-  // addUserToRandomTeam() {
-  //   // Random number 1 - 100
-  //   const randomNum = Math.floor(Math.random() * 100) + 1;
-  //   if (randomNum % 2 === 0) {
-  //     this.addUserToRedTeam();
-  //   } else {
-  //     this.addUserToBlueTeam();
-  //   }
-  // }
 }

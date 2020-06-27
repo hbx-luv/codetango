@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {Router} from '@angular/router';
+import {RoomService} from 'src/app/services/room.service';
 
 import {Game, GameStatus, Room, RoomStatus} from '../../../../types';
 import {AuthService} from '../../services/auth.service';
@@ -16,6 +17,7 @@ export class TitleBarComponent {
 
   constructor(
       readonly authService: AuthService,
+      private readonly roomService: RoomService,
       private readonly gameService: GameService,
       private readonly router: Router,
   ) {}
@@ -111,8 +113,14 @@ export class TitleBarComponent {
   }
 
   leave() {
+    this.roomService.removePlayerFromRoom(
+        this.room.id,
+        this.authService.currentUserId,
+    );
     this.gameService.removePlayerFromGame(
-        this.game.id, this.authService.currentUserId);
+        this.game.id,
+        this.authService.currentUserId,
+    );
     this.router.navigate(['home']);
   }
 }

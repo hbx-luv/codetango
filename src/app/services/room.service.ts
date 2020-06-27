@@ -43,7 +43,13 @@ export class RoomService {
 
   joinRoom(id: string) {
     return this.afs.collection('rooms').doc(id).update({
-      userIds: firestore.FieldValue.arrayUnion(this.authService.currentUserId)
+      userIds: firestore.FieldValue.arrayUnion(this.authService.currentUserId),
+    });
+  }
+
+  removePlayerFromRoom(roomId: string, userId: string) {
+    return this.afs.collection('rooms').doc(roomId).update({
+      userIds: firestore.FieldValue.arrayRemove(userId),
     });
   }
 

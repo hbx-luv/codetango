@@ -12,6 +12,7 @@ import {Game, Room, RoomStatus} from '../../../../types';
 export class TeamListsComponent {
   @Input() room: Room;
   @Input() game: Game;
+  @Input() setSpymaster: boolean;
 
   constructor(
       private readonly authService: AuthService,
@@ -28,8 +29,13 @@ export class TeamListsComponent {
         (this.game.redTeam.userIds.includes(currentUserId) ||
          this.game.blueTeam.userIds.includes(currentUserId));
 
-    return loggedInAndInRoom && !isOnTeam &&
-        this.room.status === RoomStatus.GAME_IN_PROGRESS;
+    return loggedInAndInRoom && !isOnTeam;
+  }
+
+  userClicked(userId: string, team: 'redTeam'|'blueTeam') {
+    if (this.setSpymaster) {
+      this.gameService.assignSpymaster(this.game.id, userId, team);
+    }
   }
 
   joinTeam(team: 'redTeam'|'blueTeam') {

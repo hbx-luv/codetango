@@ -33,6 +33,13 @@ export class GameService {
     });
   }
 
+  assignSpymaster(
+      gameId: string, playerId: string, team: 'redTeam'|'blueTeam') {
+    return this.afs.collection('games').doc(gameId).update({
+      [`${team}.spymaster`]: playerId,
+    });
+  }
+
   getCurrentGame(roomId: string): Observable<Game|null> {
     return this.afs
         .collection<Game>(
