@@ -12,6 +12,7 @@ import {UsersComponent} from './users/users.component';
 import {TimerComponent} from './timer/timer.component';
 import {TitleBarComponent} from './title-bar/title-bar.component';
 import {TeamListsComponent} from './team-lists/team-lists.component';
+import {WordHistoryComponent} from "./word-history/word-history.component";
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import {TeamListsComponent} from './team-lists/team-lists.component';
     UsersComponent,
     TitleBarComponent,
     TeamListsComponent,
+    WordHistoryComponent,
   ],
   imports: [
     IonicModule,
@@ -42,6 +44,7 @@ import {TeamListsComponent} from './team-lists/team-lists.component';
     UsersComponent,
     TitleBarComponent,
     TeamListsComponent,
+    WordHistoryComponent,
   ]
 })
 export class ComponentsModule {
