@@ -56,14 +56,12 @@ export class GameBoardComponent {
   }
 
   getGameStatus(tile: Tile) {
-    const userOnBlueTeam =
-        this.game.blueTeam.userIds.includes(this.authService.currentUserId);
-
     switch (tile.role) {
       case TileRole.ASSASSIN:
-        return userOnBlueTeam ? GameStatus.RED_WON : GameStatus.BLUE_WON;
+        return GameStatus.BLUES_TURN ? GameStatus.RED_WON : GameStatus.BLUE_WON;
       case TileRole.CIVILIAN:
-        return userOnBlueTeam ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
+        return GameStatus.BLUES_TURN ? GameStatus.REDS_TURN :
+                                       GameStatus.BLUES_TURN;
       case TileRole.BLUE:
         return GameStatus.BLUES_TURN;
       case TileRole.RED:
