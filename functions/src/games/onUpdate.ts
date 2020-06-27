@@ -39,7 +39,19 @@ async function updateRemainingAgents(snapshot: DocumentSnapshot):
 
     // only update when the # of remaining agents goes down
     if (blueAgents < game.blueAgents || redAgents < game.redAgents) {
-      await snapshot.ref.update({blueAgents, redAgents});
+      const updates: Partial<Game> = {blueAgents, redAgents};
+
+      // determine if the team won by getting all of their clues
+      if (blueAgents === 0) {
+        updates.status = GameStatus.BLUE_WON;
+        updates.completedAt = Date.now();
+      }
+      if (redAgents === 0) {
+        updates.status = GameStatus.RED_WON;
+        updates.completedAt = Date.now();
+      }
+
+      await snapshot.ref.update(updates);
     }
   }
 }

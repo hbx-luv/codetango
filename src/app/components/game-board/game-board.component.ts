@@ -36,19 +36,17 @@ export class GameBoardComponent {
     }
   }
 
-  selectTile(tile: Tile, index: number) {
-    console.log(index);
+  selectTile(tile: Tile) {
     tile.selected = true;
     tile.selectedBy = this.authService.currentUserId;
 
-    // update the game titles and status
-    const updates: any = {
+    const updates: Partial<Game> = {
       tiles: this.game.tiles,
       status: this.getGameStatus(tile),
     };
 
-    // determine game over
-    if (this.isGameOver(tile, this.game)) {
+    // set completedAt when the assassin is clicked
+    if (tile.role === TileRole.ASSASSIN) {
       updates.completedAt = Date.now();
     }
 
@@ -69,9 +67,5 @@ export class GameBoardComponent {
       default:
         throw 'What the fuck is this?!';
     }
-  }
-
-  isGameOver(tile: Tile, game: Game) {
-    return tile.role === TileRole.ASSASSIN;
   }
 }

@@ -1,12 +1,12 @@
 <ion-grid id="grid-container" *ngIf="game.tiles">
   <ion-button
-    *ngFor="let tile of game.tiles; let index = index"
+    *ngFor="let tile of game.tiles"
     [class.spymaster]="spymaster"
     [class.selected]="tile.selected"
     [class.readonly]="readonly"
     [color]="getColor(tile)"
     class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
-    (click)="selectTile(tile, index)">
+    (click)="selectTile(tile)">
     {{ tile.word }}
   </ion-button>
 </ion-grid>
