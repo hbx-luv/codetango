@@ -1,62 +1,98 @@
-import * as functions from "firebase-functions";
-import {Game, GameStatus, User} from '../../../types';
-import * as admin from "firebase-admin";
+import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
+import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
+
+import {Game, GameStatus, TileRole, User} from '../../../types';
 
 const db = admin.firestore();
 
 export const onUpdateGame =
     functions.firestore.document('games/{gameId}')
         .onUpdate(async (gameDoc, context) => {
-            const preGameUpdate = gameDoc.before.data() as Game;
-            const postGameUpdate = gameDoc.after.data() as Game;
+          const preGameUpdate = gameDoc.before.data() as Game;
+          const postGameUpdate = gameDoc.after.data() as Game;
 
-            //Check if we the last update was setting the gamestatus to over.
-            if (preGameUpdate.status !== postGameUpdate.status && (
-                postGameUpdate.status === GameStatus.BLUE_WON || postGameUpdate.status === GameStatus.RED_WON
-            )) {
-                //Process Endgame analytics
-                const gameId = postGameUpdate.id ? postGameUpdate.id : '';
-                for(const user of postGameUpdate.blueTeam.userIds){
-                    await calculatePlayerStats(user, postGameUpdate.status === GameStatus.BLUE_WON, gameId);
-                }
-                for(const user of postGameUpdate.redTeam.userIds){
-                    await calculatePlayerStats(user, postGameUpdate.status === GameStatus.RED_WON, gameId);
-                }
-            }
-            return 'Done'
+          await updateRemainingAgents(gameDoc.after);
+          await determineGameOver(preGameUpdate, postGameUpdate);
+
+          return 'Done';
         });
 
-async function calculatePlayerStats(userId: string, wonGame: Boolean, gameId: string) {
-    const userSnapshot = await db.collection('users').doc(userId);
-    let playerUpdate;
-    if (wonGame) {
-        playerUpdate = {
-            'stats.currentStreak': admin.firestore.FieldValue.increment(1),
-            'stats.gamesWon': admin.firestore.FieldValue.increment(1),
-            'stats.gamesPlayed': admin.firestore.FieldValue.increment(1)
-        } ;
-    } else {
-        playerUpdate = {
-            'stats.currentStreak': 0,
-            'stats.gamesWon': admin.firestore.FieldValue.increment(0),
-            'stats.gamesPlayed': admin.firestore.FieldValue.increment(1)
-        };
+async function updateRemainingAgents(snapshot: DocumentSnapshot):
+    Promise<void> {
+  const game = snapshot.data() as Game;
+
+  if (game.tiles) {
+    let blueAgents = 0;
+    let redAgents = 0;
+
+    // determine the remaining blue and red agents
+    game.tiles.forEach(tile => {
+      if (tile.selected === false) {
+        if (tile.role === TileRole.BLUE) {
+          blueAgents++;
+        } else if (tile.role === TileRole.RED) {
+          redAgents++;
+        }
+      }
+    });
+
+    // only update when the # of remaining agents goes down
+    if (blueAgents < game.blueAgents || redAgents < game.redAgents) {
+      await snapshot.ref.update({blueAgents, redAgents});
     }
-    userSnapshot.update(playerUpdate)
-      .catch(err => console.error(err))
+  }
+}
 
-    const user = (await userSnapshot.get()).data() as User;
+async function determineGameOver(preGameUpdate: Game, postGameUpdate: Game) {
+  // Check if we the last update was setting the gamestatus to over.
+  if (preGameUpdate.status !== postGameUpdate.status &&
+      (postGameUpdate.status === GameStatus.BLUE_WON ||
+       postGameUpdate.status === GameStatus.RED_WON)) {
+    // Process Endgame analytics
+    const gameId = postGameUpdate.id ? postGameUpdate.id : '';
+    for (const user of postGameUpdate.blueTeam.userIds) {
+      await calculatePlayerStats(
+          user, postGameUpdate.status === GameStatus.BLUE_WON, gameId);
+    }
+    for (const user of postGameUpdate.redTeam.userIds) {
+      await calculatePlayerStats(
+          user, postGameUpdate.status === GameStatus.RED_WON, gameId);
+    }
+  }
+}
 
-    const currentElo = {
-        elo: 0, //TODO
-        gameId,
-        gamesPlayed: user.stats.gamesPlayed,
-        gamesWon: user.stats.gamesWon,
-        playerId: user.id,
-        provisional: false
+async function calculatePlayerStats(
+    userId: string, wonGame: Boolean, gameId: string) {
+  const userSnapshot = await db.collection('users').doc(userId);
+  let playerUpdate;
+  if (wonGame) {
+    playerUpdate = {
+      'stats.currentStreak': admin.firestore.FieldValue.increment(1),
+      'stats.gamesWon': admin.firestore.FieldValue.increment(1),
+      'stats.gamesPlayed': admin.firestore.FieldValue.increment(1)
     };
+  } else {
+    playerUpdate = {
+      'stats.currentStreak': 0,
+      'stats.gamesWon': admin.firestore.FieldValue.increment(0),
+      'stats.gamesPlayed': admin.firestore.FieldValue.increment(1)
+    };
+  }
+  userSnapshot.update(playerUpdate).catch(err => console.error(err))
 
-    const eloSnapshot = await db.collection('elohistory').doc('default');
+  const user = (await userSnapshot.get()).data() as User;
 
-    return eloSnapshot.create(currentElo);
+  const currentElo = {
+    elo: 0,  // TODO
+    gameId,
+    gamesPlayed: user.stats.gamesPlayed,
+    gamesWon: user.stats.gamesWon,
+    playerId: user.id,
+    provisional: false
+  };
+
+  const eloSnapshot = await db.collection('elohistory').doc('default');
+
+  return eloSnapshot.create(currentElo);
 }
