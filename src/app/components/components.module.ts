@@ -11,6 +11,7 @@ import {PregameComponent} from './pregame/pregame.component';
 import {UsersComponent} from './users/users.component';
 import {TimerComponent} from './timer/timer.component';
 import {TitleBarComponent} from './title-bar/title-bar.component';
+import {TeamListsComponent} from './team-lists/team-lists.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import {TitleBarComponent} from './title-bar/title-bar.component';
     TimerComponent,
     UsersComponent,
     TitleBarComponent,
+    TeamListsComponent,
   ],
   imports: [
     IonicModule,
@@ -39,6 +41,7 @@ import {TitleBarComponent} from './title-bar/title-bar.component';
     TimerComponent,
     UsersComponent,
     TitleBarComponent,
+    TeamListsComponent,
   ]
 })
 export class ComponentsModule {

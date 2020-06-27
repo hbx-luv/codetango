@@ -43,6 +43,8 @@ async function calculatePlayerStats(userId: string, wonGame: Boolean, gameId: st
         };
     }
     userSnapshot.update(playerUpdate)
+      .catch(err => console.error(err))
+
     const user = (await userSnapshot.get()).data() as User;
 
     const currentElo = {
