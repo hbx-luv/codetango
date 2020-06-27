@@ -1,8 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
-import {Clue, Game, GameStatus, WordList} from '../../../../types';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
+
+import {Clue, Game, GameStatus, WordList} from '../../../../types';
 
 @Component({
   selector: 'app-clues',
@@ -10,12 +11,9 @@ import {tap} from 'rxjs/operators';
   styleUrls: ['./clues.component.scss'],
 })
 export class CluesComponent implements OnInit {
-
   @Input() game: Game;
 
-  constructor(
-      private afs: AngularFirestore
-  ) {}
+  constructor(private afs: AngularFirestore) {}
 
   clue: string;
   clueCount: number;
@@ -77,16 +75,13 @@ export class CluesComponent implements OnInit {
   }
 
   getClues(): Observable<Clue[]> {
-    return this.afs
-        .collection<Game>('games')
+    return this.afs.collection<Game>('games')
         .doc(this.game.id)
         .collection<Clue>(
-          'clues',
-          ref => {
-            return ref
-                .orderBy('createdAt', 'desc');
-          }
-        )
+            'clues',
+            ref => {
+              return ref.orderBy('createdAt', 'desc');
+            })
         .valueChanges()
         .pipe(tap(clues => {
           this.clues = clues;

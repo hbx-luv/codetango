@@ -20,7 +20,18 @@
         </app-team-lists>
     </ion-col>
 </ion-row>
-<app-clues [game]="game" *ngIf="spymaster"></app-clues>
+<ion-row class="ion-justify-content-center" *ngIf="game.completedAt">
+  <ion-button color="light" (click)="backToLobby()">
+    Go Back to Lobby
+  </ion-button>
+  <ion-button color="primary" (click)="nextGame()">
+    Next Game with Same Teams
+  </ion-button>
+</ion-row>
+<app-clues
+  [game]="game"
+  *ngIf="spymaster && !game.completedAt">
+</app-clues>
 <app-word-history
   [game]="game"
 ></app-word-history>

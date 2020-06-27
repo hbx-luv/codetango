@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
+import {UtilService} from 'src/app/services/util.service';
 import {RoomStatus, WordList} from 'types';
 
 import {WordListsService} from '../../services/word-lists.service';
@@ -23,6 +24,7 @@ export class HomePage {
       private readonly wordListsService: WordListsService,
       public readonly authService: AuthService,
       private readonly router: Router,
+      private readonly utilService: UtilService,
   ) {
     this.lists = this.wordListsService.getWordLists().pipe(tap(wordLists => {
       if (!this.selectedWordList && wordLists && wordLists.length) {
@@ -37,10 +39,14 @@ export class HomePage {
 
   async createRoom() {
     if (this.roomName) {
+      let loader;
       if (!this.authService.authenticated) {
+        loader = await this.utilService.presentLoader('Logging in...');
         await this.authService.loginWithGoogle();
+        await loader.dismiss();
       }
 
+      loader = await this.utilService.presentLoader('Joining room...');
       const id = await this.roomService.createRoom({
         name: this.roomName,
         status: RoomStatus.PREGAME,
@@ -50,8 +56,9 @@ export class HomePage {
         userIds: []
       });
 
-      this.roomService.joinRoom(id);
+      await this.roomService.joinRoom(id);
       this.router.navigate(['room', id]);
+      await loader.dismiss();
     }
   }
 }

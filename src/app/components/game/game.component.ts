@@ -2,7 +2,9 @@ import {Component, Input} from '@angular/core';
 import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
-import {Game, GameStatus, Room} from 'types';
+import {RoomService} from 'src/app/services/room.service';
+import {UtilService} from 'src/app/services/util.service';
+import {Game, GameStatus, Room, RoomStatus} from 'types';
 
 @Component({
   selector: 'app-game',
@@ -16,6 +18,8 @@ export class GameComponent {
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
+      private readonly roomService: RoomService,
+      private readonly utilService: UtilService,
   ) {}
 
   get readonly(): boolean {
@@ -44,5 +48,23 @@ export class GameComponent {
     }
 
     this.gameService.updateGame(this.game.id, {status: turnToSet});
+  }
+
+  async backToLobby() {
+    const loader = await this.utilService.presentLoader('Redirecting...');
+    await this.roomService.updateRoom(this.room.id, {
+      status: RoomStatus.PREGAME,
+    });
+    await loader.dismiss();
+  }
+
+  async nextGame() {
+    const loader =
+        await this.utilService.presentLoader('Creating the next game...');
+    const {redTeam, blueTeam, roomId} = this.game;
+    await this.gameService.createGame({redTeam, blueTeam, roomId});
+    await this.roomService.updateRoom(
+        roomId, {status: RoomStatus.ASSIGNING_ROLES});
+    await loader.dismiss();
   }
 }

@@ -12,7 +12,8 @@ export class GameService {
   ) {}
 
   createGame(game: Partial<Game>) {
-    return this.afs.collection('games').add(game);
+    const createdAt = Date.now();
+    return this.afs.collection('games').add({createdAt, ...game});
   }
 
   updateGame(id: string, game: Partial<Game>) {
@@ -46,7 +47,7 @@ export class GameService {
             'games',
             ref => {
               return ref.where('roomId', '==', roomId)
-                  .orderBy('createdAt')
+                  .orderBy('createdAt', 'desc')
                   .limit(1);
             })
         .snapshotChanges()

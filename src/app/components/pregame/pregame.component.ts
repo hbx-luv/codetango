@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import * as _ from 'lodash';
 import {Observable} from 'rxjs';
+import {UtilService} from 'src/app/services/util.service';
 
 import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
@@ -20,11 +21,13 @@ export class PregameComponent implements OnInit {
 
   constructor(
       private readonly gameService: GameService,
-      private readonly roomService: RoomService) {}
+      private readonly roomService: RoomService,
+      private readonly utilService: UtilService,
+  ) {}
 
   ngOnInit() {}
 
-  assignUsersToRandomTeams() {
+  async assignUsersToRandomTeams() {
     const redTeamUsers = [];
     const blueTeamUsers = [];
     const roomSize = this.room.userIds.length;
@@ -38,8 +41,9 @@ export class PregameComponent implements OnInit {
       }
     }
 
-    // kick off the game creation
-    this.gameService.createGame({
+    // wait for the game to be created
+    const loader = await this.utilService.presentLoader('Creating game...');
+    await this.gameService.createGame({
       createdAt: Date.now(),
       blueTeam: {
         color: TileRole.BLUE,
@@ -55,14 +59,17 @@ export class PregameComponent implements OnInit {
     });
 
     // move the room to the next state
-    this.roomService.updateRoom(this.room.id, {
+    await this.roomService.updateRoom(this.room.id, {
       status: RoomStatus.ASSIGNING_ROLES,
     });
+    await loader.dismiss();
   }
 
-  startGame() {
-    this.roomService.updateRoom(this.room.id, {
+  async startGame() {
+    const loader = await this.utilService.presentLoader('Starting game...');
+    await this.roomService.updateRoom(this.room.id, {
       status: RoomStatus.GAME_IN_PROGRESS,
     });
+    await loader.dismiss();
   }
 }
