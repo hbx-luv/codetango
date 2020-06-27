@@ -9,13 +9,12 @@ export const onUpdateGame =
         .onUpdate(async (gameDoc, context) => {
             const preGameUpdate = gameDoc.before.data() as Game;
             const postGameUpdate = gameDoc.after.data() as Game;
-            console.log(preGameUpdate.status);
-            console.log(postGameUpdate.status);
 
             //Check if we the last update was setting the gamestatus to over.
             if (preGameUpdate.status !== postGameUpdate.status && (
                 postGameUpdate.status === GameStatus.BLUE_WON || postGameUpdate.status === GameStatus.RED_WON
             )) {
+                console.log(postGameUpdate.status)
                 //Process Endgame analytics
                 postGameUpdate.blueTeam.userIds.forEach(user => calculatePlayerStats(user, postGameUpdate.status === GameStatus.BLUE_WON))
                 postGameUpdate.redTeam.userIds.forEach(user => calculatePlayerStats(user, postGameUpdate.status === GameStatus.RED_WON))
