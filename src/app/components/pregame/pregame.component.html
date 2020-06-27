@@ -10,7 +10,7 @@
     <ion-item *ngFor="let userId of room.userIds">
       <app-users [userId]="userId"></app-users>
     </ion-item>
-    <ion-button (click)="assignUsersToRandomTeams()">
+    <ion-button *ngIf="room.userIds > 1" (click)="assignUsersToRandomTeams()">
       Assign Teams
     </ion-button>
   </ion-list>
