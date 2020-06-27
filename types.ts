@@ -118,11 +118,12 @@ export interface WordList {
 
 // Snapshot in time of a player's Elo
 export interface EloHistoryDocument {
+  id?: string;
   elo: number;
-  gameId: number;
+  gameId: string;
+  playerId: string;
   gamesPlayed: number;
   gamesWon: number;
-  id: number; // player's id
   provisional: boolean;
   timestamp: number;
 }
