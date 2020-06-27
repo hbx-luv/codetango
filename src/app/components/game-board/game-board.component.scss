@@ -13,7 +13,23 @@
     --ion-color-warning: #ede2cc;
   }
 
-  ion-button.disabled {
-    pointer-events: none;
+  ion-button {
+    &.selected,
+    // &.spymaster,
+    &.readonly {
+      pointer-events: none;
+    }
+
+    &.spymaster:not(.selected) {
+      &.RED {
+        --ion-color-contrast: var(--ion-color-danger) !important;
+      }
+      &.BLUE {
+        --ion-color-contrast: var(--ion-color-primary) !important;
+      }
+      &.ASSASSIN {
+        --ion-color-base: #888 !important;
+      }
+    }
   }
 }

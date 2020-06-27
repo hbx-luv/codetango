@@ -1,9 +1,8 @@
 import {Component, Input} from '@angular/core';
-import {firestore} from 'firebase';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 
-import {Game, GameStatus, Tile, TileRole, User} from '../../../../types';
+import {Game, GameStatus, Tile, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-game-board',
@@ -12,8 +11,8 @@ import {Game, GameStatus, Tile, TileRole, User} from '../../../../types';
 })
 export class GameBoardComponent {
   @Input() game: Game;
-  @Input() user: User;
   @Input() readonly: boolean;
+  @Input() spymaster: boolean;
 
   constructor(
       private readonly authService: AuthService,
@@ -46,13 +45,6 @@ export class GameBoardComponent {
       tiles: this.game.tiles,
       status: this.getGameStatus(tile),
     };
-
-    // update the remaining agents
-    if (tile.role === TileRole.BLUE) {
-      updates.blueAgents = firestore.FieldValue.increment(-1);
-    } else if (tile.role === TileRole.RED) {
-      updates.redAgents = firestore.FieldValue.increment(-1);
-    }
 
     // determine game over
     if (this.isGameOver(tile, this.game)) {

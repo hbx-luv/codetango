@@ -2,7 +2,13 @@
   <ion-row *ngFor="let row of chunkedWords">
     <ion-col *ngFor="let tile of row">
       <div class="word-container">
-        <ion-button [color]="getColor(tile)" class="word" (click)="selectTile(tile)" [class.disabled]="readonly || tile.selected">
+        <ion-button
+          [class.spymaster]="spymaster"
+          [class.selected]="tile.selected"
+          [class.readonly]="readonly"
+          [color]="getColor(tile)"
+          class="word {{ spymaster ? tile.role : '' }}"
+          (click)="selectTile(tile)">
           {{ tile.word }}
         </ion-button>
       </div>
