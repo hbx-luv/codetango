@@ -1,5 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Observable} from 'rxjs';
+import {AuthService} from 'src/app/services/auth.service';
 
 import {User} from '../../../../types';
 import {UserService} from '../../services/user.service';
@@ -9,7 +10,7 @@ import {UserService} from '../../services/user.service';
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent {
   BASE_WIDTH = 75;
 
   @Input() userId: string;
@@ -17,13 +18,16 @@ export class UsersComponent implements OnInit {
   style: {width: string};
 
   constructor(
+      readonly authService: AuthService,
       private readonly userService: UserService,
   ) {
     this.style = {width: `${this.getRandomWidth()}px`};
   }
 
-  ngOnInit() {
-    this.user$ = this.userService.getUser(this.userId);
+  ngOnChanges() {
+    if (this.userId) {
+      this.user$ = this.userService.getUser(this.userId);
+    }
   }
 
   getRandomWidth() {

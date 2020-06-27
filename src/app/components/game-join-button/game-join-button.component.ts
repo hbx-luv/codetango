@@ -44,17 +44,4 @@ export class GameJoinButtonComponent {
     }
     this.gameService.updateGame(this.game.id, this.game);
   }
-  // Join a team when a game is already in progress
-  get showJoinTeamButtons(): boolean {
-    const currentUserId = this.authService.currentUserId;
-    const loggedInAndInRoom = this.authService.authenticated && this.room &&
-        this.room.userIds.includes(currentUserId);
-
-    const isOnTeam = this.game &&
-        (this.game.redTeam.userIds.includes(currentUserId) ||
-         this.game.blueTeam.userIds.includes(currentUserId));
-
-    return loggedInAndInRoom && !isOnTeam &&
-        this.room.status === RoomStatus.GAME_IN_PROGRESS;
-  }
 }

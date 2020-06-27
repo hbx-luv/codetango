@@ -15,15 +15,21 @@ export class GameService {
     return this.afs.collection('games').add(game);
   }
 
-  public updateGame(id: string, game: Partial<Game>) {
+  updateGame(id: string, game: Partial<Game>) {
     return this.afs.collection('games').doc(id).update(game);
   }
 
-  public removePlayerFromGame(gameId: string, userIdToRemove: string) {
-    console.log(gameId, userIdToRemove);
+  removePlayerFromGame(gameId: string, userIdToRemove: string) {
     return this.afs.collection('games').doc(gameId).update({
       'redTeam.userIds': firestore.FieldValue.arrayRemove(userIdToRemove),
       'blueTeam.userIds': firestore.FieldValue.arrayRemove(userIdToRemove),
+    });
+  }
+
+  addPlayerToTeam(
+      gameId: string, playerId: string, team: 'redTeam'|'blueTeam') {
+    return this.afs.collection('games').doc(gameId).update({
+      [`${team}.userIds`]: firestore.FieldValue.arrayUnion(playerId),
     });
   }
 

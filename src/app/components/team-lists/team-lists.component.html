@@ -6,6 +6,12 @@
     </div>
     <app-users [userId]="member"></app-users>
   </div>
+  <ion-button
+    size="small"
+    (click)="joinTeam('blueTeam')"
+    *ngIf="showJoinTeamButtons">
+    Join Blue
+  </ion-button>
   <h3>Red Team</h3>
   <div class="team-member" *ngFor="let member of game.redTeam.userIds">
     <div class="spy">
@@ -13,4 +19,10 @@
     </div>
     <app-users [userId]="member"></app-users>
   </div>
+  <ion-button
+    size="small"
+    (click)="joinTeam('redTeam')"
+    *ngIf="showJoinTeamButtons">
+    Join Red
+  </ion-button>
 </div>

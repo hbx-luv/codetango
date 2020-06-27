@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {Router} from '@angular/router';
 
 import {Game, GameStatus, Room, RoomStatus} from '../../../../types';
 import {AuthService} from '../../services/auth.service';
@@ -16,6 +17,7 @@ export class TitleBarComponent {
   constructor(
       readonly authService: AuthService,
       private readonly gameService: GameService,
+      private readonly router: Router,
   ) {}
 
   get toolbarColor(): string {
@@ -111,5 +113,6 @@ export class TitleBarComponent {
   leave() {
     this.gameService.removePlayerFromGame(
         this.game.id, this.authService.currentUserId);
+    this.router.navigate(['home']);
   }
 }
