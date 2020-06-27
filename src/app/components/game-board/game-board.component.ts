@@ -56,12 +56,12 @@ export class GameBoardComponent {
   }
 
   getGameStatus(tile: Tile) {
+    const bluesTurn = this.game.status === GameStatus.BLUES_TURN;
     switch (tile.role) {
       case TileRole.ASSASSIN:
-        return GameStatus.BLUES_TURN ? GameStatus.RED_WON : GameStatus.BLUE_WON;
+        return bluesTurn ? GameStatus.RED_WON : GameStatus.BLUE_WON;
       case TileRole.CIVILIAN:
-        return GameStatus.BLUES_TURN ? GameStatus.REDS_TURN :
-                                       GameStatus.BLUES_TURN;
+        return bluesTurn ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
       case TileRole.BLUE:
         return GameStatus.BLUES_TURN;
       case TileRole.RED:
