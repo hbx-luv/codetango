@@ -33,16 +33,6 @@ export class TitleBarComponent {
     return 'light';
   }
 
-  get showJoinGameButton(): boolean {
-    if (!this.gameInProgress) {
-      return true;
-    }
-    if (this.loggedInUserTeam == null) {
-      return true;
-    }
-    return false;
-  }
-
   get gameInProgress(): boolean {
     return this.room && this.game && [
       RoomStatus.GAME_IN_PROGRESS,
@@ -82,7 +72,7 @@ export class TitleBarComponent {
 
     switch (this.room.status) {
       case RoomStatus.PREGAME:
-        return this.room.name;
+        return `${this.room.name} Lobby`;
       case RoomStatus.ASSIGNING_ROLES:
         return 'Pick Spymasters';
       default:
