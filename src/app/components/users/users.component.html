@@ -1,8 +1,19 @@
-<div *ngIf="user$ | async as user">
-    <ion-chip>
-        <ion-avatar>
-            <img src="{{user.photoURL}}">
-        </ion-avatar>
-        <ion-label>{{user.name}}</ion-label>
-    </ion-chip>
+<div *ngIf="user$ | async as user; else loading">
+  <ion-chip>
+    <ion-avatar>
+      <img src="{{user.photoURL}}">
+    </ion-avatar>
+    <ion-label>{{user.name}}</ion-label>
+  </ion-chip>
 </div>
+
+<ng-template #loading>
+  <ion-chip>
+    <ion-avatar>
+
+    </ion-avatar>
+    <ion-label>
+      <ion-skeleton-text [ngStyle]="style" animated></ion-skeleton-text>
+    </ion-label>
+  </ion-chip>
+</ng-template>

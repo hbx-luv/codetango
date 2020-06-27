@@ -1,17 +1,16 @@
-<div>
+<div *ngIf="game">
   <h3>Blue Team</h3>
-  <ul>
-    <li *ngFor="let member of blueTeam">{{member}}</li>
-  </ul>
+  <div class="team-member" *ngFor="let member of game.blueTeam.userIds">
+    <div class="spy">
+      <span *ngIf="game.blueTeam.spymaster === member">🕵</span>
+    </div>
+    <app-users [userId]="member"></app-users>
+  </div>
   <h3>Red Team</h3>
-  <ul>
-    <li *ngFor="let member of redTeam">{{member}}</li>
-  </ul>
-<!--  Delete Below: this is what I thought we'd be interested in-->
-  <h3>Example Team</h3>
-  <ul>
-    <li>🕵 Alex Bacon</li>
-    <li>Ryan</li>
-    <li>Armin</li>
-  </ul>
+  <div class="team-member" *ngFor="let member of game.redTeam.userIds">
+    <div class="spy">
+      <span *ngIf="game.redTeam.spymaster === member">🕵</span>
+    </div>
+    <app-users [userId]="member"></app-users>
+  </div>
 </div>
