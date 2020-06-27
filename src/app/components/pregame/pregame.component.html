@@ -13,7 +13,7 @@
     </ion-button>
   </ion-list>
 </div>
-<div *ngIf="room && room.status === 'ASSIGNING_ROLES' && game">
+<div class="assign-spymaster" *ngIf="room && room.status === 'ASSIGNING_ROLES' && game">
   <h1>Assign A Spymaster</h1>
   <app-team-lists
     [room]="room"
