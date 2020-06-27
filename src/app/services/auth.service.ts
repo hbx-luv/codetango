@@ -16,10 +16,6 @@ export class AuthService {
       private afs: AngularFirestore,
       private utilService: UtilService,
   ) {
-    this.afAuth.onAuthStateChanged(user => {
-      console.log(user);
-    });
-
     this.auth = firebase.auth();
   }
 
