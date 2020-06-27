@@ -8,7 +8,7 @@
     "start": "ionic serve",
     "update": "git pull && npm i && cd functions && npm i && cd ..",
     "deploy": "npm run update && ionic build && firebase deploy",
-    "deploy-functions": "npm run update && ionic build && firebase deploy --only functions",
+    "deploy-functions": "npm run update && firebase deploy --only functions",
     "deploy-hosting": "npm run update && ionic build && firebase deploy --only hosting",
     "ng": "ng",
     "build": "ng build",
