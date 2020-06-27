@@ -9,6 +9,7 @@ import {GameJoinButtonComponent} from './game-join-button/game-join-button.compo
 import {GameComponent} from './game/game.component';
 import {PregameComponent} from './pregame/pregame.component';
 import {UsersComponent} from './users/users.component';
+import {TimerComponent} from "./timer/timer.component";
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import {UsersComponent} from './users/users.component';
     UsersComponent,
     GameJoinButtonComponent,
     PregameComponent,
+    TimerComponent,
     UsersComponent,
   ],
   imports: [
@@ -32,6 +34,7 @@ import {UsersComponent} from './users/users.component';
     UsersComponent,
     GameJoinButtonComponent,
     PregameComponent,
+    TimerComponent,
     UsersComponent,
   ]
 })
