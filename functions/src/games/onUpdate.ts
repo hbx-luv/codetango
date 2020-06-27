@@ -28,7 +28,6 @@ export const onUpdateGame =
 
 async function calculatePlayerStats(userId: string, wonGame: Boolean) {
     const userSnapshot = await db.collection('users').doc(userId);
-    console.log(userSnapshot)
     let statUpdate;
     if (wonGame) {
         statUpdate = { stats: {
@@ -39,10 +38,9 @@ async function calculatePlayerStats(userId: string, wonGame: Boolean) {
     } else {
         statUpdate = { stats: {
             currentStreak: 0,
+            gamesWon: admin.firestore.FieldValue.increment(0),
             gamesPlayed: admin.firestore.FieldValue.increment(1)
         } };
     }
     return userSnapshot.update(statUpdate)
 }
-
-//test
