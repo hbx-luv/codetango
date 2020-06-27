@@ -1,15 +1,8 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>
-      {{ room?.name }}
-    </ion-title>
-    <ion-buttons slot="end">
-      <app-game-join-button
-        *ngIf="!gameInProgress"
-        [room]="room">
-      </app-game-join-button>
-    </ion-buttons>
-  </ion-toolbar>
+    <app-title-bar
+      [room]="room"
+      [game]="currentGame$ | async"
+    ></app-title-bar>
 </ion-header>
 
 <ion-content>

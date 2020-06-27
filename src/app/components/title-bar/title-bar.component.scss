@@ -1,0 +1,28 @@
+.square:before {
+  content: "";
+  display: inline-block;
+  height: 1rem;
+  width: 1rem;
+  margin-right: 5px;
+}
+
+.blue-before:before {
+  background-color: #3880ff
+}
+
+.red-before:before {
+  background-color: #ed576b
+}
+
+.blue {
+  background-color: #3880ff
+}
+
+.red {
+  background-color: #ed576b
+}
+
+.gameStatus {
+  margin: 1rem;
+  padding: 0 3rem;
+}
