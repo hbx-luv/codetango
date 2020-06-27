@@ -99,17 +99,6 @@ export interface User {
   email: string;
   photoURL?: string;
   elo: number;  // needs to default, 1200?
-  id?: string;
-}
-
-// /wordlists
-export interface WordList {
-  name: string;
-  words: string[];
-}
-
-export interface Player {
-  name: string;
   stats: {
     currentStreak: number;
     dailyChange: number;
@@ -118,6 +107,13 @@ export interface Player {
     gamesWon: number;
     lastPlayed: number;
   };
+  id?: string;
+}
+
+// /wordlists
+export interface WordList {
+  name: string;
+  words: string[];
 }
 
 // Snapshot in time of a player's Elo
