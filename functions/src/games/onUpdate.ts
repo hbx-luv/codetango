@@ -16,10 +16,14 @@ export const onUpdateGame =
             )) {
                 console.log("GAME OVER:" + postGameUpdate.status)
                 //Process Endgame analytics
-                postGameUpdate.blueTeam.userIds.forEach(user => calculatePlayerStats(user, postGameUpdate.status === GameStatus.BLUE_WON))
-                postGameUpdate.redTeam.userIds.forEach(user => calculatePlayerStats(user, postGameUpdate.status === GameStatus.RED_WON))
-
+                for(const user of postGameUpdate.blueTeam.userIds){
+                    await calculatePlayerStats(user, postGameUpdate.status === GameStatus.BLUE_WON);
+                }
+                for(const user of postGameUpdate.redTeam.userIds){
+                    await calculatePlayerStats(user, postGameUpdate.status === GameStatus.RED_WON);
+                }
             }
+            return 'Done'
         });
 
 async function calculatePlayerStats(userId: string, wonGame: Boolean) {
@@ -38,7 +42,7 @@ async function calculatePlayerStats(userId: string, wonGame: Boolean) {
             gamesPlayed: admin.firestore.FieldValue.increment(1)
         } };
     }
-    userSnapshot.update(statUpdate)
+    return userSnapshot.update(statUpdate)
 }
 
 //test
