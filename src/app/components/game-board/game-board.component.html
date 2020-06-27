@@ -5,7 +5,7 @@
     [class.selected]="tile.selected"
     [class.readonly]="readonly"
     [color]="getColor(tile)"
-    class="word {{ spymaster ? tile.role : '' }}"
+    class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
     (click)="selectTile(tile, index)">
     {{ tile.word }}
   </ion-button>

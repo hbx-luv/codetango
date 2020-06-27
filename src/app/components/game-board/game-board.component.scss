@@ -18,8 +18,9 @@
       pointer-events: none;
     }
 
-    // spymasters can see the colors
-    &.spymaster:not(.selected) {
+    // the role of the tile will be revealed to the spymaster
+    // or to all players at the end of the game
+    &:not(.selected) {
       &.RED {
         --ion-color-contrast: var(--ion-color-danger) !important;
       }
