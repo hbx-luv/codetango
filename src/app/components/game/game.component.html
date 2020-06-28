@@ -37,6 +37,7 @@
 <!-- spymaster clue interface -->
 <app-clues
   [game]="game"
+  [isMyTurn]="myTurn"
   *ngIf="spymaster && !game.completedAt">
 </app-clues>
 <!-- word history -->

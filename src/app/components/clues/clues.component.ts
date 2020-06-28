@@ -12,6 +12,7 @@ import {Clue, Game, GameStatus, WordList} from '../../../../types';
 })
 export class CluesComponent implements OnInit {
   @Input() game: Game;
+  @Input() isMyTurn: boolean;
 
   constructor(private afs: AngularFirestore) {}
 
@@ -86,5 +87,9 @@ export class CluesComponent implements OnInit {
         .pipe(tap(clues => {
           this.clues = clues;
         }));
+  }
+
+  get submitClueButtonText(): string {
+    return this.isMyTurn ? 'Submit' : 'Waiting for Other Team';
   }
 }

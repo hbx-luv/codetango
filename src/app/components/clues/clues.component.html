@@ -1,4 +1,4 @@
-<p>
+<div>
   <ion-title [class]="getColor(currentClue)">
     {{currentTeam()}}: <span *ngIf="currentClue">{{currentClue.word}} {{currentClue.guessCount}}</span>
   </ion-title>
@@ -22,8 +22,8 @@
     <ion-button name="give-clue-button"
                 (click)="submitClue()"
                 color="primary"
-                [disabled]="!clueCount || !clue">
-      Submit
+                [disabled]="!clueCount || !clue || !isMyTurn">
+      {{submitClueButtonText}}
     </ion-button>
   </ion-item>
-</p>
+</div>
