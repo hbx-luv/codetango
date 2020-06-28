@@ -22,13 +22,14 @@ export const onCreateGame =
           const tiles = await generateNewGameTiles();
           game.tiles = tiles;
           const blueTeamTiles =
-            tiles.filter(tile => tile.role === TileRole.BLUE);
-          const redTeamTiles =
-            tiles.filter(tile => tile.role === TileRole.RED);
+              tiles.filter(tile => tile.role === TileRole.BLUE);
+          const redTeamTiles = tiles.filter(tile => tile.role === TileRole.RED);
 
           game.blueAgents = blueTeamTiles.length;
           game.redAgents = redTeamTiles.length;
-          game.status = blueTeamTiles.length > redTeamTiles.length ? GameStatus.BLUES_TURN : GameStatus.REDS_TURN;
+          game.status = blueTeamTiles.length > redTeamTiles.length ?
+              GameStatus.BLUES_TURN :
+              GameStatus.REDS_TURN;
           game.createdAt = new Date().getTime();
 
           return gameReference.update(game);
@@ -92,28 +93,34 @@ function assignRandomTileTeams():
 }
 
 async function getTwentyFiveWords(): Promise<string[]> {
-  const defaultWordListSnapshot = await db.collection('wordlists').doc('default').get();
+  const defaultWordListSnapshot =
+      await db.collection('wordlists').doc('default').get();
   if (defaultWordListSnapshot.exists && defaultWordListSnapshot.data()) {
     console.log('defaultWords exists');
     const newWordsForGame = [] as string[];
-    for (let i = 0; i < 25; i++) {
-      const wordList = defaultWordListSnapshot.data() as WordList;
-      const words = wordList.words;
+    const {words} = defaultWordListSnapshot.data() as WordList;
+
+    while (newWordsForGame.length < 25) {
       const randomIndex = Math.floor(Math.random() * words.length);
       const word = words.splice(randomIndex, 1)[0];
-      newWordsForGame.push(word)
-      // TODO: avoid word reuse from current game
+
+      // ensure no dupes (since there are some in the word list)
+      if (!newWordsForGame.includes(word)) {
+        newWordsForGame.push(word)
+      }
     }
+    // TODO: avoid word reuse from current game
+
     console.log('newWordsForGame has ' + newWordsForGame.length + ' words.');
     return newWordsForGame;
   } else {
     console.log('defaultWords did not exist')
     const hardcodedfornow = [
-      'AFRICA', 'AGENT', 'AIR', 'ALIEN', 'ALPS',
-      'AMAZON', 'AMBULANCE', 'AMERICA', 'ANGEL', 'ANTARCTICA',
-      'APPLE', 'ARM', 'ATLANTIS', 'AUSTRALIA', 'AZTEC',
-      'BACK', 'BALL', 'BAND', 'BANK', 'BAR',
-      'BARK', 'BAT', 'BATTERY', 'BEACH', 'BEAR'
+      'AFRICA', 'AGENT',     'AIR',      'ALIEN',     'ALPS',
+      'AMAZON', 'AMBULANCE', 'AMERICA',  'ANGEL',     'ANTARCTICA',
+      'APPLE',  'ARM',       'ATLANTIS', 'AUSTRALIA', 'AZTEC',
+      'BACK',   'BALL',      'BAND',     'BANK',      'BAR',
+      'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
     ];
     return hardcodedfornow;
   }
