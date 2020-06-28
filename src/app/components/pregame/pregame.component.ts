@@ -70,6 +70,12 @@ export class PregameComponent implements OnInit {
     await this.roomService.updateRoom(this.room.id, {
       status: RoomStatus.GAME_IN_PROGRESS,
     });
+    const timer = this.room.firstTurnTimer || this.room.timer;
+    if (timer) {
+      await this.gameService.updateGame(this.game.id, {
+        turnEnds: Date.now() + (timer * 1000),
+      });
+    }
     await loader.dismiss();
   }
 }

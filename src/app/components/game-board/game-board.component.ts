@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 
-import {Game, GameStatus, Tile, TileRole} from '../../../../types';
+import {Game, GameStatus, Room, Tile, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-game-board',
@@ -10,6 +10,9 @@ import {Game, GameStatus, Tile, TileRole} from '../../../../types';
   styleUrls: ['./game-board.component.scss'],
 })
 export class GameBoardComponent {
+  // readonly versions of the game board won't user the room
+  @Input() room?: Room;
+
   @Input() game: Game;
   @Input() readonly: boolean;
   @Input() spymaster: boolean;
@@ -48,6 +51,11 @@ export class GameBoardComponent {
     // set completedAt when the assassin is clicked
     if (tile.role === TileRole.ASSASSIN) {
       updates.completedAt = Date.now();
+    }
+
+    // set the timer if one exists
+    if (this.room && this.room.timer && updates.status !== this.game.status) {
+      updates.turnEnds = Date.now() + (this.room.timer * 1000);
     }
 
     this.gameService.updateGame(this.game.id, updates);

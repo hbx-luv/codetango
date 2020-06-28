@@ -41,13 +41,20 @@ export class GameComponent {
   }
 
   endCurrentTeamsTurn() {
-    let turnToSet = GameStatus.REDS_TURN;
+    const updates: Partial<Game> = {};
 
     if (this.game.status === GameStatus.REDS_TURN) {
-      turnToSet = GameStatus.BLUES_TURN;
+      updates.status = GameStatus.BLUES_TURN;
+    } else {
+      updates.status = GameStatus.REDS_TURN;
     }
 
-    this.gameService.updateGame(this.game.id, {status: turnToSet});
+    // set the timer if one exists
+    if (this.room.timer) {
+      updates.turnEnds = Date.now() + (this.room.timer * 1000);
+    }
+
+    this.gameService.updateGame(this.game.id, updates);
   }
 
   async backToLobby() {

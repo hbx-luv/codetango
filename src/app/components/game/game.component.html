@@ -1,25 +1,30 @@
-<ion-row class="ion-justify-content-between">
-    <div>
-        <span [style]="{color: 'red'}" class="ion-padding-end">Red: {{game.redAgents}}</span>
-        <span [style]="{color: 'lightskyblue'}">Blue: {{game.blueAgents}}</span>
-    </div>
-    <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="readonly">End Turn</ion-button>
+<!-- score and end turn -->
+<ion-row class="score-bar">
+  <app-timer [game]="game"></app-timer>
+  <div>
+    <span [style]="{color: 'red'}" class="ion-padding-end">Red: {{game.redAgents}}</span>
+    <span [style]="{color: 'lightskyblue'}">Blue: {{game.blueAgents}}</span>
+  </div>
+  <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="readonly">End Turn</ion-button>
 </ion-row>
+<!-- game board and teams -->
 <ion-row>
-    <ion-col size="9">
-        <app-game-board
-          [game]="game"
-          [readonly]="readonly"
-          [spymaster]="spymaster">
-        </app-game-board>
-    </ion-col>
-    <ion-col size="3">
-        <app-team-lists
-          [room]="room"
-          [game]="game">
-        </app-team-lists>
-    </ion-col>
+  <ion-col size="9">
+    <app-game-board
+      [room]="room"
+      [game]="game"
+      [readonly]="readonly"
+      [spymaster]="spymaster">
+    </app-game-board>
+  </ion-col>
+  <ion-col size="3">
+    <app-team-lists
+      [room]="room"
+      [game]="game">
+    </app-team-lists>
+  </ion-col>
 </ion-row>
+<!-- end game buttons -->
 <ion-row class="ion-justify-content-center" *ngIf="game.completedAt">
   <ion-button color="light" (click)="backToLobby()">
     New Teams
@@ -28,10 +33,12 @@
     Next Game
   </ion-button>
 </ion-row>
+<!-- spymaster clue interface -->
 <app-clues
   [game]="game"
   *ngIf="spymaster && !game.completedAt">
 </app-clues>
+<!-- word history -->
 <app-word-history
   [game]="game"
 ></app-word-history>

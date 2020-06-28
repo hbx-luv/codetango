@@ -73,7 +73,8 @@ export interface Room {
 export interface Game {
   createdAt: number;
   completedAt?: number;  // optional, set when one team wins
-  tiles: Tile[];         // the tiles on the board
+  turnEnds?: number;
+  tiles: Tile[];  // the tiles on the board
   blueTeam: Team;
   redTeam: Team;
   blueAgents: number;  // remaining blue agents
@@ -100,9 +101,7 @@ export interface User {
   photoURL?: string;
   elo: number;  // needs to default, 1200?
   stats: {
-    currentStreak: number;
-    dailyChange: number;
-    elo: number;
+    currentStreak: number; dailyChange: number; elo: number;
     gamesPlayed: number;
     gamesWon: number;
     lastPlayed: number;
