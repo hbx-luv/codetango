@@ -36,10 +36,8 @@ export class TimerComponent {
       this.clock = this.fancyTimeFormat(this.seconds);
 
       // determine the amount of time to the end of the second
-      if (this.seconds > 0) {
-        const timeToWait = 1000 - (Date.now() % 1000);
-        this.timeout = setTimeout(this.calculateClock.bind(this), timeToWait);
-      }
+      const timeToWait = 1000 - (Date.now() % 1000);
+      this.timeout = setTimeout(this.calculateClock.bind(this), timeToWait);
     }
   }
 
