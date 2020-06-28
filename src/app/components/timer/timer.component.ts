@@ -10,7 +10,7 @@ export class TimerComponent {
   @Input() game: Game;
   clock = '';
   seconds: number;
-  timeout: NodeJS.Timeout;
+  timeout: any; // NodeJS.Timeout;
 
   constructor() {}
 
