@@ -1,10 +1,11 @@
 <!-- score and end turn -->
 <ion-row class="score-bar">
   <app-timer [game]="game"></app-timer>
-  <div>
-    <span [style]="{color: 'red'}" class="ion-padding-end">Red: {{game.redAgents}}</span>
-    <span [style]="{color: 'lightskyblue'}">Blue: {{game.blueAgents}}</span>
-  </div>
+  <h4>
+    <ion-text color="primary" class="ion-padding-end">{{game.blueAgents}}</ion-text>
+    <ion-text color="dark" class="ion-padding-end">-</ion-text>
+    <ion-text color="danger">{{game.redAgents}}</ion-text>
+  </h4>
   <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="readonly">End Turn</ion-button>
 </ion-row>
 <!-- game board and teams -->
