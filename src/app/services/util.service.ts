@@ -38,8 +38,8 @@ export class UtilService {
     }
   }
 
-  async showToast(message: string, duration: number = 2000) {
-    const toast = await this.toastCtrl.create({message, duration});
+  async showToast(message: string, duration: number = 2000, options?) {
+    const toast = await this.toastCtrl.create({message, duration, ...options});
     toast.present();
   }
 

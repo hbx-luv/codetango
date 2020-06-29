@@ -2,11 +2,17 @@
   <ion-title>
     Word History
   </ion-title>
-  <ion-list>
-    <ion-item *ngFor="let clue of clues" [class]="getColor(clue)">
+  <ion-list *ngIf="clues$ | async as clues; else loading">
+    <ion-item *ngFor="let clue of clues" [color]="getColor(clue)">
       <ion-label class="uppercase">{{clue.team}}</ion-label>
       <ion-label class="uppercase">{{clue.word}}</ion-label>
       <ion-label>{{clue.guessCount}}</ion-label>
     </ion-item>
   </ion-list>
 </div>
+
+<ng-template #loading>
+  <div class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>

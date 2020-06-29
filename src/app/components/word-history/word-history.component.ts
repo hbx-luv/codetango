@@ -1,8 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Observable} from 'rxjs';
-import {Clue, Game} from '../../../../types';
 import {tap} from 'rxjs/operators';
-import {AngularFirestore} from '@angular/fire/firestore';
+import {ClueService} from 'src/app/services/clue.service';
+import {UtilService} from 'src/app/services/util.service';
+
+import {Clue, Game} from '../../../../types';
 
 @Component({
   selector: 'app-word-history',
@@ -11,16 +12,30 @@ import {AngularFirestore} from '@angular/fire/firestore';
 })
 export class WordHistoryComponent implements OnInit {
   @Input() game: Game;
-  clues = [];
+  lastClue: Clue;
+  clues$;
 
   constructor(
-    private afs: AngularFirestore
-  ) { }
+      private readonly clueService: ClueService,
+      private readonly utilService: UtilService,
+  ) {}
 
   ngOnInit() {
-    this.getClues().subscribe(clue => {
-      this.clues.push(clue);
-    });
+    this.clues$ = this.clueService.getClues(this.game.id).pipe(tap(clues => {
+      const latestClue = clues[0];
+
+      // only show the toast for new clues coming in
+      if (this.lastClue) {
+        this.utilService.showToast(
+            `Clue from SpyMaster: ${latestClue.word} for ${
+                latestClue.guessCount}`,
+            10000, {
+              color: this.getColor(latestClue),
+              buttons: ['close'],
+            });
+      }
+      this.lastClue = latestClue;
+    }));
   }
 
   getColor(clue) {
@@ -31,27 +46,9 @@ export class WordHistoryComponent implements OnInit {
 
     switch (team) {
       case 'BLUE CLUE':
-        return 'blue';
+        return 'primary';
       case 'RED CLUE':
-        return 'red';
+        return 'danger';
     }
   }
-
-  getClues(): Observable<Clue[]> {
-    return this.afs
-      .collection<Game>('games')
-      .doc(this.game.id)
-      .collection<Clue>(
-        'clues',
-        ref => {
-          return ref
-            .orderBy('createdAt', 'desc');
-        }
-      )
-      .valueChanges()
-      .pipe(tap(clues => {
-        this.clues = clues;
-      }));
-  }
-
 }
