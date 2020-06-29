@@ -12,7 +12,6 @@ import {Clue, Game, TileRole} from '../../../../types';
 })
 export class WordHistoryComponent implements OnInit {
   @Input() game: Game;
-  lastClue: Clue;
   clues$;
 
   constructor(
@@ -23,9 +22,7 @@ export class WordHistoryComponent implements OnInit {
   ngOnInit() {
     this.clues$ = this.clueService.getClues(this.game.id).pipe(tap(clues => {
       const latestClue = clues[0];
-
-      // only show the toast for new clues coming in
-      if (this.lastClue) {
+      if (latestClue) {
         this.utilService.showToast(
             `Clue from SpyMaster: ${latestClue.word} for ${
                 latestClue.guessCount}`,
@@ -34,7 +31,6 @@ export class WordHistoryComponent implements OnInit {
               buttons: ['close'],
             });
       }
-      this.lastClue = latestClue;
     }));
   }
 
