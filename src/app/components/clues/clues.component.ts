@@ -59,8 +59,9 @@ export class CluesComponent implements OnInit {
   }
 
   async submitClue() {
+    const clue = this.clue != null ? this.clue.toUpperCase() : null;
     const clueDto = {
-      word: this.clue,
+      word: clue,
       guessCount: this.clueCount,
       createdAt: Date.now(),
       team: this.currentTeam()

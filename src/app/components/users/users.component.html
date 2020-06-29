@@ -1,6 +1,6 @@
 <ng-container>
   <div *ngIf="user$ | async as user; else loading">
-    <ion-chip>
+    <ion-chip [color]="getColor" [outline]="shouldOutline">
       <ion-avatar>
         <img src="{{user.photoURL}}">
       </ion-avatar>

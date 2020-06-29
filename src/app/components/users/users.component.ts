@@ -14,6 +14,7 @@ export class UsersComponent {
   BASE_WIDTH = 75;
 
   @Input() userId: string;
+  @Input() color: string;
   user$: Observable<User>;
   style: {width: string};
 
@@ -32,5 +33,22 @@ export class UsersComponent {
 
   getRandomWidth() {
     return this.BASE_WIDTH + Math.floor(Math.random() * 20) + 1;
+  }
+
+  get getColor(): string {
+    if (this.color && this.color.toLowerCase() === 'red') {
+      return 'danger';
+    }
+    if (this.color && this.color.toLowerCase() === 'blue') {
+      return 'primary';
+    }
+    return 'dark';
+  }
+
+  get shouldOutline(): boolean {
+    if (this.getColor === 'dark') {
+      return false;
+    }
+    return true;
   }
 }
