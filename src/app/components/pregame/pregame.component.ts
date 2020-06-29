@@ -1,6 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
-import * as _ from 'lodash';
+import {Component, Input} from '@angular/core';
+import {shuffle} from 'lodash';
 import {Observable} from 'rxjs';
+import {AuthService} from 'src/app/services/auth.service';
 import {UtilService} from 'src/app/services/util.service';
 
 import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
@@ -12,7 +13,7 @@ import {RoomService} from '../../services/room.service';
   templateUrl: './pregame.component.html',
   styleUrls: ['./pregame.component.scss'],
 })
-export class PregameComponent implements OnInit {
+export class PregameComponent {
   @Input() room: Room;
   @Input() game: Game;
   currentGame$: Observable<Game>;
@@ -20,18 +21,32 @@ export class PregameComponent implements OnInit {
   constructedGame: Partial<Game>;
 
   constructor(
+      private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly utilService: UtilService,
   ) {}
 
-  ngOnInit() {}
+  get userInRoom(): boolean {
+    return this.room && this.authService.authenticated &&
+        this.room.userIds.includes(this.authService.currentUserId);
+  }
+
+  get canStartGame(): boolean {
+    return this.game &&
+        this.game.redTeam.userIds.includes(this.game.redTeam.spymaster) &&
+        this.game.blueTeam.userIds.includes(this.game.blueTeam.spymaster);
+  }
+
+  removeUser(userId: string) {
+    this.roomService.removeUserFromRoom(this.room.id, userId);
+  }
 
   async assignUsersToRandomTeams() {
     const redTeamUsers = [];
     const blueTeamUsers = [];
     const roomSize = this.room.userIds.length;
-    const randomizedUsers = _.shuffle(this.room.userIds);
+    const randomizedUsers = shuffle(this.room.userIds);
 
     for (let i = 0; i < roomSize; i++) {
       if (i % 2 === 0) {

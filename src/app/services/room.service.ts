@@ -47,7 +47,7 @@ export class RoomService {
     });
   }
 
-  removePlayerFromRoom(roomId: string, userId: string) {
+  removeUserFromRoom(roomId: string, userId: string) {
     return this.afs.collection('rooms').doc(roomId).update({
       userIds: firestore.FieldValue.arrayRemove(userId),
     });

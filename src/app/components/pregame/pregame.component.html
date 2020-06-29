@@ -1,5 +1,6 @@
-<div *ngIf="room && room.status === 'PREGAME'">
-  <ion-list>
+<!-- lobby -->
+<div class="assign-teams" *ngIf="room && room.status === 'PREGAME'">
+  <ion-list class="users-list">
     <ion-list-header>
       <ion-label>
         <h1>Players</h1>
@@ -7,21 +8,35 @@
     </ion-list-header>
     <ion-item *ngFor="let userId of room.userIds">
       <app-users [userId]="userId"></app-users>
+      <ion-button
+        *ngIf="userInRoom"
+        color="danger"
+        size="small"
+        slot="end"
+        (click)="removeUser(userId)">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
     </ion-item>
-    <ion-button [disabled]="room.userIds.length < 2" (click)="assignUsersToRandomTeams()">
-      Assign Teams
-    </ion-button>
   </ion-list>
+  <ion-button
+    *ngIf="userInRoom"
+    [disabled]="room.userIds.length < 2"
+    (click)="assignUsersToRandomTeams()">
+    <ion-icon slot="start" name="shuffle"></ion-icon>
+    Assign Teams
+  </ion-button>
 </div>
+
+<!-- assign spymaster -->
 <div class="assign-spymaster" *ngIf="room && room.status === 'ASSIGNING_ROLES' && game">
   <h1>Assign Spymaster</h1>
   <app-team-lists
     [room]="room"
     [game]="game"
-    [setSpymaster]="true">
+    [setSpymaster]="userInRoom">
   </app-team-lists>
   <hr>
-  <div *ngIf="game.redTeam.spymaster && game.blueTeam.spymaster">
-    <ion-button (click)="startGame()">Start Game</ion-button>
+  <div *ngIf="userInRoom">
+    <ion-button [disabled]="!canStartGame"  (click)="startGame()">Start Game</ion-button>
   </div>
 </div>

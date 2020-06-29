@@ -1,5 +1,11 @@
+.assign-teams,
 .assign-spymaster {
   display: flex;
   align-items: center;
   flex-direction: column;
+
+  .users-list {
+    width: 800px;
+    max-width: 95vw;
+  }
 }

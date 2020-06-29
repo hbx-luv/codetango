@@ -52,7 +52,7 @@ export class GameJoinButtonComponent {
 
   leave() {
     // remove them from the room
-    this.roomService.removePlayerFromRoom(
+    this.roomService.removeUserFromRoom(
         this.room.id,
         this.authService.currentUserId,
     );
