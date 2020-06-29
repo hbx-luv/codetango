@@ -24,9 +24,19 @@ export class TeamListsComponent {
         this.room.userIds.includes(this.authService.currentUserId);
   }
 
+  get notOnATeamYet(): boolean {
+    return this.game &&
+        !this.game.redTeam.userIds.includes(this.authService.currentUserId) &&
+        !this.game.blueTeam.userIds.includes(this.authService.currentUserId);
+  }
+
   showJoinButton(team: 'redTeam'|'blueTeam') {
     return this.loggedInAndInRoom && this.game &&
-        this.room.status === RoomStatus.ASSIGNING_ROLES &&
+        (this.canSwapTeams(team) || this.notOnATeamYet);
+  }
+
+  canSwapTeams(team: 'redTeam'|'blueTeam'): boolean {
+    return this.game && this.room.status === RoomStatus.ASSIGNING_ROLES &&
         !this.game[team].userIds.includes(this.authService.currentUserId);
   }
 
