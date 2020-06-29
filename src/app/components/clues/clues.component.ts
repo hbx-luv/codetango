@@ -93,4 +93,10 @@ export class CluesComponent implements OnInit {
   get submitClueButtonText(): string {
     return this.isMyTurn ? 'Submit' : 'Waiting for Other Team';
   }
+
+  get disableSubmitButton(): boolean {
+    // this.clueCount >= 0 didn't work when I put a number and then deleted the number
+    const hasAClue = (this.clueCount === 0 || this.clueCount > 0) && this.clue !== undefined && this.clue.trim().length;
+    return !hasAClue || !this.isMyTurn;
+  }
 }

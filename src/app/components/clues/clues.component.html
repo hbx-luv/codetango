@@ -24,7 +24,7 @@
                 (click)="submitClue()"
                 (keyup.enter)="submitClue()"
                 color="primary"
-                [disabled]="!clueCount || !clue || !isMyTurn">
+                [disabled]="disableSubmitButton">
       {{submitClueButtonText}}
     </ion-button>
   </ion-item>
