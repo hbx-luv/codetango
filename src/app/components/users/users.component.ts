@@ -46,7 +46,8 @@ export class UsersComponent {
   }
 
   get shouldOutline(): boolean {
-    if (this.getColor === 'dark') {
+    if (this.getColor === 'dark' ||
+        this.authService.currentUserId === this.userId) {
       return false;
     }
     return true;

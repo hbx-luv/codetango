@@ -4,8 +4,8 @@
   </ion-title>
   <ion-list>
     <ion-item *ngFor="let clue of clues" [class]="getColor(clue)">
-      <ion-label>{{clue.team}}</ion-label>
-      <ion-label>{{clue.word}}</ion-label>
+      <ion-label class="uppercase">{{clue.team}}</ion-label>
+      <ion-label class="uppercase">{{clue.word}}</ion-label>
       <ion-label>{{clue.guessCount}}</ion-label>
     </ion-item>
   </ion-list>
