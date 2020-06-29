@@ -24,12 +24,13 @@ export class CluesComponent implements OnDestroy {
 
   async submitClue() {
     const clue = this.clue != null ? this.clue.toUpperCase() : null;
+    const isBluesTurn = GameStatus.BLUES_TURN === this.game.status;
 
     this.clueService.addClue(this.game.id, {
       word: clue,
       guessCount: this.clueCount,
       createdAt: Date.now(),
-      team: GameStatus.BLUES_TURN ? TileRole.BLUE : TileRole.RED,
+      team: isBluesTurn ? TileRole.BLUE : TileRole.RED,
     });
 
     this.clue = null;
