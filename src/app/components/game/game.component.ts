@@ -69,6 +69,13 @@ export class GameComponent {
     const loader =
         await this.utilService.presentLoader('Creating the next game...');
     const {redTeam, blueTeam, roomId} = this.game;
+
+    // cycle the current spymaster to the end and set new ones
+    redTeam.userIds.push(redTeam.userIds.shift());
+    blueTeam.userIds.push(blueTeam.userIds.shift());
+    redTeam.spymaster = redTeam.userIds[0];
+    blueTeam.spymaster = blueTeam.userIds[0];
+
     await this.gameService.createGame({redTeam, blueTeam, roomId});
     await this.roomService.updateRoom(
         roomId, {status: RoomStatus.ASSIGNING_ROLES});

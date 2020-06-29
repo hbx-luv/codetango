@@ -8,9 +8,16 @@
   </h4>
   <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="readonly">End Turn</ion-button>
 </ion-row>
-<!-- game board and teams -->
 <ion-row>
-  <ion-col size="9">
+  <!-- team lists on the left -->
+  <ion-col size="2">
+    <app-team-lists
+      [room]="room"
+      [game]="game">
+    </app-team-lists>
+  </ion-col>
+  <!-- board in the middle -->
+  <ion-col size="8">
     <app-game-board
       [room]="room"
       [game]="game"
@@ -18,15 +25,15 @@
       [spymaster]="spymaster">
     </app-game-board>
   </ion-col>
-  <ion-col size="3">
-    <app-team-lists
-      [room]="room"
-      [game]="game">
-    </app-team-lists>
+  <!-- word history on the right -->
+  <ion-col size="2">
+    <app-word-history
+      [game]="game"
+    ></app-word-history>
   </ion-col>
 </ion-row>
 <!-- end game buttons -->
-<ion-row class="ion-justify-content-center" *ngIf="game.completedAt">
+<ion-row class="ion-justify-content-center">
   <ion-button color="light" (click)="backToLobby()">
     New Teams
   </ion-button>
@@ -40,7 +47,4 @@
   [isMyTurn]="myTurn"
   *ngIf="spymaster && !game.completedAt">
 </app-clues>
-<!-- word history -->
-<app-word-history
-  [game]="game"
-></app-word-history>
+

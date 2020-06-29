@@ -1,7 +1,4 @@
 <div>
-  <ion-title [class]="getColor(currentClue)">
-    {{currentTeam()}}: <span *ngIf="currentClue">{{currentClue.word}} {{currentClue.guessCount}}</span>
-  </ion-title>
   <ion-item>
     <ion-label for="clue-input"> Clue: </ion-label>
     <ion-input name="clue-input"

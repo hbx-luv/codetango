@@ -3,7 +3,7 @@ import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Clue, Game} from '../../../../types';
+import {Clue, Game, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-word-history',
@@ -29,7 +29,7 @@ export class WordHistoryComponent implements OnInit {
         this.utilService.showToast(
             `Clue from SpyMaster: ${latestClue.word} for ${
                 latestClue.guessCount}`,
-            10000, {
+            5000, {
               color: this.getColor(latestClue),
               buttons: ['close'],
             });
@@ -42,13 +42,13 @@ export class WordHistoryComponent implements OnInit {
     if (!clue) {
       return null;
     }
-    const team = clue.team;
-
-    switch (team) {
-      case 'BLUE CLUE':
+    switch (clue.team) {
+      case TileRole.BLUE:
         return 'primary';
-      case 'RED CLUE':
+      case TileRole.RED:
         return 'danger';
+      default:
+        return '';
     }
   }
 }

@@ -1,16 +1,15 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {ReplaySubject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 
-import {Game, GameStatus} from '../../../../types';
+import {Game, GameStatus, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-clues',
   templateUrl: './clues.component.html',
   styleUrls: ['./clues.component.scss'],
 })
-export class CluesComponent implements OnInit, OnDestroy {
+export class CluesComponent implements OnDestroy {
   private destroyed = new ReplaySubject<never>();
 
   @Input() game: Game;
@@ -18,51 +17,10 @@ export class CluesComponent implements OnInit, OnDestroy {
 
   clue: string;
   clueCount: number;
-  clues = [];
 
   constructor(
       private readonly clueService: ClueService,
   ) {}
-
-  ngOnInit() {
-    this.clueService.getClues(this.game.id)
-        .pipe(takeUntil(this.destroyed))
-        .subscribe(clues => {
-          this.clues = clues;
-        });
-  }
-
-  get currentClue() {
-    return this.clues.filter(clue => clue.team === this.currentTeam())[0];
-  }
-
-  getColor(clue) {
-    let team;
-
-    if (!clue) {
-      team = this.currentTeam();
-    } else {
-      team = clue.team;
-    }
-
-    switch (team) {
-      case 'BLUE CLUE':
-        return 'blue';
-      case 'RED CLUE':
-        return 'red';
-    }
-  }
-
-  currentTeam() {
-    switch (this.game.status) {
-      case GameStatus.BLUES_TURN:
-        return 'BLUE CLUE';
-      case GameStatus.REDS_TURN:
-        return 'RED CLUE';
-      default:
-        return 'Game Over';
-    }
-  }
 
   async submitClue() {
     const clue = this.clue != null ? this.clue.toUpperCase() : null;
@@ -71,7 +29,7 @@ export class CluesComponent implements OnInit, OnDestroy {
       word: clue,
       guessCount: this.clueCount,
       createdAt: Date.now(),
-      team: this.currentTeam(),
+      team: GameStatus.BLUES_TURN ? TileRole.BLUE : TileRole.RED,
     });
 
     this.clue = null;

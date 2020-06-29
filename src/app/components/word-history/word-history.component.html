@@ -1,12 +1,14 @@
 <div>
   <ion-title>
-    Word History
+    Clues
   </ion-title>
   <ion-list *ngIf="clues$ | async as clues; else loading">
     <ion-item *ngFor="let clue of clues" [color]="getColor(clue)">
-      <ion-label class="uppercase">{{clue.team}}</ion-label>
       <ion-label class="uppercase">{{clue.word}}</ion-label>
-      <ion-label>{{clue.guessCount}}</ion-label>
+      <span slot="end">{{clue.guessCount}}</span>
+    </ion-item>
+    <ion-item *ngIf="clues.length === 0">
+      No clues given yet!
     </ion-item>
   </ion-list>
 </div>
