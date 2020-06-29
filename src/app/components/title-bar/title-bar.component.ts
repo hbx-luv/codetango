@@ -46,22 +46,6 @@ export class TitleBarComponent {
          this.game.blueTeam.spymaster === this.authService.currentUserId);
   }
 
-  get loggedInUserTeam(): string {
-    if (this.authService.authenticated) {
-      if (!this.game) {
-        return null;
-      }
-      if (this.game.blueTeam.userIds.includes(this.authService.currentUserId)) {
-        return 'BLUE';
-      }
-      if (this.game.redTeam.userIds.includes(this.authService.currentUserId)) {
-        return 'RED';
-      }
-    }
-
-    return null;
-  }
-
   get showJoin(): boolean {
     return this.authService.authenticated && this.room &&
         !this.room.userIds.includes(this.authService.currentUserId);

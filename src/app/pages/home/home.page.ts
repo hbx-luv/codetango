@@ -57,7 +57,7 @@ export class HomePage {
       });
 
       await this.roomService.joinRoom(id);
-      this.router.navigate(['room', id]);
+      this.router.navigate([id]);
       await loader.dismiss();
     }
   }

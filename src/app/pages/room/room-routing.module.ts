@@ -4,7 +4,7 @@ import {RouterModule, Routes} from '@angular/router';
 import {RoomPage} from './room.page';
 
 const routes: Routes = [
-  {path: ':id', component: RoomPage},
+  {path: '', component: RoomPage},
 ];
 
 @NgModule({
