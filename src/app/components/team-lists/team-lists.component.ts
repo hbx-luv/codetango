@@ -19,17 +19,15 @@ export class TeamListsComponent {
       private readonly gameService: GameService,
   ) {}
 
-  // Join a team when a game is already in progress
-  get showJoinTeamButtons(): boolean {
-    const currentUserId = this.authService.currentUserId;
-    const loggedInAndInRoom = this.authService.authenticated && this.room &&
-        this.room.userIds.includes(currentUserId);
+  get loggedInAndInRoom(): boolean {
+    return this.authService.authenticated && this.room &&
+        this.room.userIds.includes(this.authService.currentUserId);
+  }
 
-    const isOnTeam = this.game &&
-        (this.game.redTeam.userIds.includes(currentUserId) ||
-         this.game.blueTeam.userIds.includes(currentUserId));
-
-    return loggedInAndInRoom && !isOnTeam;
+  showJoinButton(team: 'redTeam'|'blueTeam') {
+    return this.loggedInAndInRoom && this.game &&
+        this.room.status === RoomStatus.ASSIGNING_ROLES &&
+        !this.game[team].userIds.includes(this.authService.currentUserId);
   }
 
   userClicked(userId: string, team: 'redTeam'|'blueTeam') {

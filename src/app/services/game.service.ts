@@ -29,8 +29,10 @@ export class GameService {
 
   addPlayerToTeam(
       gameId: string, playerId: string, team: 'redTeam'|'blueTeam') {
+    const oppositeTeam = team === 'redTeam' ? 'blueTeam' : 'redTeam';
     return this.afs.collection('games').doc(gameId).update({
       [`${team}.userIds`]: firestore.FieldValue.arrayUnion(playerId),
+      [`${oppositeTeam}.userIds`]: firestore.FieldValue.arrayRemove(playerId),
     });
   }
 

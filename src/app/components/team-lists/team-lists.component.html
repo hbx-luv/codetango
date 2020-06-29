@@ -13,7 +13,7 @@
   <ion-button
     size="small"
     (click)="joinTeam('blueTeam')"
-    *ngIf="showJoinTeamButtons">
+    *ngIf="showJoinButton('blueTeam')">
     Join Blue
   </ion-button>
   <h3>Red Team</h3>
@@ -30,7 +30,7 @@
   <ion-button
     size="small"
     (click)="joinTeam('redTeam')"
-    *ngIf="showJoinTeamButtons">
+    *ngIf="showJoinButton('redTeam')">
     Join Red
   </ion-button>
 </div>

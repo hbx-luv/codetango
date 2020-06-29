@@ -20,6 +20,7 @@
     [game]="game"
     [setSpymaster]="true">
   </app-team-lists>
+  <hr>
   <div *ngIf="game.redTeam.spymaster && game.blueTeam.spymaster">
     <ion-button (click)="startGame()">Start Game</ion-button>
   </div>
