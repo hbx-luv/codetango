@@ -1,0 +1,10 @@
+.you {
+  &.ion-color-primary {
+    background: var(--ion-color-primary);
+    color: #fff;
+  }
+  &.ion-color-danger {
+    background: var(--ion-color-danger);
+    color: #fff;
+  }
+}
