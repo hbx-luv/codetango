@@ -43,7 +43,7 @@ export interface Clue {
   word: string;
   guessCount: number;
   createdAt: number;
-  team: GameStatus;
+  team: string;
 }
 
 export interface Room {

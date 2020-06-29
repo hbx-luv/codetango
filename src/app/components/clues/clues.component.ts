@@ -1,33 +1,39 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/firestore';
-import {Observable} from 'rxjs';
-import {tap} from 'rxjs/operators';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ReplaySubject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
+import {ClueService} from 'src/app/services/clue.service';
 
-import {Clue, Game, GameStatus, WordList} from '../../../../types';
+import {Game, GameStatus} from '../../../../types';
 
 @Component({
   selector: 'app-clues',
   templateUrl: './clues.component.html',
   styleUrls: ['./clues.component.scss'],
 })
-export class CluesComponent implements OnInit {
+export class CluesComponent implements OnInit, OnDestroy {
+  private destroyed = new ReplaySubject<never>();
+
   @Input() game: Game;
   @Input() isMyTurn: boolean;
-
-  constructor(private afs: AngularFirestore) {}
 
   clue: string;
   clueCount: number;
   clues = [];
 
-  get currentClue() {
-    return this.clues.filter(clue => clue.team === this.currentTeam())[0];
-  }
+  constructor(
+      private readonly clueService: ClueService,
+  ) {}
 
   ngOnInit() {
-    this.getClues().subscribe(clue => {
-      this.clues.push(clue);
-    });
+    this.clueService.getClues(this.game.id)
+        .pipe(takeUntil(this.destroyed))
+        .subscribe(clues => {
+          this.clues = clues;
+        });
+  }
+
+  get currentClue() {
+    return this.clues.filter(clue => clue.team === this.currentTeam())[0];
   }
 
   getColor(clue) {
@@ -60,34 +66,16 @@ export class CluesComponent implements OnInit {
 
   async submitClue() {
     const clue = this.clue != null ? this.clue.toUpperCase() : null;
-    const clueDto = {
+
+    this.clueService.addClue(this.game.id, {
       word: clue,
       guessCount: this.clueCount,
       createdAt: Date.now(),
-      team: this.currentTeam()
-    };
-
-    await this.afs.collection('games')
-        .doc(this.game.id)
-        .collection('clues')
-        .add(clueDto);
+      team: this.currentTeam(),
+    });
 
     this.clue = null;
     this.clueCount = null;
-  }
-
-  getClues(): Observable<Clue[]> {
-    return this.afs.collection<Game>('games')
-        .doc(this.game.id)
-        .collection<Clue>(
-            'clues',
-            ref => {
-              return ref.orderBy('createdAt', 'desc');
-            })
-        .valueChanges()
-        .pipe(tap(clues => {
-          this.clues = clues;
-        }));
   }
 
   get submitClueButtonText(): string {
@@ -95,8 +83,14 @@ export class CluesComponent implements OnInit {
   }
 
   get disableSubmitButton(): boolean {
-    // this.clueCount >= 0 didn't work when I put a number and then deleted the number
-    const hasAClue = (this.clueCount === 0 || this.clueCount > 0) && this.clue !== undefined && this.clue.trim().length;
+    // this.clueCount >= 0 didn't work when I put a number and then deleted the
+    // number
+    const hasAClue = (this.clueCount === 0 || this.clueCount > 0) &&
+        this.clue !== undefined && this.clue.trim().length;
     return !hasAClue || !this.isMyTurn;
+  }
+
+  ngOnDestroy() {
+    this.destroyed.next();
   }
 }
