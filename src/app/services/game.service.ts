@@ -16,7 +16,7 @@ export class GameService {
     return this.afs.collection('games').add({createdAt, ...game});
   }
 
-  updateGame(id: string, game: Partial<Game>) {
+  updateGame(id: string, game: Partial<any>) {
     return this.afs.collection('games').doc(id).update(game);
   }
 

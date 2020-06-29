@@ -72,10 +72,18 @@ export class PregameComponent implements OnInit {
     });
     const timer = this.room.firstTurnTimer || this.room.timer;
     if (timer) {
+      // set spymaster to the top of the list and set timer
       await this.gameService.updateGame(this.game.id, {
+        'blueTeam.userIds': this.sortSpymasterFirst(this.game.blueTeam),
+        'redTeam.userIds': this.sortSpymasterFirst(this.game.redTeam),
         turnEnds: Date.now() + (timer * 1000),
       });
     }
     await loader.dismiss();
+  }
+
+  sortSpymasterFirst(team: Team) {
+    const {userIds, spymaster} = team;
+    return userIds.sort(user => user === spymaster ? -1 : 0);
   }
 }
