@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
+
 import {Game, GameStatus, Tile, TileRole, WordList} from '../../../types';
 
 try {
@@ -160,10 +161,18 @@ async function getLastGameWords(roomId: string) {
                        .limit(1)
                        .get();
 
-  // no previous game, womp womp
-  if (snapshot.empty) return [];
-
   // return the list of words from the previous game
-  const lastGame = snapshot.docs[0].data() as Game;
-  return lastGame.tiles.map(t => t.word);
+  // TODO: this isn't serializing correctly, investigate
+  let tiles: string[] = [];
+  snapshot.docs.forEach(doc => {
+    console.log('THIS IS THE DOC', doc);
+    const game = doc.data() as Game;
+    console.log('THIS IS THE GAME', game);
+
+    console.log('TILES?!?!', game.tiles);
+    if (game && game.tiles) {
+      tiles = tiles.concat(game.tiles.map(t => t.word));
+    }
+  });
+  return tiles;
 }
