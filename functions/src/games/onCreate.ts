@@ -19,7 +19,7 @@ export const onCreateGame =
           const game = gameSnapShot.data() as Game;
 
           // Add 25 random cards to the game
-          const tiles = await generateNewGameTiles();
+          const tiles = await generateNewGameTiles(game.roomId);
           game.tiles = tiles;
           const blueTeamTiles =
               tiles.filter(tile => tile.role === TileRole.BLUE);
@@ -92,7 +92,24 @@ function assignRandomTileTeams():
   }
 }
 
-async function getTwentyFiveWords(): Promise<string[]> {
+async function generateNewGameTiles(roomId: string): Promise<Tile[]> {
+  const words = await getTwentyFiveWords(roomId)
+  const tiles = words.map(word => {
+    return {
+      word, role: TileRole.CIVILIAN, selected: false
+    }
+  });
+
+  // Assign random teams to the tiles
+  const tileTeams = assignRandomTileTeams();
+  tileTeams.red.forEach(red => {tiles[red].role = TileRole.RED});
+  tileTeams.blue.forEach(blue => {tiles[blue].role = TileRole.BLUE});
+  tiles[tileTeams.assassin].role = TileRole.ASSASSIN;
+
+  return tiles;
+}
+
+async function getTwentyFiveWords(roomId: string): Promise<string[]> {
   const defaultWordListSnapshot =
       await db.collection('wordlists').doc('default').get();
   if (defaultWordListSnapshot.exists && defaultWordListSnapshot.data()) {
@@ -100,16 +117,22 @@ async function getTwentyFiveWords(): Promise<string[]> {
     const newWordsForGame = [] as string[];
     const {words} = defaultWordListSnapshot.data() as WordList;
 
+    console.log('looking up words from last game');
+    const lastGameWords = await getLastGameWords(roomId);
+    console.log(
+        lastGameWords.length ? 'avoiding words from last game' :
+                               'there is no previous game');
+
     while (newWordsForGame.length < 25) {
       const randomIndex = Math.floor(Math.random() * words.length);
       const word = words.splice(randomIndex, 1)[0];
 
-      // ensure no dupes (since there are some in the word list)
-      if (!newWordsForGame.includes(word)) {
-        newWordsForGame.push(word)
+      // ensure no dupes (since there are some in the word list) and don't reuse
+      // words from the last game
+      if (!newWordsForGame.includes(word) && !lastGameWords.includes(word)) {
+        newWordsForGame.push(word);
       }
     }
-    // TODO: avoid word reuse from current game
 
     console.log('newWordsForGame has ' + newWordsForGame.length + ' words.');
     return newWordsForGame;
@@ -126,19 +149,21 @@ async function getTwentyFiveWords(): Promise<string[]> {
   }
 }
 
-async function generateNewGameTiles(): Promise<Tile[]> {
-  const words = await getTwentyFiveWords()
-  const tiles = words.map(word => {
-    return {
-      word, role: TileRole.CIVILIAN, selected: false
-    }
-  });
+/**
+ * Given a roomId, return the words from the last game, or an empty array if
+ * there is no previous game for this room
+ */
+async function getLastGameWords(roomId: string) {
+  const snapshot = await db.collection('games')
+                       .where('roomId', '==', roomId)
+                       .orderBy('createdAt', 'desc')
+                       .limit(1)
+                       .get();
 
-  // Assign random teams to the tiles
-  const tileTeams = assignRandomTileTeams();
-  tileTeams.red.forEach(red => {tiles[red].role = TileRole.RED});
-  tileTeams.blue.forEach(blue => {tiles[blue].role = TileRole.BLUE});
-  tiles[tileTeams.assassin].role = TileRole.ASSASSIN;
+  // no previous game, womp womp
+  if (snapshot.empty) return [];
 
-  return tiles;
+  // return the list of words from the previous game
+  const lastGame = snapshot.docs[0].data() as Game;
+  return lastGame.tiles.map(t => t.word);
 }
