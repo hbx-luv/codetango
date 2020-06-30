@@ -11,7 +11,11 @@
     height: 18vw;
 
     // better warning color
-    --ion-color-warning: #ede2cc;
+    --ion-color-warning: #bbb29f;
+
+    // make dark mode assassin clearer
+    --ion-color-dark: #000;
+    --ion-color-dark-contrast: #fff;
 
     // less padding
     --padding-start: 5px;
