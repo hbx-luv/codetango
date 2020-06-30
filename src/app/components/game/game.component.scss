@@ -4,3 +4,42 @@
   align-items: center;
   padding: 10px 20px;
 }
+
+.game-row {
+  display: flex;
+  justify-content: space-between;
+
+  .game-board {
+    flex-grow: 4;
+    margin: 0 15px;
+  }
+
+  .team-lists,
+  .word-history {
+    flex-grow: 1;
+    min-width: 230px;
+  }
+}
+
+
+@media (max-width: 760px) {
+  .game-row {
+    .game-board {
+      margin: 0;
+    }
+    .word-history {
+      width: 100%;
+    }
+    &.board-tab {
+      .team-lists {
+        display: none;
+      }
+    }
+    &.teams-tab {
+      .game-board,
+      .word-history {
+        display: none;
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-#grid-container {
+.grid-container {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   grid-gap: 5px;
@@ -7,10 +7,15 @@
   max-width: 800px;
 
   ion-button.word {
-    min-height: 75px;
+    max-height: 75px;
+    height: 18vw;
 
     // better warning color
     --ion-color-warning: #ede2cc;
+
+    // less padding
+    --padding-start: 5px;
+    --padding-end: 5px;
 
     &.selected,
     &.spymaster,
@@ -30,6 +35,16 @@
       &.ASSASSIN {
         --ion-color-base: #888 !important;
       }
+    }
+  }
+}
+
+@media (max-width: 550px) {
+  .grid-container {
+    grid-gap: 0px;
+
+    ion-button.word {
+      font-size: 2.5vw;
     }
   }
 }

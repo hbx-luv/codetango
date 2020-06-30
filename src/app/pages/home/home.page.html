@@ -1,5 +1,5 @@
 <ion-content [fullscreen]="true">
-  <div id="home-container">
+  <div class="home-container">
     <div class="new-game-container">
       <h1 class="title">CODETANGO</h1>
       <p class="description">
@@ -13,8 +13,5 @@
         </button>
       </div>
     </div>
-    <ion-button (click)="authService.logout()" *ngIf="authService.authenticated">
-      Log out
-    </ion-button>
   </div>
 </ion-content>

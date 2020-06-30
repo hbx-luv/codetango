@@ -1,0 +1,9 @@
+ion-footer {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  ion-footer {
+    display: initial;
+  }
+}

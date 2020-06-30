@@ -14,6 +14,7 @@ import {Game, GameStatus, Room, RoomStatus} from 'types';
 export class GameComponent {
   @Input() room: Room;
   @Input() game: Game;
+  @Input() selectedTab: string;
 
   constructor(
       private readonly authService: AuthService,

@@ -8,29 +8,26 @@
   </h4>
   <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="readonly">End Turn</ion-button>
 </ion-row>
-<ion-row>
+<ion-row class="game-row {{selectedTab}}">
   <!-- team lists on the left -->
-  <ion-col size="2">
-    <app-team-lists
-      [room]="room"
-      [game]="game">
-    </app-team-lists>
-  </ion-col>
+  <app-team-lists
+    class="team-lists"
+    [room]="room"
+    [game]="game">
+  </app-team-lists>
   <!-- board in the middle -->
-  <ion-col size="8">
-    <app-game-board
-      [room]="room"
-      [game]="game"
-      [readonly]="readonly"
-      [spymaster]="spymaster">
-    </app-game-board>
-  </ion-col>
+  <app-game-board
+    class="game-board"
+    [room]="room"
+    [game]="game"
+    [readonly]="readonly"
+    [spymaster]="spymaster">
+  </app-game-board>
   <!-- word history on the right -->
-  <ion-col size="2">
-    <app-word-history
-      [game]="game"
-    ></app-word-history>
-  </ion-col>
+  <app-word-history
+    class="word-history"
+    [game]="game">
+  </app-word-history>
 </ion-row>
 <!-- end game buttons -->
 <ion-row class="ion-justify-content-center">

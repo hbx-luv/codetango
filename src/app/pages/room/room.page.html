@@ -16,7 +16,7 @@
     <!-- there is a game in progress or it just ended -->
     <ng-container *ngIf="gameInProgress">
       <ng-container *ngIf="currentGame$ | async as game">
-        <app-game [room]="room" [game]="game"></app-game>
+        <app-game [room]="room" [game]="game" [selectedTab]="selectedTab"></app-game>
       </ng-container>
     </ng-container>
 
@@ -28,3 +28,14 @@
     </div>
   </ng-template>
 </ion-content>
+
+<ion-footer *ngIf="gameInProgress">
+  <ion-segment [value]="selectedTab" (click)="selectTab($event.target.value)">
+    <ion-segment-button value="board-tab">
+      <ion-label>Board</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="teams-tab">
+      <ion-label>Teams</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+</ion-footer>

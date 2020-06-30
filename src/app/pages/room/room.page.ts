@@ -14,6 +14,7 @@ import {Game, Room, RoomStatus} from 'types';
 export class RoomPage implements OnDestroy {
   private destroyed = new ReplaySubject<never>();
 
+  selectedTab = 'board-tab';
   roomId: string;
   room: Room;
   currentGame$: Observable<Game>;
@@ -33,18 +34,16 @@ export class RoomPage implements OnDestroy {
         });
   }
 
-  get pregaming(): boolean {
-    return this.room && [
-      RoomStatus.PREGAME,
-      RoomStatus.ASSIGNING_ROLES,
-    ].includes(this.room.status);
-  }
-
   get gameInProgress(): boolean {
     return this.room && [
       RoomStatus.GAME_IN_PROGRESS,
       RoomStatus.GAME_ENDED,
     ].includes(this.room.status);
+  }
+
+  selectTab($event: string) {
+    console.log($event);
+    this.selectedTab = $event;
   }
 
   ngOnDestroy() {
