@@ -59,27 +59,53 @@ export class GameComponent {
   }
 
   async backToLobby() {
-    const loader = await this.utilService.presentLoader('Redirecting...');
-    await this.roomService.updateRoom(this.room.id, {
-      status: RoomStatus.PREGAME,
-    });
-    await loader.dismiss();
+    let doIt = true;
+
+    // if game is in progress, doouble check before proceeding
+    if (!this.game.completedAt) {
+      doIt = await this.utilService.confirm(
+          'Are you sure you want to pick new teams?',
+          'New Teams',
+          'Nevermind',
+      );
+    }
+
+    if (doIt) {
+      const loader = await this.utilService.presentLoader('Redirecting...');
+      await this.roomService.updateRoom(this.room.id, {
+        status: RoomStatus.PREGAME,
+      });
+      await loader.dismiss();
+    }
   }
 
   async nextGame() {
-    const loader =
-        await this.utilService.presentLoader('Creating the next game...');
-    const {redTeam, blueTeam, roomId} = this.game;
+    let doIt = true;
 
-    // cycle the current spymaster to the end and set new ones
-    redTeam.userIds.push(redTeam.userIds.shift());
-    blueTeam.userIds.push(blueTeam.userIds.shift());
-    redTeam.spymaster = redTeam.userIds[0];
-    blueTeam.spymaster = blueTeam.userIds[0];
+    // if game is in progress, doouble check before proceeding
+    if (!this.game.completedAt) {
+      doIt = await this.utilService.confirm(
+          'Are you sure you want to start a new game?',
+          'New Game',
+          'Nevermind',
+      );
+    }
 
-    await this.gameService.createGame({redTeam, blueTeam, roomId});
-    await this.roomService.updateRoom(
-        roomId, {status: RoomStatus.ASSIGNING_ROLES});
-    await loader.dismiss();
+    if (doIt) {
+      const loader =
+          await this.utilService.presentLoader('Creating the next game...');
+      const {redTeam, blueTeam, roomId} = this.game;
+
+      // cycle the current spymaster to the end and set new ones
+      redTeam.userIds.push(redTeam.userIds.shift());
+      blueTeam.userIds.push(blueTeam.userIds.shift());
+      redTeam.spymaster = redTeam.userIds[0];
+      blueTeam.spymaster = blueTeam.userIds[0];
+
+      await this.gameService.createGame({redTeam, blueTeam, roomId});
+      await this.roomService.updateRoom(
+          roomId, {status: RoomStatus.ASSIGNING_ROLES});
+      await loader.dismiss();
+    }
   }
 }

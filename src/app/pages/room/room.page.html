@@ -6,7 +6,7 @@
 </ion-header>
 
 <ion-content>
-  <ng-container *ngIf="room; else loading">
+  <div class="room-container" *ngIf="room; else loading">
 
     <!-- we're in a lobby waiting for players and assigning teams -->
     <ng-container *ngIf="!gameInProgress">
@@ -20,7 +20,7 @@
       </ng-container>
     </ng-container>
 
-  </ng-container>
+  </div>
 
   <ng-template #loading>
     <div class="spinner-container">

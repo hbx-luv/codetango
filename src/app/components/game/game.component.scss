@@ -8,6 +8,9 @@
 .game-row {
   display: flex;
   justify-content: space-between;
+  padding-bottom: 30px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
 
   .game-board {
     flex-grow: 4;
@@ -17,19 +20,35 @@
   .team-lists,
   .word-history {
     flex-grow: 1;
-    min-width: 230px;
+    min-width: 205px;
   }
 }
 
+.bottom-buttons {
+  display: flex;
+  justify-content: center;
+}
 
-@media (max-width: 760px) {
+@media (max-width: 1090px) {
   .game-row {
+    padding: 0;
+    margin: 0;
+    border-bottom: none;
+
     .game-board {
       margin: 0;
+    }
+    .team-lists {
+      min-width: 0;
     }
     .word-history {
       width: 100%;
     }
+  }
+}
+
+@media (max-width: 830px) {
+  .game-row {
     &.board-tab {
       .team-lists {
         display: none;

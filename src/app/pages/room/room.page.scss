@@ -1,8 +1,12 @@
+.room-container {
+  padding-bottom: 20px;
+}
+
 ion-footer {
   display: none;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 830px) {
   ion-footer {
     display: initial;
   }
