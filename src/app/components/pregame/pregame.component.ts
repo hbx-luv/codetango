@@ -42,6 +42,10 @@ export class PregameComponent {
     this.roomService.removeUserFromRoom(this.room.id, userId);
   }
 
+  goBackToLobby() {
+    this.roomService.updateRoom(this.room.id, {status: RoomStatus.PREGAME});
+  }
+
   async assignUsersToRandomTeams() {
     const redTeamUsers = [];
     const blueTeamUsers = [];

@@ -37,6 +37,10 @@
   </app-team-lists>
   <hr>
   <div *ngIf="userInRoom">
-    <ion-button [disabled]="!canStartGame"  (click)="startGame()">Start Game</ion-button>
+    <ion-button color="light" (click)="goBackToLobby()">
+      <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+      Go Back
+    </ion-button>
+    <ion-button [disabled]="!canStartGame" (click)="startGame()">Start Game</ion-button>
   </div>
 </div>
