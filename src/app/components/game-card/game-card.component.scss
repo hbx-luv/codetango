@@ -21,6 +21,7 @@
     .team-lineup {
       display: flex;
       width: 40%;
+      flex-wrap: wrap;
 
       &:first-of-type {
         flex-direction: row-reverse;
@@ -30,6 +31,19 @@
       font-size: 24px;
       text-transform: uppercase;
       font-style: italic;
+    }
+  }
+}
+
+@media (max-width: 650px) {
+  .game-card {
+    ion-card-content {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .lineups .team-lineup {
+      justify-content: center;
     }
   }
 }
