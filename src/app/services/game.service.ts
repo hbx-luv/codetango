@@ -62,4 +62,21 @@ export class GameService {
           return {id: doc.id, ...doc.data()};
         }));
   }
+
+  getCompletedGames(roomId: string): Observable<Game[]> {
+    return this.afs
+        .collection<Game>(
+            'games',
+            ref => {
+              return ref.where('roomId', '==', roomId)
+                  .orderBy('completedAt', 'desc');
+            })
+        .snapshotChanges()
+        .pipe(map(actions => {
+          return actions.map(action => {
+            const {doc} = action.payload;
+            return {id: doc.id, ...doc.data()};
+          });
+        }));
+  }
 }

@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Game History</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="games-container" *ngIf="games$ | async as games; else loading">
+    <ion-card class="game-card" *ngFor="let game of games" (click)="gameClicked(game)">
+      <ion-card-header>
+        <ion-card-title>{{ game.completedAt }}</ion-card-title>
+        <ion-card-subtitle>{{ game.status }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <app-game-board
+          [game]="game"
+          [readonly]="true"
+          [spymaster]="false">
+        </app-game-board>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
+<ng-template #loading>
+  <div class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>

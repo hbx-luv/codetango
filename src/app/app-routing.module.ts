@@ -11,6 +11,16 @@ const routes: Routes = [
     path: ':id',
     loadChildren: () =>
         import('./pages/room/room.module').then(m => m.RoomPageModule)
+  },
+  {
+    path: ':id/games',
+    loadChildren: () => import('./pages/game-history/game-history.module')
+                            .then(m => m.GameHistoryPageModule)
+  },
+  {
+    path: ':id/games/:gameId',
+    loadChildren: () => import('./pages/game-detail/game-detail.module')
+                            .then(m => m.GameDetailPageModule)
   }
 ];
 
