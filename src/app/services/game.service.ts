@@ -79,4 +79,8 @@ export class GameService {
           });
         }));
   }
+
+  deleteGame(id: string): Promise<void> {
+    return this.afs.collection('games').doc(id).delete();
+  }
 }
