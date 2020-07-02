@@ -5,14 +5,15 @@ import {IonicModule} from '@ionic/angular';
 
 import {CluesComponent} from './clues/clues.component';
 import {GameBoardComponent} from './game-board/game-board.component';
+import {GameCardComponent} from './game-card/game-card.component';
 import {GameJoinButtonComponent} from './game-join-button/game-join-button.component';
 import {GameComponent} from './game/game.component';
 import {PregameComponent} from './pregame/pregame.component';
-import {UsersComponent} from './users/users.component';
+import {TeamListsComponent} from './team-lists/team-lists.component';
 import {TimerComponent} from './timer/timer.component';
 import {TitleBarComponent} from './title-bar/title-bar.component';
-import {TeamListsComponent} from './team-lists/team-lists.component';
-import {WordHistoryComponent} from "./word-history/word-history.component";
+import {UsersComponent} from './users/users.component';
+import {WordHistoryComponent} from './word-history/word-history.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import {WordHistoryComponent} from "./word-history/word-history.component";
     TitleBarComponent,
     TeamListsComponent,
     WordHistoryComponent,
+    GameCardComponent,
   ],
   imports: [
     IonicModule,
@@ -45,6 +47,7 @@ import {WordHistoryComponent} from "./word-history/word-history.component";
     TitleBarComponent,
     TeamListsComponent,
     WordHistoryComponent,
+    GameCardComponent,
   ]
 })
 export class ComponentsModule {

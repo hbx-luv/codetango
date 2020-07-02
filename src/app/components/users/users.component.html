@@ -1,18 +1,28 @@
 <ng-container>
-  <div *ngIf="user$ | async as user; else loading">
-    <ion-chip [color]="getColor" [outline]="shouldOutline" [class.you]="you">
+  <ion-chip
+    [class.avatar-only]="!showUserName"
+    [class.you]="you"
+    [color]="getColor"
+    [outline]="shouldOutline"
+  >
+    <ng-container *ngIf="user$ | async as user; else loading">
       <ion-avatar>
-        <img src="{{user.photoURL}}">
+        <img [src]="user.photoURL">
       </ion-avatar>
-      <ion-label>{{user.name}}</ion-label>
-    </ion-chip>
-  </div>
-
-  <ng-template #loading>
-    <ion-chip>
-      <ion-label>
-        <ion-skeleton-text [ngStyle]="style" animated></ion-skeleton-text>
-      </ion-label>
-    </ion-chip>
-  </ng-template>
+      <ion-label *ngIf="showUserName">{{user.name}}</ion-label>
+    </ng-container>
+  </ion-chip>
 </ng-container>
+
+<ng-template #loading>
+  <ion-label *ngIf="showUserName; else spinner">
+    <ion-skeleton-text [ngStyle]="style" animated></ion-skeleton-text>
+  </ion-label>
+</ng-template>
+
+<ng-template #spinner>
+  <ion-spinner
+    color="medium"
+    name="lines-small">
+  </ion-spinner>
+</ng-template>

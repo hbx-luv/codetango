@@ -1,0 +1,36 @@
+<ion-card class="game-card">
+  <ion-card-header>
+    <ion-card-title>
+      {{ game.completedAt }}
+    </ion-card-title>
+    <ion-card-subtitle class="game-status" [color]="status.color">
+      {{ status.text }}
+    </ion-card-subtitle>
+  </ion-card-header>
+  <ion-card-content>
+    <app-game-board
+      [game]="game"
+      [readonly]="true"
+      [spymaster]="false">
+    </app-game-board>
+    <div class="lineups">
+      <div class="team-lineup">
+        <app-users
+          *ngFor="let id of game.redTeam.userIds"
+          [userId]="id"
+          [showUserName]="false"
+          color="red">
+        </app-users>
+      </div>
+      <span class="versus">VS</span>
+      <div class="team-lineup">
+        <app-users
+          *ngFor="let id of game.blueTeam.userIds"
+          [userId]="id"
+          [showUserName]="false"
+          color="blue">
+        </app-users>
+      </div>
+    </div>
+  </ion-card-content>
+</ion-card>

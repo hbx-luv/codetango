@@ -1,6 +1,15 @@
 ion-chip {
   white-space: nowrap;
 
+  &.avatar-only {
+    max-width: 32px;
+    padding: 4px;
+
+    ion-avatar {
+      margin: 0;
+    }
+  }
+
   &.you {
     &.ion-color-primary {
       background: var(--ion-color-primary);

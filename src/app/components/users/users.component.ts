@@ -15,6 +15,7 @@ export class UsersComponent {
 
   @Input() userId: string;
   @Input() color: string;
+  @Input() showUserName = true;
   user$: Observable<User>;
   style: {width: string};
 

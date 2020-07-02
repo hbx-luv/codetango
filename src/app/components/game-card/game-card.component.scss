@@ -1,0 +1,35 @@
+.game-card {
+  max-width: 800px;
+  margin: 20px auto;
+
+  ion-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .game-status {
+    text-transform: uppercase;
+  }
+
+  .lineups {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    .team-lineup {
+      display: flex;
+      width: 40%;
+
+      &:first-of-type {
+        flex-direction: row-reverse;
+      }
+    }
+    .versus {
+      font-size: 24px;
+      text-transform: uppercase;
+      font-style: italic;
+    }
+  }
+}
