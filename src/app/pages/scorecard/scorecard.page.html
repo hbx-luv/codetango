@@ -1,5 +1,11 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+      <ion-button class="custom-back" [routerLink]="['/']">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-title *ngIf="user$ | async as user">
       {{user.name}}
     </ion-title>

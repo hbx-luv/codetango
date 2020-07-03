@@ -1,3 +1,34 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-menu side="start" menuId="first" contentId="main">
+    <ion-header>
+      <ion-toolbar>
+        <div class="title">CodeTango</div>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list>
+        <ion-menu-toggle>
+          <ion-item button [routerLink]="['/']">
+            <ion-icon slot="start" name="home-outline"></ion-icon>
+            Home
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item button [routerLink]="[roomId]">
+            <ion-icon slot="start" name="search-outline"></ion-icon>
+            Play
+          </ion-item>
+        </ion-menu-toggle>
+        <ng-container *ngIf="games$ | async as games">
+          <ion-menu-toggle *ngIf="games.length">
+            <ion-item button [routerLink]="[roomId, 'games']">
+              <ion-icon slot="start" name="time-outline"></ion-icon>
+              History
+            </ion-item>
+          </ion-menu-toggle>
+        </ng-container>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+  <ion-router-outlet id="main"></ion-router-outlet>
 </ion-app>

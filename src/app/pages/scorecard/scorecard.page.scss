@@ -1,3 +1,11 @@
+// Ionic adds a “can-go-back” class to the page which the
+// ionic-back-button uses this to determine if it should
+// be visible. Hide our custom back in that case
+::ng-deep .can-go-back .custom-back {
+  visibility: hidden;
+  display: none;
+}
+
 .user-card {
   max-width: 500px;
   margin: 20px auto;
