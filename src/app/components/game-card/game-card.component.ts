@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import * as moment from 'moment';
 import {Game, GameStatus} from 'types';
 
@@ -7,10 +7,15 @@ import {Game, GameStatus} from 'types';
   templateUrl: './game-card.component.html',
   styleUrls: ['./game-card.component.scss'],
 })
-export class GameCardComponent {
+export class GameCardComponent implements OnInit {
   @Input() game: Game;
+  completedMoment: moment.Moment;
 
   constructor() {}
+
+  ngOnInit() {
+    this.completedMoment = moment(this.game.completedAt);
+  }
 
   get status(): {text: string, color: string} {
     let text = '';
@@ -43,10 +48,14 @@ export class GameCardComponent {
   }
 
   get completedAt(): {date: string, time: string} {
-    const completedMoment = moment(this.game.completedAt);
-    return {
-      date: completedMoment.format('dddd, MMM D'),
-      time: completedMoment.format('h:mma'),
-    };
+    let date = '';
+    let time = '';
+
+    if (this.completedMoment) {
+      date = this.completedMoment.format('dddd, MMM D');
+      time = this.completedMoment.format('h:mma');
+    }
+
+    return {date, time};
   }
 }
