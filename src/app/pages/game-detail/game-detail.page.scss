@@ -1,0 +1,7 @@
+// Ionic adds a “can-go-back” class to the page which the
+// ionic-back-button uses this to determine if it should
+// be visible. Hide the menu button in that case
+::ng-deep .can-go-back ion-menu-button.optional {
+  visibility: hidden;
+  display: none;
+}
