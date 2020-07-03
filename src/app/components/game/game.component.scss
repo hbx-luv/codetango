@@ -3,6 +3,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
+
+  app-timer {
+    width: 118px;
+  }
+  ion-button {
+    width: 110px;
+  }
 }
 
 .game-row {
@@ -59,6 +66,15 @@
       .word-history {
         display: none;
       }
+    }
+  }
+}
+
+@media (max-width: 550px) {
+  .score-bar {
+    app-timer,
+    ion-button {
+      width: initial;
     }
   }
 }
