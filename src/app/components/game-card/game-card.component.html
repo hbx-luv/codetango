@@ -1,8 +1,13 @@
 <ion-card class="game-card">
   <ion-card-header>
-    <ion-card-title>
-      {{ game.completedAt }}
-    </ion-card-title>
+    <div>
+      <ion-card-title>
+        {{ completedAt.date }}
+      </ion-card-title>
+      <ion-card-subtitle>
+        {{ completedAt.time }}
+      </ion-card-subtitle>
+    </div>
     <ion-card-subtitle class="game-status" [color]="status.color">
       {{ status.text }}
     </ion-card-subtitle>

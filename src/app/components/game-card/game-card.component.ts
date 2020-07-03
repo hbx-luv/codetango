@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import * as moment from 'moment';
 import {Game, GameStatus} from 'types';
 
 @Component({
@@ -39,5 +40,13 @@ export class GameCardComponent {
     }
 
     return {text, color};
+  }
+
+  get completedAt(): {date: string, time: string} {
+    const completedMoment = moment(this.game.completedAt);
+    return {
+      date: completedMoment.format('dddd, MMM D'),
+      time: completedMoment.format('h:mma'),
+    };
   }
 }
