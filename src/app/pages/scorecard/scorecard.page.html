@@ -8,7 +8,7 @@
 
 <ion-content>
   <ion-card class="user-card" *ngIf="user$ | async as user; else loading">
-    <ion-item button (click)="testClick()">
+    <ion-item>
       <ion-avatar slot="start">
         <img [src]="user.photoURL">
       </ion-avatar>
@@ -18,17 +18,17 @@
     </ion-item>
     <ion-card-content *ngIf="user.stats">
       <ion-list>
-        <ion-item *ngIf="user.stats.currentStreak as currentStreak">
+        <ion-item *ngIf="user.stats.currentStreak >= 0">
           <h2>Current Streak</h2>
-          <h2 slot="end">{{currentStreak}}</h2>
+          <h2 slot="end">{{user.stats.currentStreak}}</h2>
         </ion-item>
-        <ion-item *ngIf="user.stats.gamesPlayed as gamesPlayed">
+        <ion-item *ngIf="user.stats.gamesPlayed >= 0">
           <h2>Games Played</h2>
-          <h2 slot="end">{{gamesPlayed}}</h2>
+          <h2 slot="end">{{user.stats.gamesPlayed}}</h2>
         </ion-item>
-        <ion-item *ngIf="user.stats.gamesWon as gamesWon">
+        <ion-item *ngIf="user.stats.gamesWon >= 0">
           <h2>Games Won</h2>
-          <h2 slot="end">{{gamesWon}}</h2>
+          <h2 slot="end">{{user.stats.gamesWon}}</h2>
         </ion-item>
       </ion-list>
     </ion-card-content>

@@ -9,11 +9,8 @@ const db = admin.firestore();
 export const onUpdateGame =
     functions.firestore.document('games/{gameId}')
         .onUpdate(async (gameDoc, context) => {
-          const preGameUpdate = gameDoc.before.data() as Game;
-          const postGameUpdate = gameDoc.after.data() as Game;
-
           await updateRemainingAgents(gameDoc.after);
-          await determineGameOver(preGameUpdate, postGameUpdate);
+          await determineGameOver(gameDoc.before, gameDoc.after);
 
           return 'Done';
         });
@@ -56,13 +53,15 @@ async function updateRemainingAgents(snapshot: DocumentSnapshot):
   }
 }
 
-async function determineGameOver(preGameUpdate: Game, postGameUpdate: Game) {
-  // Check if we the last update was setting the gamestatus to over.
-  if (preGameUpdate.status !== postGameUpdate.status &&
-      (postGameUpdate.status === GameStatus.BLUE_WON ||
-       postGameUpdate.status === GameStatus.RED_WON)) {
+async function determineGameOver(
+    before: DocumentSnapshot, after: DocumentSnapshot) {
+  const preGameUpdate = before.data() as Game;
+  const postGameUpdate = after.data() as Game;
+
+  // Check if the last update was the game completing
+  if (!preGameUpdate.completedAt && postGameUpdate.completedAt) {
     // Process Endgame analytics
-    const gameId = postGameUpdate.id ? postGameUpdate.id : '';
+    const gameId = before.id;
     for (const user of postGameUpdate.blueTeam.userIds) {
       await calculatePlayerStats(
           user, postGameUpdate.status === GameStatus.BLUE_WON, gameId);
