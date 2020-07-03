@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 
@@ -16,12 +17,14 @@ export class UsersComponent {
   @Input() userId: string;
   @Input() color: string;
   @Input() showUserName = true;
+  @Input() navToScorecard = true;
   user$: Observable<User>;
   style: {width: string};
 
   constructor(
       readonly authService: AuthService,
       private readonly userService: UserService,
+      private readonly router: Router,
   ) {
     this.style = {width: `${this.getRandomWidth()}px`};
   }
@@ -34,6 +37,13 @@ export class UsersComponent {
 
   getRandomWidth() {
     return this.BASE_WIDTH + Math.floor(Math.random() * 20) + 1;
+  }
+
+  goToUser($event) {
+    if (this.navToScorecard) {
+      $event.stopPropagation();
+      this.router.navigate(['scorecard', this.userId]);
+    }
   }
 
   get getColor(): string {

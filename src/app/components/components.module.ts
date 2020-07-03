@@ -2,6 +2,7 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
+import {TooltipModule} from 'ng2-tooltip-directive';
 
 import {CluesComponent} from './clues/clues.component';
 import {GameBoardComponent} from './game-board/game-board.component';
@@ -14,6 +15,7 @@ import {TimerComponent} from './timer/timer.component';
 import {TitleBarComponent} from './title-bar/title-bar.component';
 import {UsersComponent} from './users/users.component';
 import {WordHistoryComponent} from './word-history/word-history.component';
+
 
 @NgModule({
   declarations: [
@@ -34,6 +36,11 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     IonicModule,
     CommonModule,
     FormsModule,
+    TooltipModule.forRoot({
+      'placement': 'bottom',
+      'hide-delay': 0,
+      'displayTouchscreen': false,
+    }),
   ],
   exports: [
     GameBoardComponent,

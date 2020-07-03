@@ -21,6 +21,11 @@ const routes: Routes = [
     path: ':id/games/:gameId',
     loadChildren: () => import('./pages/game-detail/game-detail.module')
                             .then(m => m.GameDetailPageModule)
+  },
+  {
+    path: 'scorecard/:id',
+    loadChildren: () => import('./pages/scorecard/scorecard.module')
+                            .then(m => m.ScorecardPageModule)
   }
 ];
 

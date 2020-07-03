@@ -33,6 +33,7 @@
     "clang-format": "^1.4.0",
     "firebase": "^7.13.1",
     "lodash": "^4.17.15",
+    "ng2-tooltip-directive": "^2.9.20",
     "rxjs": "~6.5.1",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"

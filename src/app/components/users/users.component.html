@@ -4,9 +4,10 @@
     [class.you]="you"
     [color]="getColor"
     [outline]="shouldOutline"
+    (click)="goToUser($event)"
   >
     <ng-container *ngIf="user$ | async as user; else loading">
-      <ion-avatar>
+      <ion-avatar [tooltip]="userTemplate" content-type="template" [display]="!showUserName">
         <img [src]="user.photoURL">
       </ion-avatar>
       <ion-label *ngIf="showUserName">{{user.name}}</ion-label>
@@ -25,4 +26,8 @@
     color="medium"
     name="lines-small">
   </ion-spinner>
+</ng-template>
+
+<ng-template #userTemplate>
+  <app-users [userId]="userId" [color]="color"></app-users>
 </ng-template>
