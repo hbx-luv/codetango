@@ -38,12 +38,20 @@ export class GameJoinButtonComponent {
     return this.loggedIn && !this.userIsInRoom;
   }
 
+  get showLogout(): boolean {
+    return this.loggedIn && !this.userIsInRoom;
+  }
+
   get showLeave(): boolean {
     return this.loggedIn && this.userIsInRoom;
   }
 
   login() {
     this.authService.loginWithGoogle();
+  }
+
+  logout() {
+    this.authService.logout();
   }
 
   join() {
@@ -64,6 +72,6 @@ export class GameJoinButtonComponent {
       );
     }
     // go home
-    this.router.navigate(['']);
+    // this.router.navigate(['']);
   }
 }

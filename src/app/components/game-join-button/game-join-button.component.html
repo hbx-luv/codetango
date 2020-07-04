@@ -5,6 +5,11 @@
     *ngIf="showLogin">
     Login
   </ion-button>
+  <ion-button
+    (click)="logout()"
+    *ngIf="showLogout">
+    Logout
+  </ion-button>
   <!-- if a user is logged in, they can join -->
   <ion-button
     (click)="join()"
