@@ -22,6 +22,13 @@ export class CluesComponent implements OnDestroy {
       private readonly clueService: ClueService,
   ) {}
 
+  submitClueViaEnterPress() {
+    // Need to check if the clue is valid before submitting
+    if (!this.disableSubmitButton){
+      this.submitClue();
+    }
+  }
+
   async submitClue() {
     const clue = this.clue != null ? this.clue.toUpperCase() : null;
     const isBluesTurn = GameStatus.BLUES_TURN === this.game.status;
