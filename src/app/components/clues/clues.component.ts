@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy} from '@angular/core';
 import {ReplaySubject} from 'rxjs';
 import {ClueService} from 'src/app/services/clue.service';
 
-import {Game, GameStatus, TileRole} from '../../../../types';
+import {Game, GameStatus, TeamTypes, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-clues',
@@ -37,7 +37,7 @@ export class CluesComponent implements OnDestroy {
       word: clue,
       guessCount: this.clueCount,
       createdAt: Date.now(),
-      team: isBluesTurn ? TileRole.BLUE : TileRole.RED,
+      team: isBluesTurn ? TeamTypes.BLUE : TeamTypes.RED,
     });
 
     this.clue = null;

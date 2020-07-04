@@ -16,7 +16,9 @@
     <!-- there is a game in progress or it just ended -->
     <ng-container *ngIf="gameInProgress">
       <ng-container *ngIf="currentGame$ | async as game">
-        <app-game [room]="room" [game]="game" [selectedTab]="selectedTab"></app-game>
+        <app-game [room]="room" [game]="game" [selectedTab]="selectedTab"
+          [currentClue]="currentClue$ | async"
+        ></app-game>
       </ng-container>
     </ng-container>
 

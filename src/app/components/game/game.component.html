@@ -6,7 +6,7 @@
     <ion-text color="dark" class="ion-padding-end">-</ion-text>
     <ion-text color="danger">{{game.redAgents}}</ion-text>
   </h4>
-  <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="readonly">End Turn</ion-button>
+  <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="disableEndTurn">End Turn</ion-button>
 </ion-row>
 <ion-row class="game-row {{selectedTab}}">
   <!-- team lists on the left -->
@@ -20,7 +20,7 @@
     class="game-board"
     [room]="room"
     [game]="game"
-    [readonly]="readonly"
+    [readonly]="disableGameBoard"
     [spymaster]="spymaster">
   </app-game-board>
   <!-- word history on the right -->

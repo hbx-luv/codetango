@@ -4,7 +4,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UtilService} from 'src/app/services/util.service';
-import {Game, GameStatus, Room, RoomStatus} from 'types';
+import {Clue, Game, GameStatus, Room, RoomStatus, TeamTypes} from 'types';
 
 @Component({
   selector: 'app-game',
@@ -15,6 +15,7 @@ export class GameComponent {
   @Input() room: Room;
   @Input() game: Game;
   @Input() selectedTab: string;
+  @Input() currentClue: Clue;
 
   constructor(
       private readonly authService: AuthService,
@@ -23,7 +24,37 @@ export class GameComponent {
       private readonly utilService: UtilService,
   ) {}
 
-  get readonly(): boolean {
+  // Do not allow a player to click when:
+  // 1) There is no game
+  // 2) The game is over
+  // 3) It's not their turn
+  // 4) There isn't a clue for their turn
+  get disableGameBoard(): boolean {
+    return !this.game ||
+      !!this.game.completedAt ||
+      !this.myTurn ||
+      !this.currentClueIsFromMyTeam;
+  }
+
+  get currentClueIsFromMyTeam(): boolean {
+    if (this.currentClue) {
+      return this.myTeam === this.currentClue.team;
+    }
+    return false;
+  }
+
+  get myTeam(): TeamTypes {
+    const {currentUserId} = this.authService;
+    if (get(this.game, 'redTeam.userIds').includes(currentUserId)) {
+      return TeamTypes.RED;
+    }
+    if (get(this.game, 'blueTeam.userIds').includes(currentUserId)) {
+      return TeamTypes.BLUE;
+    }
+    return TeamTypes.OBSERVER;
+  }
+
+  get disableEndTurn(): boolean {
     return !this.game || !!this.game.completedAt || !this.myTurn;
   }
 

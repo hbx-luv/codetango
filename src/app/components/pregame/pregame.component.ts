@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, Room, RoomStatus, Team, TileRole, User} from '../../../../types';
+import {Game, Room, RoomStatus, Team, TeamTypes, TileRole, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
 
@@ -65,12 +65,12 @@ export class PregameComponent {
     await this.gameService.createGame({
       createdAt: Date.now(),
       blueTeam: {
-        color: TileRole.BLUE,
+        color: TeamTypes.BLUE,
         userIds: blueTeamUsers,
         spymaster: blueTeamUsers[0],
       },
       redTeam: {
-        color: TileRole.RED,
+        color: TeamTypes.RED,
         userIds: redTeamUsers,
         spymaster: redTeamUsers[0],
       },

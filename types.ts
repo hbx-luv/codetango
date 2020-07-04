@@ -1,3 +1,10 @@
+// the team the user/player is on
+export enum TeamTypes {
+  RED = 'RED',
+  BLUE = 'BLUE',
+  OBSERVER = 'OBSERVER',
+}
+
 // the different types of roles a tile represents
 export enum TileRole {
   RED = 'RED',
@@ -33,7 +40,7 @@ export interface Tile {
 
 // The players that make up a team
 export interface Team {
-  color: TileRole;
+  color: TeamTypes;
   userIds: string[];
   spymaster?: string;
 }
@@ -43,7 +50,7 @@ export interface Clue {
   word: string;
   guessCount: number;
   createdAt: number;
-  team: TileRole;
+  team: TeamTypes;
 }
 
 export interface Room {
