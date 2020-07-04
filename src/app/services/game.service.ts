@@ -43,6 +43,15 @@ export class GameService {
     });
   }
 
+  getGame(gameId: string): Observable<Game> {
+    return this.afs.collection('games')
+        .doc<Game>(gameId)
+        .snapshotChanges()
+        .pipe(map(game => {
+          return {id: game.payload.id, ...game.payload.data()};
+        }));
+  }
+
   getCurrentGame(roomId: string): Observable<Game|null> {
     return this.afs
         .collection<Game>(

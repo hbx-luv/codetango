@@ -1,20 +1,21 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {ComponentsModule} from 'src/app/components/components.module';
 
-import { IonicModule } from '@ionic/angular';
-
-import { GameDetailPageRoutingModule } from './game-detail-routing.module';
-
-import { GameDetailPage } from './game-detail.page';
+import {GameDetailPageRoutingModule} from './game-detail-routing.module';
+import {GameDetailPage} from './game-detail.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    GameDetailPageRoutingModule
+    GameDetailPageRoutingModule,
+    ComponentsModule,
   ],
   declarations: [GameDetailPage]
 })
-export class GameDetailPageModule {}
+export class GameDetailPageModule {
+}

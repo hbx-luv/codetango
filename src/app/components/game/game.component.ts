@@ -12,10 +12,10 @@ import {Clue, Game, GameStatus, Room, RoomStatus, TeamTypes} from 'types';
   styleUrls: ['./game.component.scss'],
 })
 export class GameComponent {
-  @Input() room: Room;
   @Input() game: Game;
-  @Input() selectedTab: string;
-  @Input() currentClue: Clue;
+  @Input() room?: Room;
+  @Input() selectedTab?: string = 'board-tab';
+  @Input() currentClue?: Clue;
 
   constructor(
       private readonly authService: AuthService,
@@ -30,10 +30,8 @@ export class GameComponent {
   // 3) It's not their turn
   // 4) There isn't a clue for their turn
   get disableGameBoard(): boolean {
-    return !this.game ||
-      !!this.game.completedAt ||
-      !this.myTurn ||
-      !this.currentClueIsFromMyTeam;
+    return !this.game || !!this.game.completedAt || !this.myTurn ||
+        !this.currentClueIsFromMyTeam;
   }
 
   get currentClueIsFromMyTeam(): boolean {

@@ -1,7 +1,9 @@
 import {Component} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Observable} from 'rxjs';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
+import {Game} from 'types';
 
 @Component({
   selector: 'app-game-detail',
@@ -11,6 +13,7 @@ import {UtilService} from 'src/app/services/util.service';
 export class GameDetailPage {
   roomId: string;
   gameId: string;
+  game$: Observable<Game>;
 
   constructor(
       private readonly gameService: GameService,
@@ -20,6 +23,7 @@ export class GameDetailPage {
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.gameId = this.route.snapshot.paramMap.get('gameId');
+    this.game$ = this.gameService.getGame(this.gameId);
   }
 
   async deleteGame() {

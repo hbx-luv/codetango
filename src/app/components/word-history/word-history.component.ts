@@ -22,7 +22,7 @@ export class WordHistoryComponent implements OnInit {
   ngOnInit() {
     this.clues$ = this.clueService.getClues(this.game.id).pipe(tap(clues => {
       const latestClue = clues[0];
-      if (latestClue) {
+      if (latestClue && !this.game.completedAt) {
         this.utilService.showToast(
             `Clue from SpyMaster: ${latestClue.word} for ${
                 latestClue.guessCount}`,

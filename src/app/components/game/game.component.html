@@ -6,8 +6,17 @@
     <ion-text color="dark" class="ion-padding-end">-</ion-text>
     <ion-text color="danger">{{game.redAgents}}</ion-text>
   </h4>
-  <ion-button fill="outline" color="medium" (click)="endCurrentTeamsTurn()" [disabled]="disableEndTurn">End Turn</ion-button>
+  <ion-button
+    [class.completed]="!!game.completedAt"
+    fill="outline"
+    color="medium"
+    (click)="endCurrentTeamsTurn()"
+    [disabled]="disableEndTurn"
+  >
+    End Turn
+  </ion-button>
 </ion-row>
+
 <ion-row class="game-row {{selectedTab}}">
   <!-- team lists on the left -->
   <app-team-lists
@@ -29,6 +38,8 @@
     [game]="game">
   </app-word-history>
 </ion-row>
+
+<!-- TODO: rip these out onto the game page -->
 <!-- end game buttons -->
 <ion-row class="bottom-buttons">
   <ion-button color="light" (click)="backToLobby()">
@@ -38,6 +49,7 @@
     Next Game
   </ion-button>
 </ion-row>
+
 <!-- spymaster clue interface -->
 <app-clues
   [game]="game"

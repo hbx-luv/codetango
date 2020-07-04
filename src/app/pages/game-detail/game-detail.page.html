@@ -14,5 +14,15 @@
 </ion-header>
 
 <ion-content>
-  Nothing to see here yet
+  <ng-container *ngIf="game$ | async as game; else loading">
+    <app-game
+      [game]="game">
+    </app-game>
+  </ng-container>
 </ion-content>
+
+<ng-template #loading>
+  <div class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>

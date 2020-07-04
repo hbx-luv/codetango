@@ -31,7 +31,7 @@ export class TeamListsComponent {
   }
 
   showJoinButton(team: 'redTeam'|'blueTeam') {
-    return this.loggedInAndInRoom && this.game &&
+    return this.loggedInAndInRoom && this.game && !this.game.completedAt &&
         (this.canSwapTeams(team) || this.notOnATeamYet);
   }
 
