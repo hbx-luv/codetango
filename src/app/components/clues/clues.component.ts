@@ -22,26 +22,22 @@ export class CluesComponent implements OnDestroy {
       private readonly clueService: ClueService,
   ) {}
 
-  submitClueViaEnterPress() {
-    // Need to check if the clue is valid before submitting
-    if (!this.disableSubmitButton){
-      this.submitClue();
-    }
-  }
-
   async submitClue() {
-    const clue = this.clue != null ? this.clue.toUpperCase() : null;
-    const isBluesTurn = GameStatus.BLUES_TURN === this.game.status;
+    // Need to check if the clue is valid before submitting
+    if (!this.disableSubmitButton) {
+      const clue = this.clue != null ? this.clue.toUpperCase() : null;
+      const isBluesTurn = GameStatus.BLUES_TURN === this.game.status;
 
-    this.clueService.addClue(this.game.id, {
-      word: clue,
-      guessCount: this.clueCount,
-      createdAt: Date.now(),
-      team: isBluesTurn ? TeamTypes.BLUE : TeamTypes.RED,
-    });
+      this.clueService.addClue(this.game.id, {
+        word: clue,
+        guessCount: this.clueCount,
+        createdAt: Date.now(),
+        team: isBluesTurn ? TeamTypes.BLUE : TeamTypes.RED,
+      });
 
-    this.clue = null;
-    this.clueCount = null;
+      this.clue = null;
+      this.clueCount = null;
+    }
   }
 
   get submitClueButtonText(): string {
