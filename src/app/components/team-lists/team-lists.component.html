@@ -23,6 +23,7 @@
       <span *ngIf="game.redTeam.spymaster === member">🕵</span>
     </div>
     <app-users
+      [navToScorecard]="!setSpymaster"
       [userId]="member"
       color="red"
       (click)="userClicked(member, 'redTeam')">
