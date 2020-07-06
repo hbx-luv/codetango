@@ -22,6 +22,16 @@
           [selectedTab]="selectedTab"
           [currentClue]="currentClue$ | async">
         </app-game>
+
+        <!-- end game buttons -->
+        <ion-row class="bottom-buttons" *ngIf="game.completedAt">
+          <ion-button color="medium" fill="outline" (click)="backToLobby(game)">
+            New Teams
+          </ion-button>
+          <ion-button color="primary" fill="outline" (click)="nextGame(game)">
+            Next Game
+          </ion-button>
+        </ion-row>
       </ng-container>
     </ng-container>
 
