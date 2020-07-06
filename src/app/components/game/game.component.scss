@@ -16,7 +16,6 @@
   display: flex;
   justify-content: space-between;
   padding-bottom: 30px;
-  border-bottom: 1px solid #ccc;
   margin-bottom: 10px;
 
   .game-board {
@@ -29,11 +28,6 @@
     flex-grow: 1;
     min-width: 205px;
   }
-}
-
-.bottom-buttons {
-  display: flex;
-  justify-content: center;
 }
 
 @media (max-width: 1090px) {

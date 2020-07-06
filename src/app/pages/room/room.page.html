@@ -16,19 +16,30 @@
     <!-- there is a game in progress or it just ended -->
     <ng-container *ngIf="gameInProgress">
       <ng-container *ngIf="currentGame$ | async as game">
-        <app-game [room]="room" [game]="game" [selectedTab]="selectedTab"
-          [currentClue]="currentClue$ | async"
-        ></app-game>
+        <app-game
+          [game]="game"
+          [room]="room"
+          [selectedTab]="selectedTab"
+          [currentClue]="currentClue$ | async">
+        </app-game>
       </ng-container>
     </ng-container>
 
   </div>
 
-  <ng-template #loading>
-    <div class="spinner-container">
-      <ion-spinner></ion-spinner>
-    </div>
-  </ng-template>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="gameInProgress">
+    <ion-fab-button color="medium" size="small">
+      <ion-icon name="settings-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top" *ngIf="currentGame$ | async as game">
+      <ion-fab-button tooltip="Next Game" (click)="nextGame(game)">
+        <ion-icon name="play-skip-forward-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button tooltip="New Teams" (click)="backToLobby(game)">
+        <ion-icon name="people-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
 </ion-content>
 
 <ion-footer *ngIf="gameInProgress">
@@ -41,3 +52,9 @@
     </ion-segment-button>
   </ion-segment>
 </ion-footer>
+
+<ng-template #loading>
+  <div class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>

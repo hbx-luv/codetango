@@ -1,5 +1,10 @@
 .room-container {
   padding-bottom: 20px;
+
+  .bottom-buttons {
+    display: flex;
+    justify-content: center;
+  }
 }
 
 ion-footer {
