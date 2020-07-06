@@ -6,7 +6,7 @@
     </ion-buttons>
     <ion-title>Game Detail</ion-title>
     <ion-buttons slot="end">
-      <ion-button color="danger" fill="clear" (click)="deleteGame()">
+      <ion-button color="danger" fill="clear" (click)="deleteGame()" *ngIf="canDelete">
         Delete
       </ion-button>
     </ion-buttons>
@@ -14,7 +14,7 @@
 </ion-header>
 
 <ion-content>
-  <ng-container *ngIf="game$ | async as game; else loading">
+  <ng-container *ngIf="game; else loading">
     <app-game
       [game]="game">
     </app-game>

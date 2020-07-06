@@ -1,6 +1,8 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs';
+import {ReplaySubject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
+import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Game} from 'types';
@@ -10,12 +12,15 @@ import {Game} from 'types';
   templateUrl: './game-detail.page.html',
   styleUrls: ['./game-detail.page.scss'],
 })
-export class GameDetailPage {
+export class GameDetailPage implements OnDestroy {
+  private destroyed = new ReplaySubject<never>();
+
   roomId: string;
   gameId: string;
-  game$: Observable<Game>;
+  game: Game;
 
   constructor(
+      private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly route: ActivatedRoute,
       private readonly router: Router,
@@ -23,7 +28,17 @@ export class GameDetailPage {
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.gameId = this.route.snapshot.paramMap.get('gameId');
-    this.game$ = this.gameService.getGame(this.gameId);
+    this.gameService.getGame(this.gameId)
+        .pipe(takeUntil(this.destroyed))
+        .subscribe(game => {
+          this.game = game;
+        });
+  }
+
+  get canDelete(): boolean {
+    return this.game && this.authService.authenticated &&
+        (this.game.blueTeam.userIds.includes(this.authService.currentUserId) ||
+         this.game.redTeam.userIds.includes(this.authService.currentUserId));
   }
 
   async deleteGame() {
@@ -38,5 +53,9 @@ export class GameDetailPage {
       this.router.navigate([this.roomId, 'games']);
       await loader.dismiss();
     }
+  }
+
+  ngOnDestroy() {
+    this.destroyed.next();
   }
 }
