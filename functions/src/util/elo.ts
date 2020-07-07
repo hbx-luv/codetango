@@ -61,8 +61,13 @@ export async function recalcElo(
     // update elo history for all users involved
     for (const userId of game.blueTeam.userIds.concat(game.redTeam.userIds)) {
       batch.set(
-          db.collection('eloHistory').doc(userId + '_' + game.id),
-          {...userMap[userId]},  // clone the object
+          db.collection('eloHistory').doc(`${userId}_${game.id}`),
+          {
+            // clone the object and set gameId and timestamp
+            ...userMap[userId],
+            gameId: game.id,
+            timestamp: game.completedAt,
+          },
       );
     }
 
@@ -96,7 +101,7 @@ export async function recalcElo(
   await batch.commit();
 
   // "queue up" a new recalc starting where we left off
-  console.log('schedule? (' + lastTimestamp + ' > ' + timestamp + ')')
+  console.log(`schedule? (${lastTimestamp} > ${timestamp})`);
   if (lastTimestamp > timestamp) {
     await db.collection('admin').doc('recalc').delete();
     await db.collection('admin').doc('recalc').set({timestamp: lastTimestamp});
