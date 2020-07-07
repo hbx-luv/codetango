@@ -57,7 +57,6 @@ export class RoomPage implements OnDestroy {
   }
 
   selectTab($event: string) {
-    console.log($event);
     this.selectedTab = $event;
   }
 
