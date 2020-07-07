@@ -5,6 +5,7 @@ import {IonicModule} from '@ionic/angular';
 import {TooltipModule} from 'ng2-tooltip-directive';
 
 import {CluesComponent} from './clues/clues.component';
+import {EloChartComponent} from './elo-chart/elo-chart';
 import {GameBoardComponent} from './game-board/game-board.component';
 import {GameCardComponent} from './game-card/game-card.component';
 import {GameJoinButtonComponent} from './game-join-button/game-join-button.component';
@@ -31,6 +32,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     TeamListsComponent,
     WordHistoryComponent,
     GameCardComponent,
+    EloChartComponent,
   ],
   imports: [
     IonicModule,
@@ -55,6 +57,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     TeamListsComponent,
     WordHistoryComponent,
     GameCardComponent,
+    EloChartComponent,
   ]
 })
 export class ComponentsModule {
