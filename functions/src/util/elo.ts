@@ -34,7 +34,7 @@ export async function recalcElo(
           .limit(500)  // only do 500 games at a time so we don't timeout
           .get();
 
-  console.log('games got got. starting calc')
+  console.log(`${games.size} games got got. starting calc`);
 
   const batch = new BigBatch(db);
   let lastTimestamp = 0;
@@ -62,13 +62,16 @@ export async function recalcElo(
     for (const userId of game.blueTeam.userIds.concat(game.redTeam.userIds)) {
       batch.set(
           db.collection('eloHistory').doc(userId + '_' + game.id),
-          userMap[userId]);
+          {...userMap[userId]},  // clone the object
+      );
     }
 
     lastTimestamp = game.completedAt!;
   }
 
   console.log('done with games, iterating through users');
+
+  console.log(userMap);
 
   const userMapPairs = toPairs(userMap);
   for (const pair of userMapPairs) {
@@ -79,7 +82,11 @@ export async function recalcElo(
       'stats.elo': data.elo,
       'stats.gamesPlayed': data.gamesPlayed,
       'stats.gamesWon': data.gamesWon,
+      'stats.spymasterGames': data.spymasterGames,
+      'stats.spymasterWins': data.spymasterWins,
       'stats.currentStreak': data.currentStreak,
+      'stats.bestStreak': data.bestStreak,
+      'stats.provisional': data.provisional,
       'stats.lastPlayed': data.timestamp
     });
   }
@@ -138,6 +145,8 @@ export async function getEloHistoryForUser(
 
   // there should only be 1 document per user
   // if there are none, then set up a base Stats object
+  console.log(`snapshot size: ${snapshot.size}, user: ${userId}, timestamp: ${
+      timestamp}`);
   return snapshot.size === 1 ? snapshot.docs[0].data() as Stats : {
     userId,
     gameId,

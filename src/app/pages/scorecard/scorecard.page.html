@@ -24,18 +24,12 @@
     </ion-item>
     <ion-card-content *ngIf="user.stats">
       <ion-list>
-        <ion-item *ngIf="user.stats.currentStreak >= 0">
-          <h2>Current Streak</h2>
-          <h2 slot="end">{{user.stats.currentStreak}}</h2>
-        </ion-item>
-        <ion-item *ngIf="user.stats.gamesPlayed >= 0">
-          <h2>Games Played</h2>
-          <h2 slot="end">{{user.stats.gamesPlayed}}</h2>
-        </ion-item>
-        <ion-item *ngIf="user.stats.gamesWon >= 0">
-          <h2>Games Won</h2>
-          <h2 slot="end">{{user.stats.gamesWon}}</h2>
-        </ion-item>
+        <ng-container *ngFor="let stat of stats">
+          <ion-item *ngIf="user.stats[stat.field]">
+            <h2>{{ stat.title }}</h2>
+            <h2 slot="end">{{ user.stats[stat.field] }}</h2>
+          </ion-item>
+        </ng-container>
       </ion-list>
     </ion-card-content>
   </ion-card>

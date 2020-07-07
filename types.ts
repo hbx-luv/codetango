@@ -123,10 +123,10 @@ export interface UserStats {
   gamesWon: number;
   spymasterGames: number;
   spymasterWins: number;
-  provisional: boolean;
   currentStreak: number;
   bestStreak: number;
-  lastPlayed?: number;
+  provisional: boolean;
+  lastPlayed?: number|string;
 }
 
 // Snapshot in time of a player's elo rating and other stats after a game has
