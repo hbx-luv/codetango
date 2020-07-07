@@ -17,14 +17,6 @@
 
     <!-- chart -->
     <ion-card class="user-card" *ngIf="user.stats?.gamesPlayed > 0">
-      <app-elo-chart
-        [userId]="userId"
-        [limit]="50">
-      </app-elo-chart>
-    </ion-card>
-
-    <!-- more stats -->
-    <ion-card class="user-card">
       <ion-item>
         <ion-avatar slot="start">
           <img [src]="user.photoURL">
@@ -33,6 +25,14 @@
           {{user.name}}
         </ion-label>
       </ion-item>
+      <app-elo-chart [userId]="userId"></app-elo-chart>
+    </ion-card>
+
+    <!-- more stats -->
+    <ion-card class="user-card">
+      <ion-card-header>
+        <ion-card-title>Some Stats</ion-card-title>
+      </ion-card-header>
       <ion-card-content *ngIf="user.stats">
         <ion-list>
           <ng-container *ngFor="let stat of stats">

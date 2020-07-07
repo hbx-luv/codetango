@@ -13,7 +13,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
   private destroyed$ = new Subject<void>();
 
   @Input() userId: string;
-  @Input() limit: number;
+  @Input() limit?: number;
   chart: any;
   uniqueId: string = _.uniqueId();
 
@@ -23,24 +23,22 @@ export class EloChartComponent implements OnChanges, OnDestroy {
       private readonly charts: EloHistoryService,
   ) {}
 
-  ngOnChanges(changes) {
+  ngOnChanges() {
+    // always kill the previous observable
+    this.destroyed$.next()
+
     // if the id is undefined, return
     if (this.userId === undefined) {
-      this.ngOnDestroy();
       return;
     }
 
     // subscribe to this player's elo history and update the chart whenever that
     // changes
-    if (changes.limit && this.limit) {
-      this.ngOnDestroy();
-
-      this.charts.getEloHistoryForUser(this.userId, this.limit)
-          .pipe(takeUntil(this.destroyed$))
-          .subscribe(dataPoints => {
-            this.updateChart(dataPoints);
-          });
-    }
+    this.charts.getEloHistoryForUser(this.userId, this.limit)
+        .pipe(takeUntil(this.destroyed$))
+        .subscribe(dataPoints => {
+          this.updateChart(dataPoints);
+        });
   }
 
   updateChart(dataPoints) {

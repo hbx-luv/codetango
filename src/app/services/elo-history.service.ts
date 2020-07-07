@@ -4,22 +4,32 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 import {map, take} from 'rxjs/operators';
 
+// set this to true to hide provisional games
+const NO_PROVISIONAL = false;
+
 @Injectable({providedIn: 'root'})
 export class EloHistoryService {
   constructor(
       private readonly afs: AngularFirestore,
   ) {}
 
-  getEloHistoryForUser(userId: string, limit: number) {
+  getEloHistoryForUser(userId: string, limit?: number) {
     return this.afs
         .collection(
             'eloHistory',
             ref => {
-              return ref
-                  .where('userId', '==', userId)
-                  // .where('provisional', '==', false)
-                  .orderBy('timestamp', 'desc')
-                  .limit(limit);
+              let query = ref.where('userId', '==', userId)
+                              .orderBy('timestamp', 'desc');
+
+              if (NO_PROVISIONAL) {
+                query = query.where('provisional', '==', false);
+              }
+
+              if (limit) {
+                query = query.limit(limit)
+              }
+
+              return query;
             })
         .snapshotChanges()
         .pipe(map(actions => {
@@ -68,11 +78,15 @@ export class EloHistoryService {
         .collection(
             'eloHistory',
             ref => {
-              return ref
-                  .where('userId', '==', userId)
-                  // .where('provisional', '==', false)
-                  .orderBy('elo', order)
-                  .limit(1);
+              let query = ref.where('userId', '==', userId)
+                              .orderBy('elo', order)
+                              .limit(1);
+
+              if (NO_PROVISIONAL) {
+                query = query.where('provisional', '==', false);
+              }
+
+              return query;
             })
         .valueChanges();
   }
