@@ -2,6 +2,7 @@ import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil, tap} from 'rxjs/operators';
+import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {RoomService} from 'src/app/services/room.service';
@@ -23,6 +24,7 @@ export class RoomPage implements OnDestroy {
   currentClue$: Observable<Clue>;
 
   constructor(
+      private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly route: ActivatedRoute,
@@ -40,6 +42,11 @@ export class RoomPage implements OnDestroy {
         .subscribe(room => {
           this.room = room;
         });
+  }
+
+  get userIsInRoom(): boolean {
+    return this.room &&
+        this.room.userIds.includes(this.authService.currentUserId);
   }
 
   get gameInProgress(): boolean {

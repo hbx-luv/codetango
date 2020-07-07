@@ -24,7 +24,7 @@
         </app-game>
 
         <!-- end game buttons -->
-        <ion-row class="bottom-buttons" *ngIf="game.completedAt">
+        <ion-row class="bottom-buttons" *ngIf="game.completedAt && userIsInRoom">
           <ion-button color="medium" fill="outline" (click)="backToLobby(game)">
             New Teams
           </ion-button>
@@ -37,7 +37,7 @@
 
   </div>
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="gameInProgress">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="gameInProgress && userIsInRoom">
     <ion-fab-button color="medium" size="small">
       <ion-icon name="settings-outline"></ion-icon>
     </ion-fab-button>
