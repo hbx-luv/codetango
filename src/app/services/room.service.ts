@@ -1,9 +1,11 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
 import {firestore} from 'firebase';
+import {without} from 'lodash';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Room} from 'types';
+
 import {AuthService} from './auth.service';
 
 @Injectable({providedIn: 'root'})
@@ -41,10 +43,23 @@ export class RoomService {
         }));
   }
 
-  joinRoom(id: string) {
-    return this.afs.collection('rooms').doc(id).update({
-      userIds: firestore.FieldValue.arrayUnion(this.authService.currentUserId),
-    });
+  async joinRoom(roomId: string): Promise<void> {
+    if (this.authService.authenticated) {
+      const {currentUserId} = this.authService;
+
+      // join the room
+      await this.afs.collection('rooms').doc(roomId).update({
+        userIds: firestore.FieldValue.arrayUnion(currentUserId),
+      });
+
+      // fetch the existing rooms for the authenticaterd user
+      const userRef = this.db.collection('users').doc(currentUserId);
+      const userSnapshot = await userRef.get();
+      let {rooms = []} = userSnapshot.data();
+
+      // put the room id first, then add all the others behind
+      await userRef.update({rooms: [roomId].concat(without(rooms, roomId))});
+    }
   }
 
   removeUserFromRoom(roomId: string, userId: string) {

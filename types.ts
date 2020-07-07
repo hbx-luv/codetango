@@ -105,9 +105,15 @@ export interface Guess {
 export interface User {
   name: string;
   email: string;
+  rooms: string[];  // room ids
+
+  // set by some auth providers
   photoURL?: string;
-  elo: number;  // needs to default, 1200?
+
+  // set by the stats recalc function
   stats?: UserStats;
+
+  // set by the client
   id?: string;
 }
 
