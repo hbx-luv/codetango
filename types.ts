@@ -107,12 +107,7 @@ export interface User {
   email: string;
   photoURL?: string;
   elo: number;  // needs to default, 1200?
-  stats: {
-    currentStreak: number; dailyChange: number; elo: number;
-    gamesPlayed: number;
-    gamesWon: number;
-    lastPlayed: number;
-  };
+  stats?: UserStats;
   id?: string;
 }
 
@@ -122,14 +117,22 @@ export interface WordList {
   words: string[];
 }
 
-// Snapshot in time of a player's Elo
-export interface EloHistoryDocument {
-  id?: string;
+export interface UserStats {
   elo: number;
-  gameId: string;
-  playerId: string;
   gamesPlayed: number;
   gamesWon: number;
+  spymasterGames: number;
+  spymasterWins: number;
   provisional: boolean;
+  currentStreak: number;
+  bestStreak: number;
+  lastPlayed?: number;
+}
+
+// Snapshot in time of a player's elo rating and other stats after a game has
+// been completed
+export interface Stats extends UserStats {
+  gameId: string;
+  userId: string;
   timestamp: number;
 }

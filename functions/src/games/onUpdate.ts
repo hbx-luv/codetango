@@ -2,7 +2,14 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
 
-import {Game, GameStatus, TileRole, User} from '../../../types';
+import {Game, GameStatus, TileRole} from '../../../types';
+import {recalcElo} from '../util/elo';
+
+try {
+  admin.initializeApp();
+} catch (e) {
+  console.log(e);
+}
 
 const db = admin.firestore();
 
@@ -61,49 +68,6 @@ async function determineGameOver(
   // Check if the last update was the game completing
   if (!preGameUpdate.completedAt && postGameUpdate.completedAt) {
     // Process Endgame analytics
-    const gameId = before.id;
-    for (const user of postGameUpdate.blueTeam.userIds) {
-      await calculatePlayerStats(
-          user, postGameUpdate.status === GameStatus.BLUE_WON, gameId);
-    }
-    for (const user of postGameUpdate.redTeam.userIds) {
-      await calculatePlayerStats(
-          user, postGameUpdate.status === GameStatus.RED_WON, gameId);
-    }
+    await recalcElo(db, postGameUpdate.completedAt);
   }
-}
-
-async function calculatePlayerStats(
-    userId: string, wonGame: Boolean, gameId: string) {
-  const userSnapshot = await db.collection('users').doc(userId);
-  let playerUpdate;
-  if (wonGame) {
-    playerUpdate = {
-      'stats.currentStreak': admin.firestore.FieldValue.increment(1),
-      'stats.gamesWon': admin.firestore.FieldValue.increment(1),
-      'stats.gamesPlayed': admin.firestore.FieldValue.increment(1)
-    };
-  } else {
-    playerUpdate = {
-      'stats.currentStreak': 0,
-      'stats.gamesWon': admin.firestore.FieldValue.increment(0),
-      'stats.gamesPlayed': admin.firestore.FieldValue.increment(1)
-    };
-  }
-  userSnapshot.update(playerUpdate).catch(err => console.error(err))
-
-  const user = (await userSnapshot.get()).data() as User;
-
-  const currentElo = {
-    elo: 0,  // TODO
-    gameId,
-    gamesPlayed: user.stats.gamesPlayed,
-    gamesWon: user.stats.gamesWon,
-    playerId: user.id,
-    provisional: false
-  };
-
-  const eloSnapshot = await db.collection('elohistory').doc('default');
-
-  return eloSnapshot.create(currentElo);
 }

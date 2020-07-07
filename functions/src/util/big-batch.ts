@@ -6,9 +6,11 @@ export const MAX_BATCH_SIZE = 500;
 export class BigBatch {
   private _size = 0;
   private batches: firestore.WriteBatch[] = [];
-  private db: firestore.Firestore = firestore();
+  private db: any;
 
-  constructor() {}
+  constructor(db: any) {
+    this.db = db;
+  }
 
   /**
    * Return the size of the BigBatch which is the sum of all of the batches in
