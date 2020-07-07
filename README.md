@@ -59,6 +59,3 @@ Or just deploy the `helloWorld` function:
 
 App is hosted at:  
 https://codetango.web.app/
-
-Here's the `helloWorld` function:  
-https://us-central1-codetango.cloudfunctions.net/helloWorld
