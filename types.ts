@@ -81,7 +81,7 @@ export interface Game {
   createdAt: number;
   completedAt?: number;  // optional, set when one team wins
   turnEnds?: number;
-  tiles: Tile[];  // the tiles on the board
+  tiles?: Tile[];  // the tiles on the board
   blueTeam: Team;
   redTeam: Team;
   blueAgents: number;  // remaining blue agents
