@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, Room, RoomStatus, Team, TeamTypes, TileRole, User} from '../../../../types';
+import {Game, Room, RoomStatus, Team, TeamTypes} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
 
