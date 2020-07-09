@@ -19,21 +19,30 @@ export const onCreateGame =
           const gameSnapShot = await gameReference.get();
           const game = gameSnapShot.data() as Game;
 
-          // Add 25 random cards to the game
-          const tiles = await generateNewGameTiles(game.roomId);
-          game.tiles = tiles;
-          const blueTeamTiles =
-              tiles.filter(tile => tile.role === TileRole.BLUE);
-          const redTeamTiles = tiles.filter(tile => tile.role === TileRole.RED);
+          const updates: Partial<Game> = {};
 
-          game.blueAgents = blueTeamTiles.length;
-          game.redAgents = redTeamTiles.length;
-          game.status = blueTeamTiles.length > redTeamTiles.length ?
-              GameStatus.BLUES_TURN :
-              GameStatus.REDS_TURN;
-          game.createdAt = new Date().getTime();
+          // Add 25 random cards to the game if there are no tiles
+          // If the game is created with tiles already set, this game was
+          // probably migrated Do not modify any of the other fields
+          if (!game.tiles) {
+            updates.tiles = await generateNewGameTiles(game.roomId);
+            const blueTeamTiles = updates.tiles.filter(
+                tile => tile.role === TileRole.BLUE && !tile.selected);
+            const redTeamTiles = updates.tiles.filter(
+                tile => tile.role === TileRole.RED && !tile.selected);
 
-          return gameReference.update(game);
+            updates.blueAgents = blueTeamTiles.length;
+            updates.redAgents = redTeamTiles.length;
+            updates.status = blueTeamTiles.length > redTeamTiles.length ?
+                GameStatus.BLUES_TURN :
+                GameStatus.REDS_TURN;
+            updates.createdAt = new Date().getTime();
+
+            // save updates
+            await gameReference.update(updates);
+          }
+
+          return 'Done!';
         });
 
 function assignRandomTileTeams():
