@@ -8,7 +8,7 @@
   >
     <ng-container *ngIf="user$ | async as user; else loading">
       <ion-avatar [tooltip]="userTemplate" content-type="template" [display]="!showUserName">
-        <img [src]="user.photoURL">
+        <ion-img [src]="user.photoURL"></ion-img>
       </ion-avatar>
       <ion-label *ngIf="showUserName">{{user.name}}</ion-label>
     </ng-container>
