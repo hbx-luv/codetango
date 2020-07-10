@@ -7,9 +7,9 @@ import {User} from '../../../../types';
 import {UserService} from '../../services/user.service';
 
 @Component({
-  selector: 'app-users',
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.scss'],
+  selector: 'app-user',
+  templateUrl: './user.component.html',
+  styleUrls: ['./user.component.scss'],
 })
 export class UsersComponent {
   BASE_WIDTH = 75;

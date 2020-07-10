@@ -4,12 +4,12 @@
     <div class="spy">
       <span *ngIf="game.blueTeam.spymaster === member">🕵</span>
     </div>
-    <app-users
+    <app-user
       [navToScorecard]="!setSpymaster"
       [userId]="member"
       color="blue"
       (click)="userClicked(member, 'blueTeam')">
-    </app-users>
+    </app-user>
   </div>
   <ion-button
     size="small"
@@ -22,12 +22,12 @@
     <div class="spy">
       <span *ngIf="game.redTeam.spymaster === member">🕵</span>
     </div>
-    <app-users
+    <app-user
       [navToScorecard]="!setSpymaster"
       [userId]="member"
       color="red"
       (click)="userClicked(member, 'redTeam')">
-    </app-users>
+    </app-user>
   </div>
   <ion-button
     size="small"

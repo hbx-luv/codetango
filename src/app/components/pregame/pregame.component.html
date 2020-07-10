@@ -7,7 +7,7 @@
       </ion-label>
     </ion-list-header>
     <ion-item *ngFor="let userId of room.userIds">
-      <app-users [userId]="userId"></app-users>
+      <app-user [userId]="userId"></app-user>
       <ion-button
         *ngIf="userInRoom"
         color="danger"

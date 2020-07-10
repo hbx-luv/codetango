@@ -9,10 +9,10 @@
     class="title-bar-end"
     slot="end"
   >
-    <app-users
+    <app-user
       *ngIf="authService.authenticated"
       [userId]="authService.currentUserId">
-    </app-users>
+    </app-user>
   </div>
   <ion-buttons slot="end">
     <app-game-join-button

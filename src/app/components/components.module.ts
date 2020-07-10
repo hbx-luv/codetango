@@ -14,7 +14,7 @@ import {PregameComponent} from './pregame/pregame.component';
 import {TeamListsComponent} from './team-lists/team-lists.component';
 import {TimerComponent} from './timer/timer.component';
 import {TitleBarComponent} from './title-bar/title-bar.component';
-import {UsersComponent} from './users/users.component';
+import {UsersComponent} from './users/user.component';
 import {WordHistoryComponent} from './word-history/word-history.component';
 
 

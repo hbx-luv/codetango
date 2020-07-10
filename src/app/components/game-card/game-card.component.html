@@ -20,21 +20,21 @@
     </app-game-board>
     <div class="lineups">
       <div class="team-lineup">
-        <app-users
+        <app-user
           *ngFor="let id of game.redTeam.userIds"
           [userId]="id"
           [showUserName]="false"
           color="red">
-        </app-users>
+        </app-user>
       </div>
       <span class="versus">VS</span>
       <div class="team-lineup">
-        <app-users
+        <app-user
           *ngFor="let id of game.blueTeam.userIds"
           [userId]="id"
           [showUserName]="false"
           color="blue">
-        </app-users>
+        </app-user>
       </div>
     </div>
   </ion-card-content>
