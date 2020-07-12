@@ -15,12 +15,8 @@ export class ScorecardPage {
   userId: string;
   user$: Observable<User>;
 
-  stats = [
+  overallStats = [
     {title: 'Elo Rating', field: 'elo'},
-    {title: 'Games Played', field: 'gamesPlayed'},
-    {title: 'Games Won', field: 'gamesWon'},
-    {title: 'Spymaster Games', field: 'spymasterGames'},
-    {title: 'Spymaster Wins', field: 'spymasterWins'},
     {title: 'Current Streak', field: 'currentStreak'},
     {title: 'Best Streak', field: 'bestStreak'},
     {title: 'Last Played', field: 'lastPlayed'}

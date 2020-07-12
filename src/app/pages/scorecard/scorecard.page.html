@@ -14,39 +14,82 @@
 
 <ion-content>
   <ng-container *ngIf="user$ | async as user; else loading">
+    <ng-container *ngIf="user.stats as stats; else empty">
 
-    <!-- chart -->
-    <ion-card class="user-card" *ngIf="user.stats?.gamesPlayed > 0">
-      <ion-item>
-        <ion-avatar slot="start">
-          <img [src]="user.photoURL">
-        </ion-avatar>
-        <ion-label>
-          {{user.name}}
-        </ion-label>
-      </ion-item>
-      <app-elo-chart [userId]="userId"></app-elo-chart>
-    </ion-card>
+      <!-- chart -->
+      <ion-card class="user-card" *ngIf="stats.gamesPlayed > 1">
+        <ion-item>
+          <ion-avatar slot="start">
+            <img [src]="user.photoURL">
+          </ion-avatar>
+          <ion-label>
+            {{user.name}}
+          </ion-label>
+        </ion-item>
+        <app-elo-chart [userId]="userId"></app-elo-chart>
+      </ion-card>
 
-    <!-- more stats -->
-    <ion-card class="user-card">
-      <ion-card-header>
-        <ion-card-title>Some Stats</ion-card-title>
-      </ion-card-header>
-      <ion-card-content *ngIf="user.stats">
-        <ion-list>
-          <ng-container *ngFor="let stat of stats">
-            <ion-item *ngIf="user.stats[stat.field]">
-              <h2>{{ stat.title }}</h2>
-              <h2 slot="end">{{ user.stats[stat.field] }}</h2>
+      <!-- overall stats -->
+      <ion-card class="user-card">
+        <ion-card-header class="space-between">
+          <ion-card-title>Overall</ion-card-title>
+          <ion-card-subtitle *ngIf="stats.gamesPlayed as games">
+            {{ games }} {{ games === 1 ? 'games' : 'games'}}
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <h2>Games Won</h2>
+              <h2 slot="end">
+                {{ stats.gamesWon }} <b>({{ (stats.gamesWon / stats.gamesPlayed * 100).toFixed(1) }}%)</b>
+              </h2>
             </ion-item>
-          </ng-container>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+            <ng-container *ngFor="let stat of overallStats">
+              <ion-item *ngIf="stats[stat.field] !== undefined">
+                <h2>{{ stat.title }}</h2>
+                <h2 slot="end">{{ stats[stat.field] }}</h2>
+              </ion-item>
+            </ng-container>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
 
+      <!-- spymaster stats -->
+      <ion-card class="user-card" *ngIf="stats.spymasterGames">
+        <ion-card-header class="space-between">
+          <ion-card-title>As Spymaster</ion-card-title>
+          <ion-card-subtitle *ngIf="stats.spymasterGames as games">
+            {{ games }} {{ games === 1 ? 'games' : 'games'}}
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <h2>Games Won</h2>
+              <h2 slot="end">
+                {{ stats.spymasterWins }} <b>({{ (stats.spymasterWins / stats.spymasterGames * 100).toFixed(1) }}%)</b>
+              </h2>
+            </ion-item>
+            <ion-item>
+              <h2>Lead to Assassin</h2>
+              <h2 slot="end">
+                {{ stats.assassinsAsSpymaster }} <b>({{ (stats.assassinsAsSpymaster / stats.spymasterGames * 100).toFixed(1) }}%)</b>
+              </h2>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+    </ng-container>
   </ng-container>
 </ion-content>
+
+<ng-template #empty>
+  <div class="empty-container">
+    <h3>Nothing to see here!</h3>
+  </div>
+</ng-template>
 
 <ng-template #loading>
   <div class="spinner-container">

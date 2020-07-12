@@ -89,6 +89,7 @@ export async function recalcElo(
       'stats.gamesWon': data.gamesWon,
       'stats.spymasterGames': data.spymasterGames,
       'stats.spymasterWins': data.spymasterWins,
+      'stats.assassinsAsSpymaster': data.assassinsAsSpymaster,
       'stats.currentStreak': data.currentStreak,
       'stats.bestStreak': data.bestStreak,
       'stats.provisional': data.provisional,
@@ -160,6 +161,7 @@ export async function getEloHistoryForUser(
     gamesWon: 0,
     spymasterGames: 0,
     spymasterWins: 0,
+    assassinsAsSpymaster: 0,
     currentStreak: 0,
     bestStreak: 0,
     provisional: true,
@@ -213,6 +215,12 @@ function setStats(game: Game, userMap: UserMap) {
     // this user was spymaster
     if (losingTeam.spymaster === loser) {
       user.spymasterGames++;
+
+      // track how many times this user has lead their team to click on the
+      // assassin as spymaster
+      if (game.blueAgents > 0 && game.redAgents > 0) {
+        user.assassinsAsSpymaster++;
+      }
     }
   }
 }
