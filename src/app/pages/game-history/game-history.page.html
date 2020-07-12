@@ -16,11 +16,7 @@
   <!-- list of games -->
   <div class="games-container" *ngIf="games; else loading">
     <ng-container *ngIf="games.length > 0; else empty">
-      <app-game-card
-        *ngFor="let game of games"
-        [game]="game"
-        (click)="gameClicked(game)">
-      </app-game-card>
+      <app-game-card [game]="game" *ngFor="let game of games"></app-game-card>
     </ng-container>
   </div>
 
