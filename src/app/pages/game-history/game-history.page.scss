@@ -1,0 +1,10 @@
+.games-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  app-game-card {
+    width: 800px;
+    max-width: 100vw;
+  }
+}

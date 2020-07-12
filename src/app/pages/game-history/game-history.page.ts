@@ -1,8 +1,10 @@
 import {Component} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs';
 import {GameService} from 'src/app/services/game.service';
 import {Game} from 'types';
+
+const LIMIT = 10;
 
 @Component({
   selector: 'app-game-history',
@@ -15,14 +17,9 @@ export class GameHistoryPage {
 
   constructor(
       private readonly gameService: GameService,
-      private readonly router: Router,
       private readonly route: ActivatedRoute,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
-    this.games$ = this.gameService.getCompletedGames(this.roomId);
-  }
-
-  gameClicked(game: Game) {
-    this.router.navigate([this.roomId, 'games', game.id]);
+    this.games$ = this.gameService.getCompletedGames(this.roomId, LIMIT);
   }
 }
