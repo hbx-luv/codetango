@@ -22,9 +22,6 @@ Serve the project:
 Ionic Framework docs:  
 https://ionicframework.com/docs/components
 
-Firebase Console:  
-https://console.firebase.google.com/u/0/project/codetango
-
 Firestore Docs:  
 https://firebase.google.com/docs/firestore
 
@@ -46,7 +43,7 @@ More options through interactive CLI:
 
 ### Deploy
 
-First, you'll need to be invited to the firebase cloud console for this project and then login to the cli via `firebase login`.
+First, you'll need to be invited to the [firebase cloud console for this project](https://console.firebase.google.com/u/0/project/codetango) and then login to the cli via `firebase login`.
 
 You need to run `ionic build` in the root of the project to get the static webapp built for deployment in `www/`. At that point you can just `firebase deploy --only hosting` to deploy just that content. Here are some aliases in the `package.json` and other quick commands:
 
