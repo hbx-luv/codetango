@@ -19,14 +19,12 @@
             Play
           </ion-item>
         </ion-menu-toggle>
-        <ng-container *ngIf="games$ | async as games">
-          <ion-menu-toggle *ngIf="games.length">
-            <ion-item button [routerLink]="[roomId, 'games']">
-              <ion-icon slot="start" name="time-outline"></ion-icon>
-              History
-            </ion-item>
-          </ion-menu-toggle>
-        </ng-container>
+        <ion-menu-toggle>
+          <ion-item button [routerLink]="[roomId, 'games']">
+            <ion-icon slot="start" name="time-outline"></ion-icon>
+            History
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
   </ion-menu>

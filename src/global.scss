@@ -25,10 +25,14 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+.empty-container,
 .spinner-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100px;
+  text-align: center;
+  padding: 20px;
+  min-height: 100px;
   font-size: 20px;
 }

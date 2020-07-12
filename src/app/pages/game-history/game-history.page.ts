@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs';
+import {first} from 'rxjs/operators';
 import {GameService} from 'src/app/services/game.service';
 import {Game} from 'types';
 
@@ -12,14 +13,66 @@ const LIMIT = 10;
   styleUrls: ['./game-history.page.scss'],
 })
 export class GameHistoryPage {
+  games: Game[];
   roomId: string;
-  games$: Observable<Game[]>;
+  infiniteScrollDisabled = true;
 
   constructor(
       private readonly gameService: GameService,
       private readonly route: ActivatedRoute,
+      private readonly router: Router,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
-    this.games$ = this.gameService.getCompletedGames(this.roomId, LIMIT);
+    this.reset();
+  }
+
+  async reset() {
+    // reset and reload
+    this.infiniteScrollDisabled = true;
+    delete this.games;
+    await this.loadMore();
+  }
+
+  /**
+   * Load more games starting from the game game we know about
+   * @param event An Ionic CustomEvent for infinite scroll
+   */
+  async loadMore(event?) {
+    // determine startAfter from the last game in thge collection
+    let startAfter = undefined;
+    if (this.games && this.games.length) {
+      startAfter = this.games[this.games.length - 1].completedAt;
+    }
+
+    // fetch LIMIT more games
+    const moreGames =
+        await this.gameService.getCompletedGames(this.roomId, LIMIT, startAfter)
+            .pipe(first())
+            .toPromise();
+
+    // instantiate the games array if undefined
+    if (this.games === undefined) this.games = [];
+
+    // push all new games into this array
+    for (const game of moreGames) {
+      this.games.push(game);
+    }
+
+    // tell infinite scroll to complete
+    if (event) {
+      event.target.complete();
+    }
+
+    if (moreGames.length === 0) {
+      // when there are no more games loaded, disable infinite scroll
+      this.infiniteScrollDisabled = true;
+    } else if (moreGames.length === 1) {
+      // when only one was loaded, load more immediately to prevent a weird case
+      // where only one game is emitted on the observable on the first request
+      this.loadMore();
+    } else {
+      // otherwise, re-enable infinite scroll
+      this.infiniteScrollDisabled = false;
+    }
   }
 }
