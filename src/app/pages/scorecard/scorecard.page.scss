@@ -8,11 +8,13 @@
 
 .scorecard-container {
   display: flex;
-  justify-content: space-around;
-  max-width: 1300px;
+  justify-content: space-between;
+  max-width: 1400px;
   margin: auto;
+  padding: 0 20px;
 
   .user-card {
+    max-width: 100%;
     width: 600px;
     margin: 20px auto;
   }
@@ -21,7 +23,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 600px;
+    width: calc(100% - 650px);
 
     h3 {
       width: 100%;
@@ -29,8 +31,35 @@
     }
 
     app-game-card {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 1350px) {
+  .scorecard-container .games-container {
+    width: calc(100% - 620px);
+  }
+}
+
+@media (max-width: 1270px) {
+  .scorecard-container {
+    flex-direction: column;
+
+    .games-container {
+      margin: auto;
       width: 600px;
       max-width: 100%;
+    }
+  }
+}
+
+@media (max-width: 650px) {
+  .scorecard-container {
+    padding: 0;
+
+    h3 {
+      padding-left: 16px;
     }
   }
 }
