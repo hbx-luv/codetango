@@ -108,7 +108,7 @@ export class GameService {
             'games',
             ref => {
               let query = ref.where('userIds', 'array-contains', userId)
-                              .orderBy('completedAt', 'asc');
+                              .orderBy('completedAt', 'desc');
 
               // support limiting
               if (limit) {
