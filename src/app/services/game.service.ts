@@ -102,6 +102,30 @@ export class GameService {
         }));
   }
 
+  getUserGames(userId: string, limit?: number): Observable<Game[]> {
+    return this.afs
+        .collection<Game>(
+            'games',
+            ref => {
+              let query = ref.where('userIds', 'array-contains', userId)
+                              .orderBy('completedAt', 'asc');
+
+              // support limiting
+              if (limit) {
+                query = query.limit(limit);
+              }
+
+              return query;
+            })
+        .snapshotChanges()
+        .pipe(map(actions => {
+          return actions.map(action => {
+            const {doc} = action.payload;
+            return {id: doc.id, ...doc.data()};
+          });
+        }));
+  }
+
   deleteGame(id: string): Promise<void> {
     return this.afs.collection('games').doc(id).delete();
   }

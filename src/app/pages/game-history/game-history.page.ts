@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs';
+import {ActivatedRoute} from '@angular/router';
 import {first} from 'rxjs/operators';
 import {GameService} from 'src/app/services/game.service';
 import {Game} from 'types';
@@ -20,7 +19,6 @@ export class GameHistoryPage {
   constructor(
       private readonly gameService: GameService,
       private readonly route: ActivatedRoute,
-      private readonly router: Router,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.reset();

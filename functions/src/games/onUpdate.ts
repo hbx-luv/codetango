@@ -26,7 +26,8 @@ async function updateRemainingAgents(snapshot: DocumentSnapshot):
     Promise<void> {
   const game = snapshot.data() as Game;
 
-  if (game.tiles) {
+  // only update if there are tiles set
+  if (game.tiles && game.tiles.length) {
     let blueAgents = 0;
     let redAgents = 0;
 

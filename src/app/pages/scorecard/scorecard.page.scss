@@ -6,7 +6,31 @@
   display: none;
 }
 
-.user-card {
-  max-width: 600px;
-  margin: 20px auto;
+.scorecard-container {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1300px;
+  margin: auto;
+
+  .user-card {
+    width: 600px;
+    margin: 20px auto;
+  }
+
+  .games-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 600px;
+
+    h3 {
+      width: 100%;
+      text-align: left;
+    }
+
+    app-game-card {
+      width: 600px;
+      max-width: 100%;
+    }
+  }
 }

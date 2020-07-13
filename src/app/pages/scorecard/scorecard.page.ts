@@ -3,8 +3,11 @@ import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {GameService} from 'src/app/services/game.service';
 import {UserService} from 'src/app/services/user.service';
-import {User} from 'types';
+import {Game, User} from 'types';
+
+const LIMIT = 3;
 
 @Component({
   selector: 'app-scorecard',
@@ -14,6 +17,7 @@ import {User} from 'types';
 export class ScorecardPage {
   userId: string;
   user$: Observable<User>;
+  recentGames$: Observable<Game[]>;
 
   overallStats = [
     {title: 'Elo Rating', field: 'elo'},
@@ -23,10 +27,12 @@ export class ScorecardPage {
   ];
 
   constructor(
+      private readonly gameService: GameService,
       private readonly userService: UserService,
       private readonly route: ActivatedRoute,
   ) {
     this.userId = this.route.snapshot.paramMap.get('id');
+    this.recentGames$ = this.gameService.getUserGames(this.userId, LIMIT);
     this.user$ = this.userService.getUser(this.userId).pipe(map(user => {
       if (user.stats && typeof user.stats.lastPlayed === 'number') {
         user.stats.lastPlayed =

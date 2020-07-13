@@ -1,14 +1,15 @@
 elo-chart {
-    .chart-container {
-        padding: 0px 10px;
-        margin-bottom: 5px;
-        margin-top: -10px;
-        height: 250px;
-    }
+  .chart-container {
+    padding: 0px 10px 15px;
+    margin-bottom: 5px;
+    margin-top: -10px;
+    height: 250px;
+  }
 
-    ion-spinner {
-        position: absolute;
-        left: calc(50% - 14px);
-        top: 150px;
-    }
+  ion-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }

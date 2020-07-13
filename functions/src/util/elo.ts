@@ -50,6 +50,10 @@ export async function recalcElo(
     const game = games.docs[i].data() as Game;
     game.id = games.docs[i].id;
 
+    // set the userIds for the completed game
+    const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
+    batch.update(games.docs[i].ref, {userIds});
+
     // ensure all of the users are in the userMap before passing that off to
     // the elo function
     await populateUserMap(db, userMap, game);

@@ -89,6 +89,9 @@ export interface Game {
   status: GameStatus;
   roomId: string;
 
+  // set by the server for querying
+  userIds?: string[];
+
   // client fields
   id?: string;
 }
