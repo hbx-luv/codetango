@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import * as moment from 'moment';
+import {GameService} from 'src/app/services/game.service';
 import {Game, GameStatus} from 'types';
 
 @Component({
@@ -18,6 +19,10 @@ export class GameCardComponent implements OnInit {
 
   ngOnInit() {
     this.completedMoment = moment(this.game.completedAt);
+  }
+
+  get blueWon(): boolean {
+    return this.game && this.game.status === GameStatus.BLUE_WON;
   }
 
   get status(): {text: string, color: string} {

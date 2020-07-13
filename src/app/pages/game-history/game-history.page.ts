@@ -64,9 +64,9 @@ export class GameHistoryPage {
     if (moreGames.length === 0) {
       // when there are no more games loaded, disable infinite scroll
       this.infiniteScrollDisabled = true;
-    } else if (moreGames.length === 1) {
-      // when only one was loaded, load more immediately to prevent a weird case
-      // where only one game is emitted on the observable on the first request
+    } else if (moreGames.length < LIMIT) {
+      // when few were loaded, load more immediately to prevent a weird case
+      // where not all games emit on the observable on the first request
       this.loadMore();
     } else {
       // otherwise, re-enable infinite scroll

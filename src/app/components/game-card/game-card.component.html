@@ -8,9 +8,18 @@
         {{ completedAt.time }}
       </ion-card-subtitle>
     </div>
-    <ion-card-subtitle class="game-status" [color]="status.color">
-      {{ status.text }}
-    </ion-card-subtitle>
+    <div>
+      <ion-card-subtitle class="game-status" [color]="status.color">
+        {{ status.text }}
+      </ion-card-subtitle>
+      <ion-card-title class="agents">
+        <ion-text color="danger" *ngIf="!blueWon">{{ game.redAgents }}</ion-text>
+        <ion-text color="primary" *ngIf="blueWon">{{ game.blueAgents }}</ion-text>
+        -
+        <ion-text color="danger" *ngIf="blueWon">{{ game.redAgents }}</ion-text>
+        <ion-text color="primary" *ngIf="!blueWon">{{ game.blueAgents }}</ion-text>
+      </ion-card-title>
+    </div>
   </ion-card-header>
   <ion-card-content>
     <app-game-board
