@@ -22,15 +22,18 @@
 
           <!-- chart -->
           <ion-card class="user-card" *ngIf="stats.gamesPlayed > 1">
-            <ion-item>
+            <ion-item class="user-item">
               <ion-avatar slot="start">
                 <img [src]="user.photoURL">
               </ion-avatar>
               <ion-label>
                 {{user.name}}
               </ion-label>
+              <ion-button slot="end" (click)="toggleChartLimit()" *ngIf="stats.gamesPlayed > chartLimit">
+                {{ chartLimit ? 'Show more' : 'Show less'}}
+              </ion-button>
             </ion-item>
-            <app-elo-chart [userId]="userId"></app-elo-chart>
+            <app-elo-chart [userId]="userId" [limit]="chartLimit"></app-elo-chart>
           </ion-card>
 
           <!-- overall stats -->

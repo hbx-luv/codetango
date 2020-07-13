@@ -17,6 +17,10 @@
     max-width: 100%;
     width: 600px;
     margin: 20px auto;
+
+    .user-item {
+      --ion-item-border-color: transparent;
+    }
   }
 
   .games-container {

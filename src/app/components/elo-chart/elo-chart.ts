@@ -54,6 +54,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
     }
 
     const eloPoints = _.map(dataPoints, 'elo');
+    const allTime = !this.limit || this.limit > eloPoints.length;
 
     this.chart = new Chart('chart-' + this.uniqueId, {
       type: 'line',
@@ -83,7 +84,8 @@ export class EloChartComponent implements OnChanges, OnDestroy {
         },
         title: {
           display: true,
-          text: 'Data from the last ' + dataPoints.length + ' games'
+          text: allTime ? 'Data from all time' :
+                          'Data from the last ' + dataPoints.length + ' games'
         },
         maintainAspectRatio: false
       }

@@ -8,6 +8,7 @@ import {UserService} from 'src/app/services/user.service';
 import {Game, User} from 'types';
 
 const LIMIT = 3;
+const CHART_LIMIT = 20;
 
 @Component({
   selector: 'app-scorecard',
@@ -18,6 +19,8 @@ export class ScorecardPage {
   userId: string;
   user$: Observable<User>;
   recentGames$: Observable<Game[]>;
+
+  chartLimit = CHART_LIMIT;
 
   overallStats = [
     {title: 'Elo Rating', field: 'elo'},
@@ -40,5 +43,9 @@ export class ScorecardPage {
       }
       return user;
     }));
+  }
+
+  toggleChartLimit() {
+    this.chartLimit = this.chartLimit > 0 ? 0 : CHART_LIMIT;
   }
 }
