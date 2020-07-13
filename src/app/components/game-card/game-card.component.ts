@@ -25,6 +25,10 @@ export class GameCardComponent implements OnInit {
     return this.game && this.game.status === GameStatus.BLUE_WON;
   }
 
+  get assassin(): boolean {
+    return this.game && this.game.blueAgents > 0 && this.game.redAgents > 0;
+  }
+
   get status(): {text: string, color: string} {
     let text = '';
     let color = '';

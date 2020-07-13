@@ -7,8 +7,14 @@
   }
 
   .agents {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
     font-size: 18px;
+
+    ion-text {
+      margin-left: 8px;
+    }
   }
 
   .lineups {
