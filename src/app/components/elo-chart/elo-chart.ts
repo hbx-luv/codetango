@@ -7,7 +7,8 @@ import {EloHistoryService} from 'src/app/services/elo-history.service';
 
 @Component({
   selector: 'app-elo-chart',
-  templateUrl: 'elo-chart.html',
+  templateUrl: './elo-chart.html',
+  styleUrls: ['./elo-chart.scss'],
 })
 export class EloChartComponent implements OnChanges, OnDestroy {
   private destroyed$ = new Subject<void>();
