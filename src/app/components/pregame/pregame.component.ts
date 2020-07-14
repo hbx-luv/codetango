@@ -47,18 +47,11 @@ export class PregameComponent {
   }
 
   async assignUsersToRandomTeams() {
-    const redTeamUsers = [];
-    const blueTeamUsers = [];
     const roomSize = this.room.userIds.length;
+    const halfway = Math.ceil(roomSize / 2);
     const randomizedUsers = shuffle(this.room.userIds);
-
-    for (let i = 0; i < roomSize; i++) {
-      if (i % 2 === 0) {
-        redTeamUsers.push(randomizedUsers[i]);
-      } else {
-        blueTeamUsers.push(randomizedUsers[i]);
-      }
-    }
+    const blueTeamUsers = randomizedUsers.slice(0, halfway);
+    const redTeamUsers = randomizedUsers.slice(halfway);
 
     // wait for the game to be created
     const loader = await this.utilService.presentLoader('Creating game...');
