@@ -41,7 +41,7 @@
             <ion-card-header class="space-between">
               <ion-card-title>Overall</ion-card-title>
               <ion-card-subtitle *ngIf="stats.gamesPlayed as games">
-                {{ games }} {{ games === 1 ? 'games' : 'games'}}
+                {{ games }} {{ games === 1 ? 'game' : 'games'}}
               </ion-card-subtitle>
             </ion-card-header>
             <ion-card-content>
@@ -67,7 +67,7 @@
             <ion-card-header class="space-between">
               <ion-card-title>As Spymaster</ion-card-title>
               <ion-card-subtitle *ngIf="stats.spymasterGames as games">
-                {{ games }} {{ games === 1 ? 'games' : 'games'}}
+                {{ games }} {{ games === 1 ? 'game' : 'games'}}
               </ion-card-subtitle>
             </ion-card-header>
             <ion-card-content>
