@@ -34,7 +34,9 @@ export class RoomPage implements OnDestroy {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.currentGame$ =
         this.gameService.getCurrentGame(this.roomId).pipe(tap(currentGame => {
-          this.currentClue$ = this.clueService.getCurrentClue(currentGame.id);
+          if (currentGame) {
+            this.currentClue$ = this.clueService.getCurrentClue(currentGame.id);
+          }
         }));
 
     this.roomService.getRoom(this.roomId)

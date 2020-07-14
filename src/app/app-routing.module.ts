@@ -23,10 +23,15 @@ const routes: Routes = [
                             .then(m => m.GameDetailPageModule)
   },
   {
+    path: ':id/leaderboard',
+    loadChildren: () => import('./pages/leaderboard/leaderboard.module')
+                            .then(m => m.LeaderboardPageModule)
+  },
+  {
     path: 'scorecard/:id',
     loadChildren: () => import('./pages/scorecard/scorecard.module')
                             .then(m => m.ScorecardPageModule)
-  }
+  },
 ];
 
 @NgModule({

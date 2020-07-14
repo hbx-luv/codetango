@@ -1,0 +1,16 @@
+.leaderboard-container {
+  display: flex;
+  justify-content: center;
+
+  ion-list {
+    width: 800px;
+    max-width: 100%;
+
+    .rank {
+      font-size: 24px;
+      text-align: center;
+      width: 40px;
+      margin-right: 10px;
+    }
+  }
+}

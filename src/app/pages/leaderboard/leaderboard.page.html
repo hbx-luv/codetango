@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Leaderboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="leaderboard-container">
+    <ion-list *ngIf="users$ | async as users; else loading">
+      <ion-item *ngFor="let user of users; let index = index" [routerLink]="['/scorecard', user.id]">
+        <ion-text class="rank" slot="start">
+          {{ index + 1 }}
+        </ion-text>
+        <ion-avatar slot="start">
+          <img [src]="user.photoURL">
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ user.name }}</h2>
+          <p>
+            {{ user.stats.gamesPlayed }} {{ user.stats.gamesPlayed === 1 ? 'game' : 'games' }}
+          </p>
+        </ion-label>
+        <ion-text slot="end">
+          {{ user.stats.elo }}
+        </ion-text>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>
+
+<ng-template #loading>
+  <div class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>
