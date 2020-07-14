@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {LeaderboardService} from 'src/app/services/leaderboard.service';
 import {User} from 'types';
 
@@ -18,6 +19,9 @@ export class LeaderboardPage {
       private readonly route: ActivatedRoute,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
-    this.users$ = this.leaderboardService.getLeaderboard(this.roomId);
+    this.users$ =
+        this.leaderboardService.getLeaderboard(this.roomId).pipe(map(users => {
+          return users.filter(user => user.stats.gamesPlayed > 0);
+        }));
   }
 }
