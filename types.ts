@@ -72,6 +72,10 @@ export interface Room {
   // and for the players to guess
   enforceTimer?: boolean;
 
+  // word list, optional
+  // server defaults to 'default'
+  wordList?: string;
+
   // client fields
   id?: string;
 }

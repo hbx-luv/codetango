@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
-import {Game, GameStatus, Tile, TileRole, WordList} from '../../../types';
+import {Game, GameStatus, Room, Tile, TileRole, WordList} from '../../../types';
 
 try {
   admin.initializeApp();
@@ -120,8 +120,11 @@ async function generateNewGameTiles(roomId: string): Promise<Tile[]> {
 }
 
 async function getTwentyFiveWords(roomId: string): Promise<string[]> {
+  const roomSnapshot = await db.collection('rooms').doc(roomId).get();
+  const wordList = (roomSnapshot.data() as Room).wordList || 'default';
+
   const defaultWordListSnapshot =
-      await db.collection('wordlists').doc('default').get();
+      await db.collection('wordlists').doc(wordList).get();
   if (defaultWordListSnapshot.exists && defaultWordListSnapshot.data()) {
     console.log('defaultWords exists');
     const newWordsForGame = [] as string[];
