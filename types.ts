@@ -136,6 +136,8 @@ export interface UserStats {
   gamesWon: number;
   spymasterGames: number;
   spymasterWins: number;
+  spymasterStreak: number;
+  spymasterBestStreak: number;
   assassinsAsSpymaster: number;
   currentStreak: number;
   bestStreak: number;

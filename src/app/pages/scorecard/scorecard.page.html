@@ -84,6 +84,12 @@
                     {{ stats.assassinsAsSpymaster }} <b>({{ (stats.assassinsAsSpymaster / stats.spymasterGames * 100).toFixed(1) }}%)</b>
                   </h2>
                 </ion-item>
+                <ng-container *ngFor="let stat of spymasterStats">
+                  <ion-item *ngIf="stats[stat.field] !== undefined">
+                    <h2>{{ stat.title }}</h2>
+                    <h2 slot="end">{{ stats[stat.field] }}</h2>
+                  </ion-item>
+                </ng-container>
               </ion-list>
             </ion-card-content>
           </ion-card>

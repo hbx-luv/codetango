@@ -29,6 +29,11 @@ export class ScorecardPage {
     {title: 'Last Played', field: 'lastPlayed'}
   ];
 
+  spymasterStats = [
+    {title: 'Current Streak', field: 'spymasterStreak'},
+    {title: 'Best Streak', field: 'spymasterBestStreak'},
+  ];
+
   constructor(
       private readonly gameService: GameService,
       private readonly userService: UserService,
