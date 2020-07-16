@@ -5,6 +5,10 @@
         {{ completedAt.date }}
       </ion-card-title>
       <ion-card-subtitle>
+        <span class="room-name" (click)="goToRoom($event)" *ngIf="showRoom">
+          {{ game.roomId }}
+          <span class="separator">&#183;</span>
+        </span>
         {{ completedAt.time }}
       </ion-card-subtitle>
     </div>

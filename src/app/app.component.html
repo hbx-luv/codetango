@@ -10,19 +10,19 @@
     <ion-content>
       <ion-list>
         <ion-menu-toggle>
-          <ion-item button [routerLink]="[roomId]">
+          <ion-item button [routerLink]="['/', roomId]">
             <ion-icon slot="start" name="search-outline"></ion-icon>
             Play
           </ion-item>
         </ion-menu-toggle>
         <ion-menu-toggle>
-          <ion-item button [routerLink]="[roomId, 'games']">
+          <ion-item button [routerLink]="['/', roomId, 'games']">
             <ion-icon slot="start" name="time-outline"></ion-icon>
             History
           </ion-item>
         </ion-menu-toggle>
         <ion-menu-toggle>
-          <ion-item button [routerLink]="[roomId, 'leaderboard']">
+          <ion-item button [routerLink]="['/', roomId, 'leaderboard']">
             <ion-icon slot="start" name="podium-outline"></ion-icon>
             Leaderboard
           </ion-item>

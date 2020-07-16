@@ -94,7 +94,7 @@
           <ng-container *ngIf="recentGames$ | async as games; else loading">
             <ng-container *ngIf="games.length > 0">
               <h3>Recent Games</h3>
-              <app-game-card [game]="game" *ngFor="let game of games"></app-game-card>
+              <app-game-card [game]="game" [showRoom]="true" *ngFor="let game of games"></app-game-card>
             </ng-container>
           </ng-container>
         </section>

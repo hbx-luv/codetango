@@ -2,6 +2,15 @@
   cursor: pointer;
   margin: 20px 0;
 
+  .room-name:hover {
+    cursor: pointer;
+    color: var(--ion-color-primary);
+  }
+
+  .separator {
+    margin: 0 2px;
+  }
+
   .game-status {
     text-transform: uppercase;
   }

@@ -11,6 +11,7 @@ import {Game, GameStatus} from 'types';
 })
 export class GameCardComponent implements OnInit {
   @Input() game: Game;
+  @Input() showRoom = false;
   completedMoment: moment.Moment;
 
   constructor(
@@ -73,5 +74,10 @@ export class GameCardComponent implements OnInit {
 
   gameClicked() {
     this.router.navigate([this.game.roomId, 'games', this.game.id]);
+  }
+
+  goToRoom($event) {
+    $event.stopPropagation();
+    this.router.navigate(['/', this.game.roomId, 'games']);
   }
 }
