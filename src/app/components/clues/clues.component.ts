@@ -52,19 +52,32 @@ export class CluesComponent implements OnDestroy {
 
   async isClueIllegalWord(clue: string) {
     clue = clue.toUpperCase().trim();
-    const wordMatch = this.game.tiles.filter(tile => tile.word.toUpperCase().trim() === clue);
-    if (wordMatch.length > 0) {
 
-      // You cannot use a word that's on the board
+    // Some clue tiles are 2 words - match those exactly?
+    let illegalWord = this.game.tiles.find(tile => tile.word.toUpperCase().trim() === clue);
+
+    if (!illegalWord) {
+      // Check each individual word against the game tiles
+      const allWordsInClue = clue.split(' ');
+
+      allWordsInClue.some(individualWord => {
+        illegalWord = this.game.tiles.find(tile => tile.word.toUpperCase().trim() === individualWord);
+        if (illegalWord) {
+          return true;
+        }
+      });
+    }
+
+    if (illegalWord){
       const alert = await this.alertController.create({
         header: 'Try again',
-        message: `${clue} is on the board, so you need to give a different clue!`,
+        message: `${illegalWord.word} is on the board, so you need to give a different clue!`,
         buttons: ['OK']
       });
       await alert.present();
-      return true;
     }
-    return false;
+
+    return !!illegalWord;
   }
 
   async isClueCountTooHigh(clueCount: number) {
