@@ -34,13 +34,6 @@ export class GameJoinButtonComponent {
     return this.room.userIds.includes(this.authService.currentUserId);
   }
 
-  get showJoin(): boolean {
-    return this.loggedIn && !this.userIsInRoom;
-  }
-
-  get showLogout(): boolean {
-    return this.loggedIn && !this.userIsInRoom;
-  }
 
   get showLeave(): boolean {
     return this.loggedIn && this.userIsInRoom;
@@ -48,14 +41,6 @@ export class GameJoinButtonComponent {
 
   login() {
     this.authService.loginWithGoogle();
-  }
-
-  logout() {
-    this.authService.logout();
-  }
-
-  join() {
-    this.roomService.joinRoom(this.room.id);
   }
 
   leave() {

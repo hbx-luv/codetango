@@ -25,6 +25,12 @@
     <ion-icon slot="start" name="shuffle"></ion-icon>
     Assign Teams
   </ion-button>
+  <ion-button
+    *ngIf="!userInRoom"
+    (click)="joinRoom()">
+    <ion-icon slot="start" name="game-controller"></ion-icon>
+    Join
+  </ion-button>
 </div>
 
 <!-- assign spymaster -->

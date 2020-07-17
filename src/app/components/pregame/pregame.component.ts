@@ -94,6 +94,14 @@ export class PregameComponent {
     await loader.dismiss();
   }
 
+  async joinRoom() {
+    if (!this.authService.authenticated) {
+      await this.authService.loginWithGoogle();
+    }
+
+    this.roomService.joinRoom(this.room.id);
+  }
+
   sortSpymasterFirst(team: Team) {
     const {userIds, spymaster} = team;
     return userIds.sort(user => user === spymaster ? -1 : 0);

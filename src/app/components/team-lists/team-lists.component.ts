@@ -3,6 +3,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 
 import {Game, Room, RoomStatus} from '../../../../types';
+import {RoomService} from '../../services/room.service';
 
 @Component({
   selector: 'app-team-lists',
@@ -17,11 +18,20 @@ export class TeamListsComponent {
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
+      private readonly roomService: RoomService,
   ) {}
 
   get loggedInAndInRoom(): boolean {
-    return this.authService.authenticated && this.room &&
-        this.room.userIds.includes(this.authService.currentUserId);
+    return this.isLoggedIn && this.room &&
+        this.isInRoom;
+  }
+
+  get isInRoom(): boolean {
+    return this.room.userIds.includes(this.authService.currentUserId);
+  }
+
+  get isLoggedIn(): boolean {
+    return this.authService.authenticated;
   }
 
   get notOnATeamYet(): boolean {
@@ -31,9 +41,13 @@ export class TeamListsComponent {
   }
 
   showJoinButton(team: 'redTeam'|'blueTeam') {
-    return this.loggedInAndInRoom && this.game && !this.game.completedAt &&
-        (this.canSwapTeams(team) || this.notOnATeamYet);
-  }
+    if (!this.loggedInAndInRoom) {
+      // Log in / Join the game and a team
+      return true;
+    }
+    return this.game && !this.game.completedAt &&
+      (this.canSwapTeams(team) || this.notOnATeamYet);
+    }
 
   canSwapTeams(team: 'redTeam'|'blueTeam'): boolean {
     return this.game && this.room.status === RoomStatus.ASSIGNING_ROLES &&
@@ -46,7 +60,15 @@ export class TeamListsComponent {
     }
   }
 
-  joinTeam(team: 'redTeam'|'blueTeam') {
+  async joinTeam(team: 'redTeam'|'blueTeam') {
+    if (!this.isLoggedIn) {
+      await this.authService.loginWithGoogle();
+    }
+
+    if (!this.isInRoom) {
+      this.roomService.joinRoom(this.room.id);
+    }
+
     this.gameService.addPlayerToTeam(
         this.game.id,
         this.authService.currentUserId,
