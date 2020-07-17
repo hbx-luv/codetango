@@ -88,6 +88,8 @@ export class GameBoardComponent {
     this.gameService.updateGame(this.game.id, updates);
   }
 
+  // This recalculates constantly - if I were a better angular developer I would have fixed it already
+  // Maybe later :)
   get advice(): string {
     if (this.isGameOver) {
       return '';
