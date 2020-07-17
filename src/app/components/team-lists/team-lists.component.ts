@@ -22,8 +22,7 @@ export class TeamListsComponent {
   ) {}
 
   get loggedInAndInRoom(): boolean {
-    return this.isLoggedIn && this.room &&
-        this.isInRoom;
+    return this.isLoggedIn && this.room && this.isInRoom;
   }
 
   get isInRoom(): boolean {
@@ -41,13 +40,9 @@ export class TeamListsComponent {
   }
 
   showJoinButton(team: 'redTeam'|'blueTeam') {
-    if (!this.loggedInAndInRoom) {
-      // Log in / Join the game and a team
-      return true;
-    }
     return this.game && !this.game.completedAt &&
-      (this.canSwapTeams(team) || this.notOnATeamYet);
-    }
+        (this.canSwapTeams(team) || this.notOnATeamYet);
+  }
 
   canSwapTeams(team: 'redTeam'|'blueTeam'): boolean {
     return this.game && this.room.status === RoomStatus.ASSIGNING_ROLES &&
