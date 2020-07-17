@@ -1,8 +1,9 @@
 import {Component, Input} from '@angular/core';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
+import {get} from 'lodash';
 
-import {Game, GameStatus, Room, Tile, TileRole} from '../../../../types';
+import {Clue, Game, GameStatus, Room, TeamTypes, Tile, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-game-board',
@@ -16,11 +17,32 @@ export class GameBoardComponent {
   @Input() game: Game;
   @Input() readonly: boolean;
   @Input() spymaster: boolean;
+  @Input() currentClue?: Clue;
 
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
   ) {}
+
+  get isMyTurn(): boolean {
+    // Probably a better way for this, feel free to refactor
+    if (this.myTeam === TeamTypes.RED) {
+      return this.game.status === GameStatus.REDS_TURN;
+    }
+    return this.game.status === GameStatus.BLUES_TURN;
+
+  }
+
+  get myTeam(): TeamTypes {
+    const {currentUserId} = this.authService;
+    if (get(this.game, 'redTeam.userIds').includes(currentUserId)) {
+      return TeamTypes.RED;
+    }
+    if (get(this.game, 'blueTeam.userIds').includes(currentUserId)) {
+      return TeamTypes.BLUE;
+    }
+    return TeamTypes.OBSERVER;
+  }
 
   getColor(tile: Tile): string {
     if (!tile.selected) {
@@ -59,6 +81,29 @@ export class GameBoardComponent {
     }
 
     this.gameService.updateGame(this.game.id, updates);
+  }
+
+  get advice() {
+    if (this.isMyTurn){
+      if (this.spymaster) {
+        if (this.currentClue.team === this.myTeam) {
+          return 'Waiting for your team to guess';
+        } else {
+          return 'Give your team a clue';
+        }
+      } else {
+        // Guesser
+        if (this.currentClue.team === this.myTeam) {
+          if (this.currentClue.guessCount === 0) {
+            return 'You have unlimited guesses';
+          }
+          return `You can guess up to ${this.currentClue.guessCount + 1} words`;
+        } else {
+          return 'Waiting for spymaster to give a clue';
+        }
+      }
+    }
+    return 'Waiting for the other team';
   }
 
   getGameStatus(tile: Tile) {
