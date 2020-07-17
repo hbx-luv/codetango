@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {StatusBar} from '@ionic-native/status-bar/ngx';
 import {Platform} from '@ionic/angular';
+import {AuthService} from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ export class AppComponent {
       private readonly splashScreen: SplashScreen,
       private readonly statusBar: StatusBar,
       private readonly router: Router,
+      private readonly authService: AuthService,
   ) {
     this.initializeApp();
   }
@@ -24,6 +26,18 @@ export class AppComponent {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
     });
+  }
+
+  get isLoggedIn() {
+    return this.authService.authenticated;
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+
+  login() {
+    this.authService.loginWithGoogle();
   }
 
   get roomId(): string {
