@@ -26,10 +26,6 @@ export class GameJoinButtonComponent {
     return this.room && this.authService.authenticated;
   }
 
-  get showLogin(): boolean {
-    return !this.loggedIn;
-  }
-
   get userIsInRoom(): boolean {
     return this.room.userIds.includes(this.authService.currentUserId);
   }
@@ -39,9 +35,6 @@ export class GameJoinButtonComponent {
     return this.loggedIn && this.userIsInRoom;
   }
 
-  login() {
-    this.authService.loginWithGoogle();
-  }
 
   leave() {
     // remove them from the room
