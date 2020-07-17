@@ -14,7 +14,7 @@
 
 <ion-content>
   <ng-container *ngIf="user$ | async as user; else loading">
-    <ng-container *ngIf="user.stats as stats; else empty">
+    <ng-container *ngIf="user.stats as stats; else noGames">
       <div class="scorecard-container" *ngIf="stats.gamesPlayed > 0; else noGames">
 
         <!-- stats + chart on the left -->
@@ -113,13 +113,6 @@
 <ng-template #noGames>
   <div class="empty-container">
     <h3>No games played yet!</h3>
-  </div>
-</ng-template>
-
-<ng-template #empty>
-  <div class="empty-container">
-    <h3>This user doesn't seem to exist!</h3>
-    <h4><ion-text color="medium">Mysterious 🤔</ion-text></h4>
   </div>
 </ng-template>
 
