@@ -65,7 +65,7 @@ export class GameJoinButtonComponent {
         this.authService.currentUserId,
     );
     // remove them from the game, so long as it hasn't already completed
-    if (!this.game.completedAt) {
+    if (this.game && !this.game.completedAt) {
       this.gameService.removePlayerFromGame(
           this.game.id,
           this.authService.currentUserId,
