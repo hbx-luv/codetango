@@ -17,7 +17,7 @@
         {{ status.text }}
       </ion-card-subtitle>
       <ion-card-title class="agents">
-        <ion-icon name="skull" *ngIf="assassin"></ion-icon>
+        <ion-icon name="skull" [tooltip]="assassinExplanation" *ngIf="assassin"></ion-icon>
         <ion-text color="danger" *ngIf="!blueWon">{{ game.redAgents }}</ion-text>
         <ion-text color="primary" *ngIf="blueWon">{{ game.blueAgents }}</ion-text>
         <ion-text>-</ion-text>

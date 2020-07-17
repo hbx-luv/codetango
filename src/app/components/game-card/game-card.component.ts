@@ -72,6 +72,12 @@ export class GameCardComponent implements OnInit {
     return {date, time};
   }
 
+  get assassinExplanation(): string {
+    const color = this.game.status === GameStatus.BLUE_WON ? 'red' : 'blue';
+    return `This game ended because the ${
+        color} team made contact with the assassin`;
+  }
+
   gameClicked() {
     this.router.navigate([this.game.roomId, 'games', this.game.id]);
   }
