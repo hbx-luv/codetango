@@ -23,6 +23,8 @@ export class RoomPage implements OnDestroy {
   currentGame$: Observable<Game>;
   currentClue$: Observable<Clue>;
 
+  lastGame: string;
+
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
@@ -34,7 +36,8 @@ export class RoomPage implements OnDestroy {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.currentGame$ =
         this.gameService.getCurrentGame(this.roomId).pipe(tap(currentGame => {
-          if (currentGame) {
+          if (currentGame && this.lastGame !== currentGame.id) {
+            this.lastGame = currentGame.id;
             this.currentClue$ = this.clueService.getCurrentClue(currentGame.id);
           }
         }));
