@@ -86,14 +86,14 @@ export class GameBoardComponent {
   get advice() {
     if (this.isMyTurn){
       if (this.spymaster) {
-        if (this.currentClue.team === this.myTeam) {
+        if (this.currentClue && this.currentClue.team === this.myTeam) {
           return 'Waiting for your team to guess';
         } else {
           return 'Give your team a clue';
         }
       } else {
         // Guesser
-        if (this.currentClue.team === this.myTeam) {
+        if (this.currentClue && this.currentClue.team === this.myTeam) {
           if (this.currentClue.guessCount === 0) {
             return 'You have unlimited guesses';
           }

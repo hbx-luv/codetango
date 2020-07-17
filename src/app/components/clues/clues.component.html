@@ -12,6 +12,7 @@
     <ion-label for="clue-count-input"> Clue Count: </ion-label>
     <ion-input name="clue-count-input"
                type="number"
+               max="999"
                placeholder="8"
                (keyup.enter)="submitClue()"
                [(ngModel)]="clueCount">
