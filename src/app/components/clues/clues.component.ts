@@ -3,6 +3,7 @@ import {ReplaySubject} from 'rxjs';
 import {ClueService} from 'src/app/services/clue.service';
 
 import {Game, GameStatus, TeamTypes, TileRole} from '../../../../types';
+import {AlertController} from '@ionic/angular';
 
 @Component({
   selector: 'app-clues',
@@ -20,11 +21,20 @@ export class CluesComponent implements OnDestroy {
 
   constructor(
       private readonly clueService: ClueService,
+      private readonly alertController: AlertController,
   ) {}
 
   async submitClue() {
     // Need to check if the clue is valid before submitting
     if (!this.disableSubmitButton) {
+      if (await this.isClueIllegalWord(this.clue)) {
+        return;
+      }
+
+      if (await this.isClueCountTooHigh(this.clueCount)) {
+        return;
+      }
+
       const clue = this.clue != null ? this.clue.toUpperCase() : null;
       const isBluesTurn = GameStatus.BLUES_TURN === this.game.status;
 
@@ -38,6 +48,37 @@ export class CluesComponent implements OnDestroy {
       this.clue = null;
       this.clueCount = null;
     }
+  }
+
+  async isClueIllegalWord(clue: string) {
+    clue = clue.toUpperCase().trim();
+    const wordMatch = this.game.tiles.filter(tile => tile.word.toUpperCase().trim() === clue);
+    if (wordMatch.length > 0) {
+
+      // You cannot use a word that's on the board
+      const alert = await this.alertController.create({
+        header: 'Try again',
+        message: `${clue} is on the board, so you need to give a different clue!`,
+        buttons: ['OK']
+      });
+      await alert.present();
+      return true;
+    }
+    return false;
+  }
+
+  async isClueCountTooHigh(clueCount: number) {
+    if (clueCount > 999) {
+      // You cannot use a word that's on the board
+      const alert = await this.alertController.create({
+        header: 'Try again',
+        message: `Clues must be lower than 1,000!`,
+        buttons: ['OK']
+      });
+      await alert.present();
+      return true;
+    }
+    return false;
   }
 
   get submitClueButtonText(): string {
