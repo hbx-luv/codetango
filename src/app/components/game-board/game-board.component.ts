@@ -88,14 +88,6 @@ export class GameBoardComponent {
     this.gameService.updateGame(this.game.id, updates);
   }
 
-  get maxGuesses(): number {
-    const nPlusOne = this.currentClue.guessCount + 1;
-    if (this.game.status === GameStatus.REDS_TURN) {
-      return nPlusOne > this.game.redAgents ? this.game.redAgents : nPlusOne;
-    }
-    return nPlusOne > this.game.blueAgents ? this.game.blueAgents : nPlusOne;
-  }
-
   get advice(): string {
     if (this.isGameOver) {
       return '';
@@ -110,10 +102,10 @@ export class GameBoardComponent {
       } else {
         // Guesser
         if (this.currentClue && this.currentClue.team === this.myTeam) {
-          if (this.currentClue.guessCount === 0) {
+          if (this.currentClue.guessCount === 0 || this.currentClue.guessCount > 10) {
             return 'You have unlimited guesses';
           }
-          return `You can guess up to ${this.maxGuesses} words`;
+          return `You can guess up to ${this.currentClue.guessCount + 1} words`;
         } else {
           return 'Waiting for spymaster to give a clue';
         }
