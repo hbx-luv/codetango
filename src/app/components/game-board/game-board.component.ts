@@ -24,6 +24,11 @@ export class GameBoardComponent {
       private readonly gameService: GameService,
   ) {}
 
+  get isGameOver(): boolean {
+    return this.game && (this.game.status === GameStatus.RED_WON ||
+      this.game.status === GameStatus.BLUE_WON);
+  }
+
   get isMyTurn(): boolean {
     // Probably a better way for this, feel free to refactor
     if (this.myTeam === TeamTypes.RED) {
@@ -83,7 +88,18 @@ export class GameBoardComponent {
     this.gameService.updateGame(this.game.id, updates);
   }
 
-  get advice() {
+  get maxGuesses(): number {
+    const nPlusOne = this.currentClue.guessCount + 1;
+    if (this.game.status === GameStatus.REDS_TURN) {
+      return nPlusOne > this.game.redAgents ? this.game.redAgents : nPlusOne;
+    }
+    return nPlusOne > this.game.blueAgents ? this.game.blueAgents : nPlusOne;
+  }
+
+  get advice(): string {
+    if (this.isGameOver) {
+      return '';
+    }
     if (this.isMyTurn){
       if (this.spymaster) {
         if (this.currentClue && this.currentClue.team === this.myTeam) {
@@ -97,7 +113,7 @@ export class GameBoardComponent {
           if (this.currentClue.guessCount === 0) {
             return 'You have unlimited guesses';
           }
-          return `You can guess up to ${this.currentClue.guessCount + 1} words`;
+          return `You can guess up to ${this.maxGuesses} words`;
         } else {
           return 'Waiting for spymaster to give a clue';
         }
