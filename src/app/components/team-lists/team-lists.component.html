@@ -1,5 +1,14 @@
 <div class="ion-padding-start" *ngIf="game">
-  <h3>Blue Team</h3>
+  <h3 class="team-title">
+    Blue Team
+    <ion-button
+      color="primary"
+      size="small"
+      (click)="joinTeam('blueTeam')"
+      *ngIf="showJoinButton('blueTeam')">
+      Join
+    </ion-button>
+  </h3>
   <div class="team-member" *ngFor="let member of game.blueTeam.userIds">
     <div class="spy">
       <span *ngIf="game.blueTeam.spymaster === member">🕵</span>
@@ -11,13 +20,16 @@
       (click)="userClicked(member, 'blueTeam')">
     </app-user>
   </div>
-  <ion-button
-    size="small"
-    (click)="joinTeam('blueTeam')"
-    *ngIf="showJoinButton('blueTeam')">
-    Join Blue
-  </ion-button>
-  <h3>Red Team</h3>
+  <h3 class="team-title">
+    Red Team
+    <ion-button
+      color="danger"
+      size="small"
+      (click)="joinTeam('redTeam')"
+      *ngIf="showJoinButton('redTeam')">
+      Join
+    </ion-button>
+  </h3>
   <div class="team-member" *ngFor="let member of game.redTeam.userIds">
     <div class="spy">
       <span *ngIf="game.redTeam.spymaster === member">🕵</span>
@@ -29,10 +41,4 @@
       (click)="userClicked(member, 'redTeam')">
     </app-user>
   </div>
-  <ion-button
-    size="small"
-    (click)="joinTeam('redTeam')"
-    *ngIf="showJoinButton('redTeam')">
-    Join Red
-  </ion-button>
 </div>
