@@ -68,13 +68,18 @@ export class RoomPage implements OnDestroy {
   async backToLobby(game: Game) {
     let doIt = true;
 
-    // if game is in progress, doouble check before proceeding
+    // if game is in progress, double check before proceeding
     if (!game.completedAt) {
       doIt = await this.utilService.confirm(
           'Are you sure you want to pick new teams?',
           'New Teams',
           'Nevermind',
       );
+
+      // delete this incomplete game before proceeding
+      if (doIt) {
+        await this.gameService.deleteGame(game.id);
+      }
     }
 
     if (doIt) {
@@ -89,13 +94,18 @@ export class RoomPage implements OnDestroy {
   async nextGame(game: Game) {
     let doIt = true;
 
-    // if game is in progress, doouble check before proceeding
+    // if game is in progress, double check before proceeding
     if (!game.completedAt) {
       doIt = await this.utilService.confirm(
           'Are you sure you want to start a new game?',
           'New Game',
           'Nevermind',
       );
+
+      // delete this incomplete game before proceeding
+      if (doIt) {
+        await this.gameService.deleteGame(game.id);
+      }
     }
 
     if (doIt) {
