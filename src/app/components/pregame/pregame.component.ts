@@ -42,7 +42,12 @@ export class PregameComponent {
     this.roomService.removeUserFromRoom(this.room.id, userId);
   }
 
-  goBackToLobby() {
+  goBackToLobby(game: Game) {
+    // delete this game when going back, since it (most likely) has not been
+    // completed yet (but we still check completedAt)
+    if (!this.game.completedAt) {
+      this.gameService.deleteGame(game.id);
+    }
     this.roomService.updateRoom(this.room.id, {status: RoomStatus.PREGAME});
   }
 

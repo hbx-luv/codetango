@@ -43,7 +43,7 @@
   </app-team-lists>
   <hr>
   <div *ngIf="userInRoom">
-    <ion-button color="light" (click)="goBackToLobby()">
+    <ion-button color="light" (click)="goBackToLobby(game)">
       <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
       Go Back
     </ion-button>
