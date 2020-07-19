@@ -20,6 +20,13 @@ export class PregameComponent {
   teams: Team[];
   constructedGame: Partial<Game>;
 
+  wordLists = [
+    {url: './assets/original.png', id: 'original'},
+    {url: './assets/duet.png', id: 'duetWords'},
+    {url: './assets/deep-undercover.png', id: 'deepUndercover'},
+    {url: './assets/pictures.png', id: 'pictures', comingSoon: true},
+  ];
+
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
@@ -36,6 +43,10 @@ export class PregameComponent {
     return this.game &&
         this.game.redTeam.userIds.includes(this.game.redTeam.spymaster) &&
         this.game.blueTeam.userIds.includes(this.game.blueTeam.spymaster);
+  }
+
+  selectWordList(wordList: string) {
+    this.roomService.updateRoom(this.room.id, {wordList});
   }
 
   removeUser(userId: string) {

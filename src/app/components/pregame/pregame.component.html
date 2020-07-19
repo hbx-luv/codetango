@@ -1,36 +1,48 @@
 <!-- lobby -->
 <div class="assign-teams" *ngIf="room && room.status === 'PREGAME'">
-  <ion-list class="users-list">
-    <ion-list-header>
-      <ion-label>
-        <h1>Players</h1>
-      </ion-label>
-    </ion-list-header>
-    <ion-item *ngFor="let userId of room.userIds">
-      <app-user [userId]="userId"></app-user>
-      <ion-button
-        *ngIf="userInRoom"
-        color="danger"
-        size="small"
-        slot="end"
-        (click)="removeUser(userId)">
-        <ion-icon name="trash"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-  <ion-button
-    *ngIf="userInRoom"
-    [disabled]="room.userIds.length < 2"
-    (click)="assignUsersToRandomTeams()">
-    <ion-icon slot="start" name="shuffle"></ion-icon>
-    Assign Teams
-  </ion-button>
-  <ion-button
-    *ngIf="!userInRoom"
-    (click)="joinRoom()">
-    <ion-icon slot="start" name="game-controller"></ion-icon>
-    Join
-  </ion-button>
+  <div class="users-list">
+    <h3>Players</h3>
+    <ion-list>
+      <ion-item *ngFor="let userId of room.userIds">
+        <app-user [userId]="userId"></app-user>
+        <ion-button
+          *ngIf="userInRoom"
+          color="danger"
+          size="small"
+          slot="end"
+          (click)="removeUser(userId)">
+          <ion-icon name="trash"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-list>
+    <ion-button
+      *ngIf="userInRoom"
+      [disabled]="room.userIds.length < 2"
+      (click)="assignUsersToRandomTeams()">
+      <ion-icon slot="start" name="shuffle"></ion-icon>
+      Assign Teams
+    </ion-button>
+    <ion-button
+      *ngIf="!userInRoom"
+      (click)="joinRoom()">
+      <ion-icon slot="start" name="game-controller"></ion-icon>
+      Join
+    </ion-button>
+  </div>
+  <div class="room-settings">
+    <h3>Choose Word List</h3>
+    <div class="word-lists">
+      <ion-card
+        *ngFor="let list of wordLists"
+        [class.selected]="list.id === room.wordList"
+        [class.soon]="list.comingSoon"
+        (click)="selectWordList(list.id)"
+      >
+        <ion-img [src]="list.url"></ion-img>
+        <span *ngIf="list.comingSoon">COMING SOON</span>
+      </ion-card>
+    </div>
+  </div>
 </div>
 
 <!-- assign spymaster -->

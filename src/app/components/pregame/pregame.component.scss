@@ -1,11 +1,96 @@
-.assign-teams,
+.assign-teams {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1500px;
+  margin: auto;
+
+  .users-list {
+    width: 700px;
+    max-width: 100%;
+    margin: 0 20px;
+    position: relative;
+
+    > ion-button {
+      margin-top: 10px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+  .room-settings {
+    width: 550px;
+
+    .word-lists {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      ion-card {
+        width: 250px;
+        cursor: pointer;
+        box-shadow: none;
+        transition: box-shadow 0.2s ease-in-out;
+        margin: 12px;
+
+        &:hover {
+          box-shadow: 0 5px 15px rgba(75, 72, 72, 0.8);
+        }
+
+        &.selected {
+          // box-shadow: 0 5px 15px var(--ion-color-primary);
+          border: 8px solid var(--ion-color-primary);
+          margin: 9px 12px;
+        }
+
+        &.soon {
+          pointer-events: none;
+          position: relative;
+
+          ion-img {
+            opacity: .5;
+          }
+
+          span {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--ion-color-light);
+            width: 100%;
+            text-align: center;
+            opacity: 1;
+            padding: 10px;
+            font-weight: bold;
+          }
+        }
+      }
+    }
+  }
+}
+
 .assign-spymaster {
   display: flex;
   align-items: center;
   flex-direction: column;
+}
 
-  .users-list {
-    width: 800px;
-    max-width: 95vw;
+// on even smaller devices, switch to a column view
+@media (max-width: 650px) {
+  .assign-teams {
+    flex-direction: column;
+
+    .users-list,
+    .room-settings {
+      width: 100%;
+      margin: 0;
+      padding-bottom: 50px;
+
+      h3 {
+        margin-left: 18px;
+      }
+
+      ion-list {
+        width: 100%;
+      }
+    }
   }
 }
