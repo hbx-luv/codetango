@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
+import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
-import {get} from 'lodash';
 
 import {Clue, Game, GameStatus, Room, TeamTypes, Tile, TileRole} from '../../../../types';
 
@@ -19,14 +19,19 @@ export class GameBoardComponent {
   @Input() spymaster: boolean;
   @Input() currentClue?: Clue;
 
+  advice: string;
+
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
   ) {}
 
+  ngOnChanges() {
+    this.advice = this.getAdvice();
+  }
+
   get isGameOver(): boolean {
-    return this.game && (this.game.status === GameStatus.RED_WON ||
-      this.game.status === GameStatus.BLUE_WON);
+    return this.game && this.game.completedAt > 0;
   }
 
   get isMyTurn(): boolean {
@@ -35,7 +40,6 @@ export class GameBoardComponent {
       return this.game.status === GameStatus.REDS_TURN;
     }
     return this.game.status === GameStatus.BLUES_TURN;
-
   }
 
   get myTeam(): TeamTypes {
@@ -88,13 +92,14 @@ export class GameBoardComponent {
     this.gameService.updateGame(this.game.id, updates);
   }
 
-  // This recalculates constantly - if I were a better angular developer I would have fixed it already
-  // Maybe later :)
-  get advice(): string {
+  getAdvice(): string {
     if (this.isGameOver) {
       return '';
     }
-    if (this.isMyTurn){
+    if (this.game && !this.game.tiles) {
+      return 'Generating board';
+    }
+    if (this.isMyTurn) {
       if (this.spymaster) {
         if (this.currentClue && this.currentClue.team === this.myTeam) {
           return 'Waiting for your team to guess';
@@ -104,7 +109,8 @@ export class GameBoardComponent {
       } else {
         // Guesser
         if (this.currentClue && this.currentClue.team === this.myTeam) {
-          if (this.currentClue.guessCount === 0 || this.currentClue.guessCount > 10) {
+          if (this.currentClue.guessCount === 0 ||
+              this.currentClue.guessCount > 10) {
             return 'You have unlimited guesses';
           }
           return `You can guess up to ${this.currentClue.guessCount + 1} words`;
