@@ -9,17 +9,20 @@
 .scorecard-container {
   display: flex;
   justify-content: space-between;
-  max-width: 1400px;
+  max-width: 1500px;
   margin: auto;
   padding: 0 20px;
 
-  .user-card {
-    max-width: 100%;
-    width: 600px;
-    margin: 20px auto;
+  .stats-container {
+    width: calc(100% - 840px);
 
-    .user-item {
-      --ion-item-border-color: transparent;
+    .user-card {
+      max-width: 100%;
+      margin: 20px auto;
+
+      .user-item {
+        --ion-item-border-color: transparent;
+      }
     }
   }
 
@@ -27,7 +30,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: calc(100% - 650px);
+    width: 800px;
+    max-width: 100%;
 
     h3 {
       width: 100%;
@@ -40,24 +44,48 @@
   }
 }
 
-@media (max-width: 1350px) {
-  .scorecard-container .games-container {
-    width: calc(100% - 620px);
+// lock the stats container width for 20px to reduce the margin
+@media (max-width: 1450px) {
+  .scorecard-container .stats-container {
+    width: 570px;
   }
 }
 
-@media (max-width: 1270px) {
+// then shink with the display for a while
+@media (max-width: 1430px) {
+  .scorecard-container .stats-container {
+    width: calc(100% - 820px);
+  }
+}
+
+// lock the stats container at 380px and let the games container shrink for a while
+@media (max-width: 1240px) {
+  .scorecard-container {
+    .stats-container {
+      width: 380px;
+    }
+
+    .games-container {
+      width: calc(100% - 400px);
+    }
+  }
+}
+
+// eventually switch to a column layout with a max width of 800px
+@media (max-width: 1050px) {
   .scorecard-container {
     flex-direction: column;
 
+    .stats-container,
     .games-container {
       margin: auto;
-      width: 600px;
+      width: 800px;
       max-width: 100%;
     }
   }
 }
 
+// on even smaller devices, let the cards expand to the width of the display
 @media (max-width: 650px) {
   .scorecard-container {
     padding: 0;
