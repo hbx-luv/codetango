@@ -72,6 +72,9 @@ export interface Room {
   // and for the players to guess
   enforceTimer?: boolean;
 
+  // seconds to increment the turn timer by after each correct guess
+  guessIncrement?: number;
+
   // word list, optional
   // server defaults to 'default'
   wordList?: string;

@@ -85,8 +85,17 @@ export class GameBoardComponent {
     }
 
     // set the timer if one exists
-    if (this.room && this.room.timer && updates.status !== this.game.status) {
-      updates.turnEnds = Date.now() + (this.room.timer * 1000);
+    if (this.room && this.room.timer) {
+      if (updates.status === this.game.status) {
+        // the guess was correct, increment the timer if guessIncrement is set
+        if (this.game.turnEnds && this.room.guessIncrement) {
+          updates.turnEnds =
+              this.game.turnEnds + (this.room.guessIncrement * 1000);
+        }
+      } else {
+        // the turn has switched, new timer
+        updates.turnEnds = Date.now() + (this.room.timer * 1000);
+      }
     }
 
     this.gameService.updateGame(this.game.id, updates);
