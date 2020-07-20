@@ -80,8 +80,6 @@ export async function recalcElo(
 
   console.log('done with games, iterating through users');
 
-  console.log(userMap);
-
   const userMapPairs = toPairs(userMap);
   for (const pair of userMapPairs) {
     const userId: string = pair[0];
@@ -157,8 +155,6 @@ export async function getEloHistoryForUser(
 
   // there should only be 1 document per user
   // if there are none, then set up a base Stats object
-  console.log(`snapshot size: ${snapshot.size}, user: ${userId}, timestamp: ${
-      timestamp}`);
   return snapshot.size === 1 ? snapshot.docs[0].data() as Stats : {
     userId,
     gameId,
