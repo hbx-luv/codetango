@@ -19,11 +19,14 @@ export const onDeleteGame =
     });
 
 async function handleGameDeleted(game: Game) {
-  // add deleted games to a deletedGames collection so we can restore them in
-  // the future
-  await db.collection('deletedGames').add(game);
+  // only bother dealing with completed games
+  if (game.completedAt) {
+    // add deleted games to a deletedGames collection so we can restore them in
+    // the future
+    await db.collection('deletedGames').add(game);
 
-  // delete this elo history record and recalc elo, update league game stats
-  await nukeEloHistoryForGame(db, game.id!);
-  await recalcElo(db, game.createdAt, game);
+    // delete this elo history record and recalc elo, update league game stats
+    await nukeEloHistoryForGame(db, game.id!);
+    await recalcElo(db, game.createdAt, game);
+  }
 }
