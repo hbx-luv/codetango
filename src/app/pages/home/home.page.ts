@@ -1,13 +1,10 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
-import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UtilService} from 'src/app/services/util.service';
 import {RoomStatus, WordList} from 'types';
-
-import {WordListsService} from '../../services/word-lists.service';
 
 @Component({
   selector: 'app-home',
@@ -21,17 +18,10 @@ export class HomePage {
 
   constructor(
       private readonly roomService: RoomService,
-      private readonly wordListsService: WordListsService,
       public readonly authService: AuthService,
       private readonly router: Router,
       private readonly utilService: UtilService,
-  ) {
-    this.lists = this.wordListsService.getWordLists().pipe(tap(wordLists => {
-      if (!this.selectedWordList && wordLists && wordLists.length) {
-        this.selectedWordList = wordLists[0];
-      }
-    }));
-  }
+  ) {}
 
   get disabled(): boolean {
     return this.roomService.createRoomId(this.roomName).length === 0;
