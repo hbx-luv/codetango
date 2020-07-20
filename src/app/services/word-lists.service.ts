@@ -263,6 +263,10 @@ export class WordListsService {
     return this.afs.collection('wordlists').add({name, words});
   }
 
+  setWordList(name: string, words: string[]): Promise<void> {
+    return this.afs.collection('wordlists').doc(name).set({name, words});
+  }
+
   // Warning - this is a complete replacement update
   updateWordList(id: string, words: string[]): Promise<void> {
     return this.afs.collection('wordlists').doc(id).update({words});
