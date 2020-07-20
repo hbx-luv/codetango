@@ -71,7 +71,7 @@ export class RoomService {
   /**
    * "Suh dude!" turns into "suh-dude"
    */
-  private createRoomId(name: string): string {
+  createRoomId(name: string = ''): string {
     return name.toLowerCase()
         .replace(/[^a-zA-Z0-9 ]/g, '')  // remove illegal values
         .replace(/[ ]/g, '-');          // spaces to dashes

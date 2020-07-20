@@ -33,6 +33,10 @@ export class HomePage {
     }));
   }
 
+  get disabled(): boolean {
+    return this.roomService.createRoomId(this.roomName).length === 0;
+  }
+
   selectWordList(list: WordList) {
     this.selectedWordList = list;
   }
