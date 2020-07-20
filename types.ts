@@ -32,7 +32,8 @@ export enum RoomStatus {
 // the word/image to display on the board as well as information about
 // the team/role it's tied to and whether or not it has been selected
 export interface Tile {
-  word: string;  // support images?
+  word?: string;
+  image?: string;
   role: TileRole;
   selected: boolean;
   selectedBy?: string;  // user who clicked
