@@ -130,19 +130,12 @@ async function getTwentyFiveWords(roomId: string): Promise<string[]> {
     const newWordsForGame = [] as string[];
     const {words} = defaultWordListSnapshot.data() as WordList;
 
-    console.log('looking up words from last game');
-    const lastGameWords = await getLastGameWords(roomId);
-    console.log(
-        lastGameWords.length ? 'avoiding words from last game' :
-                               'there is no previous game');
-
     while (newWordsForGame.length < 25) {
       const randomIndex = Math.floor(Math.random() * words.length);
       const word = words.splice(randomIndex, 1)[0];
 
-      // ensure no dupes (since there are some in the word list) and don't reuse
-      // words from the last game
-      if (!newWordsForGame.includes(word) && !lastGameWords.includes(word)) {
+      // ensure no dupes (since there are some in the word list)
+      if (!newWordsForGame.includes(word)) {
         newWordsForGame.push(word);
       }
     }
@@ -160,31 +153,4 @@ async function getTwentyFiveWords(roomId: string): Promise<string[]> {
     ];
     return hardcodedfornow;
   }
-}
-
-/**
- * Given a roomId, return the words from the last game, or an empty array if
- * there is no previous game for this room
- */
-async function getLastGameWords(roomId: string) {
-  const snapshot = await db.collection('games')
-                       .where('roomId', '==', roomId)
-                       .orderBy('createdAt', 'desc')
-                       .limit(1)
-                       .get();
-
-  // return the list of words from the previous game
-  // TODO: this isn't serializing correctly, investigate
-  let tiles: string[] = [];
-  snapshot.docs.forEach(doc => {
-    console.log('THIS IS THE DOC', doc);
-    const game = doc.data() as Game;
-    console.log('THIS IS THE GAME', game);
-
-    console.log('TILES?!?!', game.tiles);
-    if (game && game.tiles) {
-      tiles = tiles.concat(game.tiles.map(t => t.word));
-    }
-  });
-  return tiles;
 }
