@@ -5,10 +5,14 @@
       [class.spymaster]="spymaster"
       [class.selected]="tile.selected"
       [class.readonly]="readonly"
+      [class.pictures]="game.hasPictures"
       [color]="getColor(tile)"
       class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
       (click)="selectTile(tile)">
-      {{ tile.word }}
+      <span *ngIf="!game.hasPictures">{{ tile.word }}</span>
+      <span *ngIf="game.hasPictures">
+        <ion-img src="./assets/pictures/{{tile.word}}.png"></ion-img>
+      </span>
     </ion-button>
   </ion-grid>
   <ion-row class="advice-row">

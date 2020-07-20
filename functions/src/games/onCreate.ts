@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
+import {shuffle} from 'lodash';
 
 import {Game, GameStatus, Room, Tile, TileRole, WordList} from '../../../types';
 
@@ -25,7 +26,11 @@ export const onCreateGame =
           // If the game is created with tiles already set, this game was
           // probably migrated. Do not modify any of the other fields
           if (!game.tiles) {
-            updates.tiles = await generateNewGameTiles(game.roomId);
+            const wordList = await getWordList(game.roomId);
+
+            updates.hasPictures = wordList === 'pictures';
+
+            updates.tiles = await generateNewGameTiles(wordList);
             const blueTeamTiles = updates.tiles.filter(
                 tile => tile.role === TileRole.BLUE && !tile.selected);
             const redTeamTiles = updates.tiles.filter(
@@ -45,92 +50,41 @@ export const onCreateGame =
           return 'Done!';
         });
 
-function assignRandomTileTeams():
-    {red: number[], blue: number[], assassin: number} {
-  const assignedNumbers: number[] = [];
-  const firstTeam = [];
-  const secondTeam = [];
-
-  // the team with 9
-  for (let i = 0; i < 9; i++) {
-    let randomFirstTeamNumber;
-    do {
-      // Should be a unique number 0-24
-      randomFirstTeamNumber = Math.floor(Math.random() * 25)
-    } while (assignedNumbers.includes(randomFirstTeamNumber));
-
-    // Add to first team
-    firstTeam.push(randomFirstTeamNumber)
-    assignedNumbers.push(randomFirstTeamNumber)
-  }
-
-  // the team with 8
-  for (let i = 0; i < 8; i++) {
-    let randomSecondTeamNumber;
-    do {
-      // Should be a unique number 0-24
-      randomSecondTeamNumber = Math.floor(Math.random() * 25)
-    } while (assignedNumbers.includes(randomSecondTeamNumber));
-
-    // Add to second team
-    secondTeam.push(randomSecondTeamNumber)
-    assignedNumbers.push(randomSecondTeamNumber)
-  }
-
-  // Assassin
-  let randomAssassinNumber;
-  do {
-    // Should be a unique number 0-24
-    randomAssassinNumber = Math.floor(Math.random() * 25)
-  } while (assignedNumbers.includes(randomAssassinNumber));
-  const assassin = randomAssassinNumber;
-
-  // Which team goes first?
-  const randomNumber = Math.floor(Math.random() * 2);
-  let blue = [];
-  let red = [];
-  if (randomNumber === 0) {
-    blue = firstTeam;
-    red = secondTeam;
-  } else {
-    red = firstTeam;
-    blue = secondTeam;
-  }
-
-  return {
-    blue, red, assassin
-  }
-}
-
-async function generateNewGameTiles(roomId: string): Promise<Tile[]> {
-  const words = await getTwentyFiveWords(roomId)
+async function generateNewGameTiles(wordList: string): Promise<Tile[]> {
+  const words = await getWords(wordList);
   const tiles = words.map(word => {
     return {
       word, role: TileRole.CIVILIAN, selected: false
     }
   });
 
-  // Assign random teams to the tiles
-  const tileTeams = assignRandomTileTeams();
-  tileTeams.red.forEach(red => {tiles[red].role = TileRole.RED});
-  tileTeams.blue.forEach(blue => {tiles[blue].role = TileRole.BLUE});
-  tiles[tileTeams.assassin].role = TileRole.ASSASSIN;
+  // get red, blue, and assassin counts
+  // assign the roles then shuffle the tiles
+  let {red, blue, assassins} = getRoleCounts(wordList);
+  for (let i = 0; i < red; i++) {
+    tiles[i].role = TileRole.RED;
+  }
+  for (let i = red; i < red + blue; i++) {
+    tiles[i].role = TileRole.BLUE;
+  }
+  for (let i = red + blue; i < red + blue + assassins; i++) {
+    tiles[i].role = TileRole.ASSASSIN;
+  }
 
-  return tiles;
+  return shuffle(tiles);
 }
 
-async function getTwentyFiveWords(roomId: string): Promise<string[]> {
-  const roomSnapshot = await db.collection('rooms').doc(roomId).get();
-  const wordList = (roomSnapshot.data() as Room).wordList || 'original';
-
-  const defaultWordListSnapshot =
-      await db.collection('wordlists').doc(wordList).get();
-  if (defaultWordListSnapshot.exists && defaultWordListSnapshot.data()) {
+async function getWords(wordList: string): Promise<string[]> {
+  const snapshot = await db.collection('wordlists').doc(wordList).get();
+  if (snapshot.exists && snapshot.data()) {
     console.log('defaultWords exists');
     const newWordsForGame = [] as string[];
-    const {words} = defaultWordListSnapshot.data() as WordList;
+    const {words} = snapshot.data() as WordList;
 
-    while (newWordsForGame.length < 25) {
+    // in codenames pictures, you only get 20 tiles
+    const count = wordList === 'pictures' ? 20 : 25;
+
+    while (newWordsForGame.length < count) {
       const randomIndex = Math.floor(Math.random() * words.length);
       const word = words.splice(randomIndex, 1)[0];
 
@@ -152,5 +106,21 @@ async function getTwentyFiveWords(roomId: string): Promise<string[]> {
       'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
     ];
     return hardcodedfornow;
+  }
+}
+
+async function getWordList(roomId: string): Promise<string> {
+  const roomSnapshot = await db.collection('rooms').doc(roomId).get();
+  return (roomSnapshot.data() as Room).wordList || 'original';
+}
+
+function getRoleCounts(wordList: string) {
+  const random = Math.round(Math.random());
+  if (wordList === 'pictures') {
+    return random ? {red: 7, blue: 8, assassins: 1} :
+                    {red: 8, blue: 7, assassins: 1};
+  } else {
+    return random ? {red: 8, blue: 9, assassins: 1} :
+                    {red: 9, blue: 8, assassins: 1};
   }
 }

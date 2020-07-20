@@ -97,6 +97,9 @@ export interface Game {
   status: GameStatus;
   roomId: string;
 
+  // true for games that are using pictures
+  hasPictures?: boolean;
+
   // set by the server for querying
   userIds?: string[];
 

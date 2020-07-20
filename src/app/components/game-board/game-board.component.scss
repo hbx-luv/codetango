@@ -9,6 +9,7 @@
   ion-button.word {
     max-height: 75px;
     height: 18vw;
+    border-radius: 4px;
 
     // better warning color
     --ion-color-warning: #bbb29f;
@@ -32,13 +33,26 @@
     &:not(.selected) {
       &.RED {
         --ion-color-contrast: var(--ion-color-danger) !important;
+        &.pictures {
+          border: 4px solid var(--ion-color-danger);
+        }
       }
       &.BLUE {
         --ion-color-contrast: var(--ion-color-primary) !important;
+        &.pictures {
+          border: 4px solid var(--ion-color-primary);
+        }
       }
       &.ASSASSIN {
         --ion-color-base: #888 !important;
       }
+    }
+
+    &.pictures {
+      max-height: 130px;
+      height: 16vw;
+      max-width: 150px;
+      width: 18vw;
     }
   }
 }
