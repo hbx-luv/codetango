@@ -23,7 +23,7 @@ export const onCreateGame =
 
           // Add 25 random cards to the game if there are no tiles
           // If the game is created with tiles already set, this game was
-          // probably migrated Do not modify any of the other fields
+          // probably migrated. Do not modify any of the other fields
           if (!game.tiles) {
             updates.tiles = await generateNewGameTiles(game.roomId);
             const blueTeamTiles = updates.tiles.filter(
@@ -121,7 +121,7 @@ async function generateNewGameTiles(roomId: string): Promise<Tile[]> {
 
 async function getTwentyFiveWords(roomId: string): Promise<string[]> {
   const roomSnapshot = await db.collection('rooms').doc(roomId).get();
-  const wordList = (roomSnapshot.data() as Room).wordList || 'default';
+  const wordList = (roomSnapshot.data() as Room).wordList || 'original';
 
   const defaultWordListSnapshot =
       await db.collection('wordlists').doc(wordList).get();

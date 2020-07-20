@@ -76,7 +76,7 @@ export interface Room {
   guessIncrement?: number;
 
   // word list, optional
-  // server defaults to 'default'
+  // server defaults to 'original'
   wordList?: string;
 
   // client fields

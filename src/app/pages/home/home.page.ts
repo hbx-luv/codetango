@@ -52,6 +52,8 @@ export class HomePage {
         status: RoomStatus.PREGAME,
         timer: 120,
         firstTurnTimer: 180,
+        guessIncrement: 30,
+        wordList: 'original',
         enforceTimer: false,
         userIds: []
       });
