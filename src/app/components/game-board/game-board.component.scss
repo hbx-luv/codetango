@@ -51,8 +51,6 @@
     &.pictures {
       max-height: 130px;
       height: 16vw;
-      max-width: 150px;
-      width: 18vw;
     }
   }
 }
@@ -69,6 +67,7 @@
 
     ion-button.word {
       font-size: 2.5vw;
+      border-width: 2px !important;
     }
   }
 }

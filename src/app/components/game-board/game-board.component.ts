@@ -19,6 +19,7 @@ export class GameBoardComponent {
   @Input() spymaster: boolean;
   @Input() currentClue?: Clue;
 
+  tiles: Tile[];
   advice: string;
 
   constructor(
@@ -28,6 +29,17 @@ export class GameBoardComponent {
 
   ngOnChanges() {
     this.advice = this.getAdvice();
+
+    // hold onto a copy of the tiles to prevent flickering when the game changes
+    if (this.game && this.game.tiles) {
+      if (this.tiles) {
+        for (let i = 0; i < this.game.tiles.length; i++) {
+          Object.assign(this.tiles[i], this.game.tiles[i]);
+        }
+      } else {
+        this.tiles = this.game.tiles;
+      }
+    }
   }
 
   get isGameOver(): boolean {
@@ -75,7 +87,7 @@ export class GameBoardComponent {
     tile.selectedBy = this.authService.currentUserId;
 
     const updates: Partial<Game> = {
-      tiles: this.game.tiles,
+      tiles: this.tiles,
       status: this.getGameStatus(tile),
     };
 

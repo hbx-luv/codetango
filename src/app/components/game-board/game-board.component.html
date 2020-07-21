@@ -1,7 +1,7 @@
 <div>
-  <ion-grid class="grid-container" *ngIf="game.tiles">
+  <ion-grid class="grid-container">
     <ion-button
-      *ngFor="let tile of game.tiles"
+      *ngFor="let tile of tiles"
       [class.spymaster]="spymaster"
       [class.selected]="tile.selected"
       [class.readonly]="readonly"
