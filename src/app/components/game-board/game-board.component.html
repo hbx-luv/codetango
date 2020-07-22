@@ -11,7 +11,7 @@
       (click)="selectTile(tile)">
       <span *ngIf="!game.hasPictures">{{ tile.word }}</span>
       <span *ngIf="game.hasPictures">
-        <ion-img src="./assets/pictures/{{tile.word}}.png"></ion-img>
+        <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
       </span>
     </ion-button>
   </ion-grid>
