@@ -34,4 +34,8 @@ export class UserService {
     this.userObservables[userId] = user$;
     return user$;
   }
+
+  updateUser(userId: string, data: Partial<User>): Promise<void> {
+    return this.afs.collection('users').doc(userId).update(data);
+  }
 }

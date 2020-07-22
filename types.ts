@@ -121,6 +121,8 @@ export interface User {
   email: string;
   rooms: string[];  // room ids
 
+  nickname?: string;
+
   // set by some auth providers
   photoURL?: string;
 
