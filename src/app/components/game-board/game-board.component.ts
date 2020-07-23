@@ -96,12 +96,6 @@ export class GameBoardComponent {
       updates.completedAt = Date.now();
     }
 
-    // Increment the guesses made for the current clue and end turn if reached max
-    this.currentClue.guessesMade++;
-    if (this.currentClue.guessesMade === this.currentClue.maxGuesses) {
-      updates.status = updates.status === GameStatus.BLUES_TURN ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
-    }
-
     // set the timer if one exists
     if (this.room && this.room.timer) {
       if (updates.status === this.game.status) {
@@ -151,15 +145,16 @@ export class GameBoardComponent {
 
   getGameStatus(tile: Tile) {
     const bluesTurn = this.game.status === GameStatus.BLUES_TURN;
+    const maxGuessesReached = ++this.currentClue.guessesMade === this.currentClue.maxGuesses;
     switch (tile.role) {
       case TileRole.ASSASSIN:
         return bluesTurn ? GameStatus.RED_WON : GameStatus.BLUE_WON;
       case TileRole.CIVILIAN:
         return bluesTurn ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
       case TileRole.BLUE:
-        return GameStatus.BLUES_TURN;
+        return maxGuessesReached && bluesTurn ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
       case TileRole.RED:
-        return GameStatus.REDS_TURN;
+        return maxGuessesReached && !bluesTurn ? GameStatus.BLUES_TURN : GameStatus.REDS_TURN;
       default:
         throw new Error('What the fuck is this?!');
     }
