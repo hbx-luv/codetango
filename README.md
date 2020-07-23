@@ -50,16 +50,22 @@ More options through interactive CLI:
 
 First, you'll need to be invited to the [firebase cloud console for this project](https://console.firebase.google.com/u/0/project/codetango) and then login to the cli via `firebase login`.
 
-You need to run `ionic build` in the root of the project to get the static webapp built for deployment in `www/`. At that point you can just `firebase deploy --only hosting` to deploy just that content. Here are some aliases in the `package.json` and other quick commands:
+You need to run `ionic build` in the root of the project to get the static webapp built for deployment in `www/`. At that point you can just `firebase deploy --only hosting -P [env]` to deploy just that content. Here are some aliases in the `package.json` and other quick commands:
+
+You can deploy to either the `dev` database or the `prod` database. By default, when serving the application, it uses the `dev` project so we don't mess with `prod` data. These configurations are stored in `environment.ts` and `environment.prod.ts`
 
 Deploy everything in one go:  
-`npm run deploy`
+`npm run deploy:dev`  
+`npm run deploy:prod`  
 
 Deploy hosting separately:  
-`npm run deploy-hosting`
+`npm run deploy-hosting:dev`  
+`npm run deploy-hosting:prod`  
 
 Deploy functions seperately:  
-`firebase deploy --only functions`  
+`firebase deploy --only functions -P dev`  
+`firebase deploy --only functions -P prod`  
 
 Or just deploy a single cloud function like so:  
-`firebase deploy --only functions:onGameCreate`  
+`firebase deploy --only functions:onGameCreate -P dev`  
+`firebase deploy --only functions:onGameCreate -P prod`  
