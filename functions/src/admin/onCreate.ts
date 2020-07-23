@@ -76,12 +76,22 @@ async function migrateUser(oldUser: string, newUser: string): Promise<void> {
     const game = games.docs[i].data() as Game;
 
     // replace the old id within the game
-    batch.update(games.docs[i].ref, {
+    const updates: any = {
       'userIds': replaceInArray(game.userIds!, oldUser, newUser),
       'redTeam.userIds': replaceInArray(game.redTeam.userIds, oldUser, newUser),
       'blueTeam.userIds':
           replaceInArray(game.blueTeam.userIds, oldUser, newUser),
-    });
+    };
+
+    // make sure we replace spymasters too
+    if (game.redTeam.spymaster === oldUser) {
+      updates['redTeam.spymaster'] = newUser;
+    }
+    if (game.blueTeam.spymaster === oldUser) {
+      updates['blueTeam.spymaster'] = newUser;
+    }
+
+    batch.update(games.docs[i].ref, updates);
 
     // delete the elo history record for this game
     batch.delete(
