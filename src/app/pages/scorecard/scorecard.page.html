@@ -6,8 +6,13 @@
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title >
-      {{user.nickname || user.name}}
+    <ion-title>
+      <span *ngIf="user.nickname && user.nickname !== user.name" [tooltip]="user.name">
+        {{ user.nickname }}
+      </span>
+      <span *ngIf="!user.nickname">
+        {{ user.name }}
+      </span>
     </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="promptForName(user)" *ngIf="isMe">

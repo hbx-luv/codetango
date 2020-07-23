@@ -8,8 +8,10 @@ import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UserService} from 'src/app/services/user.service';
 import {Game, User} from 'types';
+
 const LIMIT = 3;
 const CHART_LIMIT = 20;
+
 @Component({
   selector: 'app-scorecard',
   templateUrl: './scorecard.page.html',
@@ -20,6 +22,7 @@ export class ScorecardPage {
   user$: Observable<User>;
   recentGames$: Observable<Game[]>;
   chartLimit = CHART_LIMIT;
+
   overallStats = [
     {title: 'Elo Rating', field: 'elo'},
     {title: 'Current Streak', field: 'currentStreak'},
@@ -30,6 +33,7 @@ export class ScorecardPage {
     {title: 'Current Streak', field: 'spymasterStreak'},
     {title: 'Best Streak', field: 'spymasterBestStreak'},
   ];
+
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
@@ -47,12 +51,15 @@ export class ScorecardPage {
       return user;
     }));
   }
+
   get isMe(): boolean {
     return this.userId === this.authService.currentUserId;
   }
+
   toggleChartLimit() {
     this.chartLimit = this.chartLimit > 0 ? 0 : CHART_LIMIT;
   }
+
   async promptForName(user: User) {
     const alert = await this.alertController.create({
       header: 'Set a nickname',
