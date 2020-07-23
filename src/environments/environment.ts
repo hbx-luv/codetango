@@ -5,14 +5,14 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: 'AIzaSyDTncO1ABukAWNm1TROLRVTeW-y8DemgoA',
-    authDomain: 'codetango.firebaseapp.com',
-    databaseURL: 'https://codetango.firebaseio.com',
-    projectId: 'codetango',
-    storageBucket: 'codetango.appspot.com',
-    messagingSenderId: '552807035418',
-    appId: '1:552807035418:web:545b44bf7b7884d7d2d7a3',
-    measurementId: 'G-MD21480XBY'
+    apiKey: 'AIzaSyDywn0GScSqGB3I9pzyiq5j_WuXd2_dlWQ',
+    authDomain: 'codetango-dev.firebaseapp.com',
+    databaseURL: 'https://codetango-dev.firebaseio.com',
+    projectId: 'codetango-dev',
+    storageBucket: 'codetango-dev.appspot.com',
+    messagingSenderId: '862254291099',
+    appId: '1:862254291099:web:e86dc89b3aa45983e1ce3e',
+    measurementId: 'G-7H1TZ0T8XY'
   }
 };
 

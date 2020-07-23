@@ -1,5 +1,22 @@
 {
   "projects": {
-    "default": "codetango"
+    "prod": "codetango",
+    "dev": "codetango-dev"
+  },
+  "targets": {
+    "codetango": {
+      "hosting": {
+        "master": [
+          "codetango"
+        ]
+      }
+    },
+    "codetango-dev": {
+      "hosting": {
+        "master": [
+          "codetango-dev"
+        ]
+      }
+    }
   }
 }
