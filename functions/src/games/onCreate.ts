@@ -60,7 +60,7 @@ async function generateNewGameTiles(wordList: string): Promise<Tile[]> {
 
   // get red, blue, and assassin counts
   // assign the roles then shuffle the tiles
-  let {red, blue, assassins} = getRoleCounts(wordList);
+  const {red, blue, assassins} = getRoleCounts(wordList);
   for (let i = 0; i < red; i++) {
     tiles[i].role = TileRole.RED;
   }
