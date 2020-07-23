@@ -10,7 +10,7 @@
       <ion-avatar [tooltip]="userTemplate" content-type="template" [display]="!showUserName">
         <ion-img [src]="user.photoURL"></ion-img>
       </ion-avatar>
-      <ion-label *ngIf="showUserName">{{user.name}}</ion-label>
+      <ion-label *ngIf="showUserName">{{user.nickname || user.name}}</ion-label>
     </ng-container>
   </ion-chip>
 </ng-container>
