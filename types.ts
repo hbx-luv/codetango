@@ -50,6 +50,8 @@ export interface Team {
 export interface Clue {
   word: string;
   guessCount: number;
+  maxGuesses: number;
+  guessesMade: number;
   createdAt: number;
   team: TeamTypes;
 }

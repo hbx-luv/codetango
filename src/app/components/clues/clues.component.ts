@@ -41,6 +41,8 @@ export class CluesComponent implements OnDestroy {
       this.clueService.addClue(this.game.id, {
         word: clue,
         guessCount: this.clueCount,
+        maxGuesses: this.clueCount === 0 ? 999 : this.clueCount + 1,
+        guessesMade: 0,
         createdAt: Date.now(),
         team: isBluesTurn ? TeamTypes.BLUE : TeamTypes.RED,
       });

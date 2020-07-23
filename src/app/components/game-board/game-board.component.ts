@@ -96,6 +96,12 @@ export class GameBoardComponent {
       updates.completedAt = Date.now();
     }
 
+    // Increment the guesses made for the current clue and end turn if reached max
+    this.currentClue.guessesMade++;
+    if (this.currentClue.guessesMade === this.currentClue.maxGuesses) {
+      updates.status = updates.status === GameStatus.BLUES_TURN ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
+    }
+
     // set the timer if one exists
     if (this.room && this.room.timer) {
       if (updates.status === this.game.status) {
@@ -155,7 +161,7 @@ export class GameBoardComponent {
       case TileRole.RED:
         return GameStatus.REDS_TURN;
       default:
-        throw 'What the fuck is this?!';
+        throw new Error('What the fuck is this?!');
     }
   }
 }
