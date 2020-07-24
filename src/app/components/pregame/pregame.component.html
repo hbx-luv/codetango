@@ -42,6 +42,29 @@
         <span *ngIf="list.comingSoon">COMING SOON</span>
       </ion-card>
     </div>
+    <h3>Timer Settings</h3>
+    <div class="timer-settings">
+      <ion-item>
+        <ion-label for="timer-input">Timer (seconds): </ion-label>
+        <ion-input name="timer-input"
+                   type="number"
+                   [(ngModel)]="room.timer">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label for="first-timer-input">First Turn Timer (seconds): </ion-label>
+        <ion-input name="first-timer-input"
+                   type="number"
+                   [(ngModel)]="room.firstTurnTimer">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label for="enforce-timer-toggle">Enforce Timer: </ion-label>
+        <ion-toggle name="enforce-timer-toggle"
+                    [(ngModel)]="room.enforceTimer">
+        </ion-toggle>
+      </ion-item>
+    </div>
   </div>
 </div>
 
