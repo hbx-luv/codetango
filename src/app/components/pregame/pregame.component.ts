@@ -53,7 +53,8 @@ export class PregameComponent {
     this.roomService.updateRoom(this.room.id, {
       timer: this.room.timer,
       firstTurnTimer: this.room.firstTurnTimer,
-      enforceTimer: this.room.enforceTimer
+      enforceTimer: this.room.enforceTimer,
+      guessIncrement: this.room.guessIncrement
     });
   }
 

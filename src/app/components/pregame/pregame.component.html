@@ -61,6 +61,14 @@
         </ion-input>
       </ion-item>
       <ion-item>
+        <ion-label for="guess-increment-input">Correct Guess Increment (seconds): </ion-label>
+        <ion-input name="guess-increment-input"
+                   type="number"
+                   (keyup.enter)="saveTimerSettings()"
+                   [(ngModel)]="room.guessIncrement">
+        </ion-input>
+      </ion-item>
+      <ion-item>
         <ion-label for="enforce-timer-toggle">Enforce Timer: </ion-label>
         <ion-toggle name="enforce-timer-toggle"
                     (ionChange)="saveTimerSettings()"
