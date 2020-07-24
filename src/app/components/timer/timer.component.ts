@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
-import {Game} from 'types';
+import {Game, GameStatus, Room} from 'types';
+import {GameService} from '../../services/game.service';
 
 @Component({
   selector: 'app-timer',
@@ -7,12 +8,13 @@ import {Game} from 'types';
   styleUrls: ['./timer.component.scss'],
 })
 export class TimerComponent {
+  @Input() room: Room;
   @Input() game: Game;
   clock = '';
   seconds: number;
   timeout: any; // NodeJS.Timeout;
 
-  constructor() {}
+  constructor(private readonly gameService: GameService) {}
 
   get color(): string {
     if (this.seconds <= 10) {
@@ -34,6 +36,13 @@ export class TimerComponent {
     if (!this.game.completedAt && this.game.turnEnds) {
       this.seconds = (this.game.turnEnds - Date.now()) / 1000;
       this.clock = this.fancyTimeFormat(this.seconds);
+
+      if (this.seconds <= 0 && this.room.enforceTimer) {
+        this.gameService.updateGame(this.game.id, {
+          status: this.game.status === GameStatus.BLUES_TURN ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN,
+          turnEnds: Date.now() + (this.room.timer * 1000)
+        });
+      }
 
       // determine the amount of time to the end of the second
       const timeToWait = 1000 - (Date.now() % 1000);
