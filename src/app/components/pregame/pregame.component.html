@@ -48,6 +48,7 @@
         <ion-label for="timer-input">Timer (seconds): </ion-label>
         <ion-input name="timer-input"
                    type="number"
+                   (keyup.enter)="saveTimerSettings()"
                    [(ngModel)]="room.timer">
         </ion-input>
       </ion-item>
@@ -55,14 +56,24 @@
         <ion-label for="first-timer-input">First Turn Timer (seconds): </ion-label>
         <ion-input name="first-timer-input"
                    type="number"
+                   (keyup.enter)="saveTimerSettings()"
                    [(ngModel)]="room.firstTurnTimer">
         </ion-input>
       </ion-item>
       <ion-item>
         <ion-label for="enforce-timer-toggle">Enforce Timer: </ion-label>
         <ion-toggle name="enforce-timer-toggle"
+                    (ionChange)="saveTimerSettings()"
                     [(ngModel)]="room.enforceTimer">
         </ion-toggle>
+      </ion-item>
+      <ion-item>
+        <ion-button name="save-timer-settings-button"
+                    (click)="saveTimerSettings()"
+                    (keyup.enter)="saveTimerSettings()"
+                    color="primary">
+          Save Timer Settings
+        </ion-button>
       </ion-item>
     </div>
   </div>

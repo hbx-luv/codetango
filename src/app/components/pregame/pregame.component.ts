@@ -49,6 +49,14 @@ export class PregameComponent {
     this.roomService.updateRoom(this.room.id, {wordList});
   }
 
+  saveTimerSettings() {
+    this.roomService.updateRoom(this.room.id, {
+      timer: this.room.timer,
+      firstTurnTimer: this.room.firstTurnTimer,
+      enforceTimer: this.room.enforceTimer
+    });
+  }
+
   removeUser(userId: string) {
     this.roomService.removeUserFromRoom(this.room.id, userId);
   }
