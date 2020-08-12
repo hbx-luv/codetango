@@ -8,8 +8,8 @@
 </ion-header>
 
 <ion-content>
-  <div class="leaderboard-container">
-    <ion-list *ngIf="users$ | async as users; else loading">
+  <div class="leaderboard-container" *ngIf="users$ | async as users; else loading">
+    <ion-list *ngIf="users.length > 0; else empty">
       <ion-item *ngFor="let user of users; let index = index" [routerLink]="['/scorecard', user.id]">
         <ion-text class="rank" slot="start">
           {{ index + 1 }}
@@ -30,6 +30,13 @@
     </ion-list>
   </div>
 </ion-content>
+
+<ng-template #empty>
+  <div class="empty-container">
+    <h3>No games have been completed yet!</h3>
+    <ion-button [routerLink]="['/', roomId]">Play your first game</ion-button>
+  </div>
+</ng-template>
 
 <ng-template #loading>
   <div class="spinner-container">
