@@ -19,6 +19,7 @@ export class PregameComponent {
   currentGame$: Observable<Game>;
   teams: Team[];
   constructedGame: Partial<Game>;
+  debounce = 500;
 
   wordLists = [
     {url: './assets/original.png', id: 'original'},
