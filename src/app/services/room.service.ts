@@ -12,6 +12,8 @@ import {AuthService} from './auth.service';
 export class RoomService {
   private db: firestore.Firestore;
 
+  roomObservables: {[roomId: string]: Observable<Room>} = {};
+
   constructor(
       private readonly authService: AuthService,
       private readonly afs: AngularFirestore,
@@ -37,10 +39,21 @@ export class RoomService {
   }
 
   getRoom(id: string): Observable<Room> {
-    return this.afs.collection('rooms').doc<Room>(id).snapshotChanges().pipe(
-        map(room => {
-          return {id: room.payload.id, ...room.payload.data()};
-        }));
+    // load from cache when we can
+    if (this.roomObservables[id]) {
+      return this.roomObservables[id];
+    }
+
+    // otherwise query for the room
+    const room$ =
+        this.afs.collection('rooms').doc<Room>(id).snapshotChanges().pipe(
+            map(room => {
+              return {id: room.payload.id, ...room.payload.data()};
+            }));
+
+    // save to cache and return
+    this.roomObservables[id] = room$;
+    return room$;
   }
 
   async joinRoom(roomId: string): Promise<void> {

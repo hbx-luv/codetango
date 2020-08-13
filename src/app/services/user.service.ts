@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
+import {AngularFireAuth} from '@angular/fire/auth';
 import {AngularFirestore} from '@angular/fire/firestore';
-import {Observable} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {User} from '../../../types';
@@ -9,9 +10,35 @@ import {User} from '../../../types';
 export class UserService {
   userObservables: {[userId: string]: Observable<User>} = {};
 
+  currentUser$?: Subscription;
+  currentUser?: User;
+
   constructor(
+      private readonly afAuth: AngularFireAuth,
       private readonly afs: AngularFirestore,
-  ) {}
+  ) {
+    this.afAuth.authState.subscribe(observer => {
+      if (observer && observer.uid) {
+        this.subscribeToUser(observer.uid);
+      } else {
+        this.currentUser$.unsubscribe();
+        delete this.currentUser$;
+        delete this.currentUser;
+      }
+    });
+  }
+
+  subscribeToUser(uid: string) {
+    // unsubscribe from current user observable
+    if (this.currentUser$) {
+      this.currentUser$.unsubscribe();
+    }
+
+    // subscribe to user changes
+    this.currentUser$ = this.getUser(uid).subscribe(user => {
+      this.currentUser = user;
+    });
+  }
 
   getUser(userId: string): Observable<User> {
     // load from cache when we can

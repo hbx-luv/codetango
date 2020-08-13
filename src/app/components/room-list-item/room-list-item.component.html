@@ -1,0 +1,10 @@
+<ion-item *ngIf="room$ | async as room; else loading">
+  {{ room.name }}
+  <ng-content></ng-content>
+</ion-item>
+
+<ng-template #loading>
+  <ion-item>
+    <ion-skeleton-text [ngStyle]="style" animated></ion-skeleton-text>
+  </ion-item>
+</ng-template>

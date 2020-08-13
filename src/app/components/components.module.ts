@@ -11,6 +11,7 @@ import {GameCardComponent} from './game-card/game-card.component';
 import {GameJoinButtonComponent} from './game-join-button/game-join-button.component';
 import {GameComponent} from './game/game.component';
 import {PregameComponent} from './pregame/pregame.component';
+import {RoomListItemComponent} from './room-list-item/room-list-item.component';
 import {TeamListsComponent} from './team-lists/team-lists.component';
 import {TimerComponent} from './timer/timer.component';
 import {TitleBarComponent} from './title-bar/title-bar.component';
@@ -33,6 +34,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     WordHistoryComponent,
     GameCardComponent,
     EloChartComponent,
+    RoomListItemComponent,
   ],
   imports: [
     IonicModule,
@@ -58,6 +60,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     WordHistoryComponent,
     GameCardComponent,
     EloChartComponent,
+    RoomListItemComponent,
   ]
 })
 export class ComponentsModule {

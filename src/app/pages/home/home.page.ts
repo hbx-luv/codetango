@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
+import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 import {RoomStatus, WordList} from 'types';
 
@@ -17,14 +18,27 @@ export class HomePage {
   selectedWordList: WordList;
 
   constructor(
-      private readonly roomService: RoomService,
       public readonly authService: AuthService,
+      private readonly roomService: RoomService,
       private readonly router: Router,
       private readonly utilService: UtilService,
+      private readonly userService: UserService,
   ) {}
 
   get disabled(): boolean {
     return this.roomService.createRoomId(this.roomName).length === 0;
+  }
+
+  get roomIds(): string[] {
+    if (this.userService.currentUser) {
+      const {rooms} = this.userService.currentUser;
+      if (!this.roomName) {
+        this.roomName = rooms[0];
+      }
+      return rooms.slice(0, 5);
+    } else {
+      return [];
+    }
   }
 
   selectWordList(list: WordList) {
@@ -52,9 +66,13 @@ export class HomePage {
         userIds: []
       });
 
-      await this.roomService.joinRoom(id);
-      this.router.navigate([id]);
+      this.joinRoom(id);
       await loader.dismiss();
     }
+  }
+
+  joinRoom(id: string) {
+    this.roomService.joinRoom(id);
+    this.router.navigate([id]);
   }
 }

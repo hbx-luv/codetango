@@ -12,5 +12,15 @@
         </button>
       </div>
     </div>
+
+    <div class="rooms-container" *ngIf="roomIds.length">
+      <h5>Recent Rooms</h5>
+      <app-room-list-item
+        *ngFor="let roomId of roomIds"
+        [roomId]="roomId"
+      >
+        <ion-button size="small" slot="end" (click)="joinRoom(roomId)">Join</ion-button>
+      </app-room-list-item>
+    </div>
   </div>
 </ion-content>
