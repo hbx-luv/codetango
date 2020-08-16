@@ -23,4 +23,10 @@
       </app-room-list-item>
     </div>
   </div>
+
+  <ion-fab vertical="top" horizontal="end" slot="fixed" *ngIf="authService.authenticated">
+    <ion-fab-button color="medium" [routerLink]="['/', 'scorecard', authService.currentUserId]">
+      <ion-icon name="person"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
