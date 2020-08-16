@@ -8,11 +8,11 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
       - name: Install @angular/cli
         run: npm i -D -E @angular/cli
       - name: Use coturiv/setup-ionic
-        uses: coturiv/setup-ionic@v1
+        uses: coturiv/setup-ionic@master
         with:
           cordova-version: 8
       - run: npm run build-app:prod
