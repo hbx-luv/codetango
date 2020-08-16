@@ -1,4 +1,4 @@
-name: Node CI Test branch
+name: Build Prod App
 
 on:
   pull_request:
@@ -13,4 +13,4 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: npm run build
+      - run: npm run build-app:prod
