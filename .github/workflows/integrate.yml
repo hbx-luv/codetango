@@ -1,16 +1,19 @@
-name: Node CI
+name: Build Prod App
 
 on:
   pull_request:
     branches: [ master ]
 
 jobs:
-  test_pull_request:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@master
+      - name: Install @angular/cli
+        run: npm i -D -E @angular/cli
+      - name: Use coturiv/setup-ionic
+        uses: coturiv/setup-ionic@master
         with:
-          node-version: 12
+          cordova-version: 8
       - run: npm ci
-      - run: npm run build
+      - run: npm run build-app:prod
