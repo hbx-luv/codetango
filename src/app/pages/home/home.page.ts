@@ -33,7 +33,12 @@ export class HomePage {
     if (this.userService.currentUser) {
       const {rooms} = this.userService.currentUser;
       if (!this.roomName) {
-        this.roomName = rooms[0];
+        // An ExpressionChangedAfterItHasBeenCheckedError expection is thrown if
+        // there is no timeout here
+        // https://blog.angular-university.io/angular-debugging/
+        setTimeout(() => {
+          this.roomName = rooms[0];
+        });
       }
       return rooms.slice(0, 5);
     } else {
