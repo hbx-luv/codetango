@@ -5,15 +5,14 @@ on:
     branches: [ master ]
 
 jobs:
-  test_pull_request:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm ci
-      - uses: coturiv/setup-ionic@master
+      - name: Install @angular/cli
+        run: npm i -D -E @angular/cli
+      - name: Use coturiv/setup-ionic
+        uses: coturiv/setup-ionic@v1
         with:
           cordova-version: 8
       - run: npm run build-app:prod
