@@ -12,8 +12,8 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
+      - run: npm ci
       - uses: coturiv/setup-ionic@v1
         with:
           cordova-version: 8
-      - run: npm ci
       - run: npm run build-app:prod
