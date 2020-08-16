@@ -15,8 +15,12 @@ jobs:
         uses: coturiv/setup-ionic@master
         with:
           cordova-version: 8
-      - run: npm ci
-      - run: npm run build-app:prod
+      - name: Install app dependencies
+        run: npm ci
+      - name: Install functions dependencies
+        run: cd functions && npm i && cd ..
+      - name: Build prod app
+        run: npm run build-app:prod
       - uses: w9jds/firebase-action@master
         with:
           args: deploy -P prod
