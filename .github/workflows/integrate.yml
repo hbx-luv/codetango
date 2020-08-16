@@ -15,4 +15,5 @@ jobs:
         uses: coturiv/setup-ionic@master
         with:
           cordova-version: 8
+      - run: npm ci
       - run: npm run build-app:prod
