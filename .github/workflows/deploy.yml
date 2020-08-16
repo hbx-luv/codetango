@@ -21,4 +21,4 @@ jobs:
         with:
           args: deploy -P prod
         env:
-          FIREBASE_TOKEN: $
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
