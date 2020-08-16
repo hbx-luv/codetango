@@ -19,6 +19,6 @@ jobs:
       - run: npm run build-app:prod
       - uses: w9jds/firebase-action@master
         with:
-          args: deploy
+          args: deploy -P prod
         env:
           FIREBASE_TOKEN: $
