@@ -54,6 +54,7 @@ export class UserService {
                 user = {name: userId, email: userId, rooms: []};
               }
               user.rooms = user.rooms || [];
+              user.id = userId;
               return user;
             }));
 
