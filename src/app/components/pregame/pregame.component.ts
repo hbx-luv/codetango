@@ -1,10 +1,12 @@
 import {Component, Input} from '@angular/core';
 import {shuffle} from 'lodash';
 import {Observable} from 'rxjs';
+import {first} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
+import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, Room, RoomStatus, Team, TeamTypes} from '../../../../types';
+import {Game, Room, RoomStatus, Team, TeamTypes, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
 
@@ -33,6 +35,7 @@ export class PregameComponent {
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly utilService: UtilService,
+      private readonly userService: UserService,
   ) {}
 
   get userInRoom(): boolean {
@@ -79,19 +82,24 @@ export class PregameComponent {
     const blueTeamUsers = randomizedUsers.slice(0, halfway);
     const redTeamUsers = randomizedUsers.slice(halfway);
 
+    // sort the users by their spymaster frequency so that users who have been
+    // spymaster the least (compared to games played) will be chosen first
+    const sortedBlue = await this.sortUsersBySpymasterFrequency(blueTeamUsers);
+    const sortedRed = await this.sortUsersBySpymasterFrequency(redTeamUsers);
+
     // wait for the game to be created
     const loader = await this.utilService.presentLoader('Creating game...');
     await this.gameService.createGame({
       createdAt: Date.now(),
       blueTeam: {
         color: TeamTypes.BLUE,
-        userIds: blueTeamUsers,
-        spymaster: blueTeamUsers[0],
+        userIds: sortedBlue,
+        spymaster: sortedBlue[0],
       },
       redTeam: {
         color: TeamTypes.RED,
-        userIds: redTeamUsers,
-        spymaster: redTeamUsers[0],
+        userIds: sortedRed,
+        spymaster: sortedRed[0],
       },
       roomId: this.room.id,
     });
@@ -131,5 +139,23 @@ export class PregameComponent {
   sortSpymasterFirst(team: Team) {
     const {userIds, spymaster} = team;
     return userIds.sort(user => user === spymaster ? -1 : 0);
+  }
+
+  async sortUsersBySpymasterFrequency(userIds: string[]): Promise<string[]> {
+    const users: User[] = await Promise.all(userIds.map(
+        userId => this.userService.getUser(userId).pipe(first()).toPromise()));
+
+    return users
+        .sort((a, b) => {
+          if (!a.stats) {
+            return -1;
+          } else if (!b.stats) {
+            return 1;
+          } else {
+            return (a.stats.spymasterGames / a.stats.gamesPlayed) -
+                (b.stats.spymasterGames / b.stats.gamesPlayed);
+          }
+        })
+        .map(user => user.id!);
   }
 }
