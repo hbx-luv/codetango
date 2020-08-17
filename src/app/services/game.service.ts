@@ -72,14 +72,18 @@ export class GameService {
         }));
   }
 
-  getCompletedGames(roomId: string, limit?: number, startAfter?: number):
+  getCompletedGames(roomId?: string, limit?: number, startAfter?: number):
       Observable<Game[]> {
     return this.afs
         .collection<Game>(
             'games',
             ref => {
-              let query = ref.where('roomId', '==', roomId)
-                              .orderBy('completedAt', 'desc');
+              let query = ref.orderBy('completedAt', 'desc');
+
+              // filter by given room
+              if (roomId) {
+                query = query.where('roomId', '==', roomId);
+              }
 
               // support limiting
               if (limit) {

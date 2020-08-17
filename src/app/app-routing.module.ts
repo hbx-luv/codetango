@@ -32,6 +32,11 @@ const routes: Routes = [
     loadChildren: () => import('./pages/scorecard/scorecard.module')
                             .then(m => m.ScorecardPageModule)
   },
+  {
+    path: 'all/rooms/games',
+    loadChildren: () => import('./pages/game-history/game-history.module')
+                            .then(m => m.GameHistoryPageModule)
+  },
 ];
 
 @NgModule({
