@@ -16,6 +16,7 @@ export class HomePage {
   roomName: string;
   lists: Observable<WordList[]>;
   selectedWordList: WordList;
+  userHasTyped = false;
 
   constructor(
       public readonly authService: AuthService,
@@ -32,7 +33,7 @@ export class HomePage {
   get roomIds(): string[] {
     if (this.userService.currentUser) {
       const {rooms} = this.userService.currentUser;
-      if (!this.roomName) {
+      if (!this.userHasTyped) {
         // An ExpressionChangedAfterItHasBeenCheckedError expection is thrown if
         // there is no timeout here
         // https://blog.angular-university.io/angular-debugging/

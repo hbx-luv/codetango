@@ -6,7 +6,7 @@
         Play Codenames online across multiple devices on a shared board. To create a new room or join an existing room, enter a room identifier and click 'GO'.
       </p>
       <div class="input-container">
-        <ion-input class="create-input" [(ngModel)]="roomName" (keyup.enter)="createRoom()"></ion-input>
+        <ion-input class="create-input" [(ngModel)]="roomName" (keyup.enter)="createRoom()" (keyup)="userHasTyped = true"></ion-input>
         <button class="create-button" (click)="createRoom()" [disabled]="disabled">
           GO
         </button>
