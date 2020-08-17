@@ -88,7 +88,7 @@
 
 <!-- assign spymaster -->
 <div class="assign-spymaster" *ngIf="room && room.status === 'ASSIGNING_ROLES' && game">
-  <h1>Assign Spymaster</h1>
+  <h4 class="description">Assign your team's Spymaster by clicking their name below</h4>
   <app-team-lists
     [room]="room"
     [game]="game"

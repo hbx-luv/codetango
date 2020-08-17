@@ -71,6 +71,12 @@
   display: flex;
   align-items: center;
   flex-direction: column;
+
+  .description {
+    text-align: center;
+    padding: 20px 16px 0;
+    color: #7f7f7f;
+  }
 }
 
 // on even smaller devices, switch to a column view
