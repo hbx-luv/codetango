@@ -14,6 +14,8 @@ export class TimerComponent {
   seconds: number;
   timeout: any;  // NodeJS.Timeout;
 
+  timerTooltip: string;
+
   constructor(private readonly gameService: GameService) {}
 
   get color(): string {
@@ -29,6 +31,11 @@ export class TimerComponent {
   ngOnChanges() {
     if (this.game && this.game.createdAt && !this.timeout) {
       this.calculateClock();
+    }
+    if (this.room) {
+      this.timerTooltip = this.room.enforceTimer ?
+          'When the timer runs out, the turn will automaticlly be ended.' :
+          'The timer here is just a suggestion, nothing will happen when the timer runs out.';
     }
   }
 
