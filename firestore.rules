@@ -6,6 +6,37 @@ service cloud.firestore {
     // all data in your Firestore database. It is useful for getting
     // started, but it leaves your app open to attackers.
     match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /deletedGames/{document=**} {
+      allow read, write: if true;
+    }
+
+    match /eloHistory/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /games/{document=**} {
+      // TODO: get to the bottom of doc mmmNCiIPKhnU0qiYxeYO beign written to over and over
+      allow read: if true;
+      allow create: if true;
+      allow update: if resource.data.status != 'LOCKED';
+      allow delete: if true;
+    }
+
+    match /rooms/{document=**} {
+      allow read, write: if true;
+    }
+
+    match /users/{document=**} {
+      // Allow reading/writing to your own user doc
+      allow read: if true;
+      allow write: if request.auth.uid == request.resource.id;
+    }
+
+    match /wordlists/{document=**} {
       allow read, write: if true;
     }
   }
