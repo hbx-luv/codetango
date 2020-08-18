@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
+import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 
 import {Clue, Game, GameStatus, Room, TeamTypes, Tile, TileRole} from '../../../../types';
@@ -25,6 +26,7 @@ export class GameBoardComponent {
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
+      private readonly clueService: ClueService,
   ) {}
 
   ngOnChanges() {
@@ -110,6 +112,8 @@ export class GameBoardComponent {
       }
     }
 
+    // add this guess to the clue and save
+    this.clueService.addGuessToClue(this.game.id, this.currentClue.id, tile);
     this.gameService.updateGame(this.game.id, updates);
   }
 
@@ -145,16 +149,19 @@ export class GameBoardComponent {
 
   getGameStatus(tile: Tile) {
     const bluesTurn = this.game.status === GameStatus.BLUES_TURN;
-    const maxGuessesReached = ++this.currentClue.guessesMade === this.currentClue.maxGuesses;
+    const maxGuessesReached =
+        this.currentClue.guessesMade.length + 1 === this.currentClue.maxGuesses;
     switch (tile.role) {
       case TileRole.ASSASSIN:
         return bluesTurn ? GameStatus.RED_WON : GameStatus.BLUE_WON;
       case TileRole.CIVILIAN:
         return bluesTurn ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
       case TileRole.BLUE:
-        return maxGuessesReached && bluesTurn ? GameStatus.REDS_TURN : GameStatus.BLUES_TURN;
+        return maxGuessesReached && bluesTurn ? GameStatus.REDS_TURN :
+                                                GameStatus.BLUES_TURN;
       case TileRole.RED:
-        return maxGuessesReached && !bluesTurn ? GameStatus.BLUES_TURN : GameStatus.REDS_TURN;
+        return maxGuessesReached && !bluesTurn ? GameStatus.BLUES_TURN :
+                                                 GameStatus.REDS_TURN;
       default:
         throw new Error('What the fuck is this?!');
     }

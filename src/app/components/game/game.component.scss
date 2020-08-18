@@ -22,14 +22,19 @@
     margin: 0 15px;
   }
 
-  .team-lists,
-  .word-history {
+  .team-lists {
     flex-grow: 1;
     min-width: 205px;
   }
+
+  .word-history {
+    flex-grow: 1;
+    width: 350px;
+    max-width: 350px;
+  }
 }
 
-@media (max-width: 1090px) {
+@media (max-width: 1350px) {
   .game-row {
     padding: 0;
     margin: 0;
@@ -43,6 +48,7 @@
     }
     .word-history {
       width: 100%;
+      max-width: initial;
     }
   }
 }

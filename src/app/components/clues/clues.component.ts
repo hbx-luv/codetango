@@ -42,7 +42,7 @@ export class CluesComponent implements OnDestroy {
         word: clue,
         guessCount: this.clueCount,
         maxGuesses: this.clueCount === 0 ? 999 : this.clueCount + 1,
-        guessesMade: 0,
+        guessesMade: [],
         createdAt: Date.now(),
         team: isBluesTurn ? TeamTypes.BLUE : TeamTypes.RED,
       });

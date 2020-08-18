@@ -51,9 +51,12 @@ export interface Clue {
   word: string;
   guessCount: number;
   maxGuesses: number;
-  guessesMade: number;
+  guessesMade: Tile[];
   createdAt: number;
   team: TeamTypes;
+
+  // assigned by client
+  id?: string;
 }
 
 export interface Room {

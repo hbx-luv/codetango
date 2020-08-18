@@ -1,4 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -12,7 +13,7 @@ import {Clue, Game, TileRole} from '../../../../types';
 })
 export class WordHistoryComponent implements OnInit {
   @Input() game: Game;
-  clues$;
+  clues$: Observable<Clue[]>;
 
   constructor(
       private readonly clueService: ClueService,
