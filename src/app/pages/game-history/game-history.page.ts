@@ -21,6 +21,9 @@ export class GameHistoryPage {
       private readonly route: ActivatedRoute,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
+  }
+
+  ionViewDidEnter() {
     this.reset();
   }
 
