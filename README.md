@@ -46,7 +46,11 @@ Create a new service:
 More options through interactive CLI:
 `ionic generate`
 
-### Deploy
+### CI/CD
+
+When a pull request is created (and any future commits are pushed to that branch), a build is kicked off to ensure you didn't break anything. Any push to master (including merged pull requests) will autimatically trigger a build + deploy to prod. You can check out this config under `.github/workflows`
+
+### Manual Deploys
 
 First, you'll need to be invited to the [firebase cloud console for this project](https://console.firebase.google.com/u/0/project/codetango) and then login to the cli via `firebase login`.
 
