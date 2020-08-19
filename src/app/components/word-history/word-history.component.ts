@@ -15,6 +15,8 @@ export class WordHistoryComponent implements OnInit {
   @Input() game: Game;
   clues$: Observable<Clue[]>;
 
+  latestClue?: Clue;
+
   constructor(
       private readonly clueService: ClueService,
       private readonly utilService: UtilService,
@@ -22,20 +24,33 @@ export class WordHistoryComponent implements OnInit {
 
   ngOnInit() {
     this.clues$ = this.clueService.getClues(this.game.id).pipe(tap(clues => {
-      const latestClue = clues[0];
-      if (latestClue && !this.game.completedAt) {
+      const clue = clues[0] as Clue;
+      const uniqueClue = this.notEqual(clue, this.latestClue);
+
+      // toast when we have a unique clue and the game isn't over
+      if (clue && uniqueClue && !this.game.completedAt) {
+        this.latestClue = clues[0];
         this.utilService.showToast(
-            `Clue from SpyMaster: ${latestClue.word} for ${
-                latestClue.guessCount}`,
-            5000, {
-              color: this.getColor(latestClue),
+            `Clue from SpyMaster: ${clue.word} for ${clue.guessCount}`, 5000, {
+              color: this.getColor(clue),
               buttons: ['close'],
             });
       }
     }));
   }
 
-  getColor(clue) {
+  /**
+   * Return true when either provided clue is falsey or when they both exist but
+   * have different createdAt timestamps
+   */
+  notEqual(a: Clue, b: Clue): boolean {
+    return !a || !b || a.createdAt !== b.createdAt;
+  }
+
+  /**
+   * Return the Ionic color to render as the background of a given clue
+   */
+  getColor(clue): string {
     if (!clue) {
       return null;
     }
