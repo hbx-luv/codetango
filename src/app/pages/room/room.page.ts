@@ -50,8 +50,7 @@ export class RoomPage implements OnDestroy {
   }
 
   get userIsInRoom(): boolean {
-    return this.room &&
-        this.room.userIds.includes(this.authService.currentUserId);
+    return this.isUserInRoom(this.authService.currentUserId);
   }
 
   get gameInProgress(): boolean {
@@ -59,6 +58,10 @@ export class RoomPage implements OnDestroy {
       RoomStatus.GAME_IN_PROGRESS,
       RoomStatus.GAME_ENDED,
     ].includes(this.room.status);
+  }
+
+  isUserInRoom(userId: string): boolean {
+    return this.room && this.room.userIds.includes(userId);
   }
 
   selectTab($event: string) {
@@ -112,6 +115,20 @@ export class RoomPage implements OnDestroy {
       const loader =
           await this.utilService.presentLoader('Creating the next game...');
       const {redTeam, blueTeam, roomId} = game;
+
+      // ensure the users are still in the room
+      redTeam.userIds = redTeam.userIds.filter(this.isUserInRoom.bind(this));
+      blueTeam.userIds = blueTeam.userIds.filter(this.isUserInRoom.bind(this));
+
+      // if any team is now too small, redirect back to the pregame lobby
+      if (redTeam.userIds.length < 2 || blueTeam.userIds.length < 2) {
+        loader.dismiss();
+        this.roomService.updateRoom(this.room.id, {status: RoomStatus.PREGAME});
+        this.utilService.showToast(
+            'Too many users left the room to start a new game with the same teams',
+            10000);
+        return;
+      }
 
       // cycle the current spymaster to the end and set new ones
       redTeam.userIds.push(redTeam.userIds.shift());
