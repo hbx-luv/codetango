@@ -22,7 +22,7 @@ service cloud.firestore {
       // TODO: get to the bottom of doc mmmNCiIPKhnU0qiYxeYO beign written to over and over
       allow read: if true;
       allow create: if true;
-      allow update: if resource.data.status != 'LOCKED';
+      allow update: if true;
       allow delete: if true;
     }
 
