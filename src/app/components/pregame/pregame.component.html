@@ -45,16 +45,7 @@
     <h3>Timer Settings</h3>
     <div class="timer-settings">
       <ion-item>
-        <ion-label for="timer-input">Timer (seconds): </ion-label>
-        <ion-input
-          name="timer-input"
-          type="number"
-          [debounce]="debounce"
-          (ionChange)="saveTimerSettings()"
-          [(ngModel)]="room.timer">
-        </ion-input>
-      </ion-item>
-      <ion-item>
+        <ion-icon class="help" name="help-circle-outline" tooltip="The amount of time the first team gets on the first round"></ion-icon>
         <ion-label for="first-timer-input">First Turn Timer (seconds): </ion-label>
         <ion-input
           name="first-timer-input"
@@ -65,7 +56,20 @@
         </ion-input>
       </ion-item>
       <ion-item>
-        <ion-label for="guess-increment-input">Correct Guess Increment (seconds): </ion-label>
+        <ion-icon class="help" name="help-circle-outline" tooltip="The amount of time each team gets after the first turn"></ion-icon>
+        <ion-label for="timer-input">Timer (seconds): </ion-label>
+        <ion-input
+          slot="end"
+          name="timer-input"
+          type="number"
+          [debounce]="debounce"
+          (ionChange)="saveTimerSettings()"
+          [(ngModel)]="room.timer">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-icon class="help" name="help-circle-outline" tooltip="The amount of time added back to the timer when a correct guess is made"></ion-icon>
+        <ion-label for="guess-increment-input">Guess Increment (seconds): </ion-label>
         <ion-input
           name="guess-increment-input"
           type="number"
