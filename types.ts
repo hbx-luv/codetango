@@ -49,7 +49,7 @@ export interface Team {
 // The clues that make up a game
 export interface Clue {
   word: string;
-  guessCount: number;
+  guessCount: string;
   maxGuesses: number;
   guessesMade: Tile[];
   createdAt: number;

@@ -46,11 +46,6 @@ export class TitleBarComponent {
          this.game.blueTeam.spymaster === this.authService.currentUserId);
   }
 
-  get showJoin(): boolean {
-    return this.authService.authenticated && this.room &&
-        !this.room.userIds.includes(this.authService.currentUserId);
-  }
-
   get title(): string {
     if (!this.room) return 'Loading...';
 

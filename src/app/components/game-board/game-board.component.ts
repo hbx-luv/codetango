@@ -134,11 +134,13 @@ export class GameBoardComponent {
       } else {
         // Guesser
         if (this.currentClue && this.currentClue.team === this.myTeam) {
-          if (this.currentClue.guessCount === 0 ||
-              this.currentClue.guessCount > 10) {
+          if (this.currentClue.guessCount === '0' ||
+              this.currentClue.guessCount === '∞') {
             return 'You have unlimited guesses';
           }
-          return `You can guess up to ${this.currentClue.guessCount + 1} words`;
+          const remaining = this.remainingGuesses(this.currentClue);
+          return `You can make ${remaining} more ${
+              remaining === 1 ? 'guess' : 'guesses'}`;
         } else {
           return 'Waiting for spymaster to give a clue';
         }
@@ -165,5 +167,9 @@ export class GameBoardComponent {
       default:
         throw new Error('What the fuck is this?!');
     }
+  }
+
+  remainingGuesses(clue: Clue): number {
+    return clue ? clue.maxGuesses - clue.guessesMade.length : 0;
   }
 }
