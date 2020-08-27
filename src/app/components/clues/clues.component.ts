@@ -2,8 +2,14 @@ import {Component, Input, OnDestroy} from '@angular/core';
 import {AlertController} from '@ionic/angular';
 import {ReplaySubject} from 'rxjs';
 import {ClueService} from 'src/app/services/clue.service';
+import {UtilService} from 'src/app/services/util.service';
 
-import {Game, GameStatus, TeamTypes, TileRole} from '../../../../types';
+import {Game, GameStatus, TeamTypes} from '../../../../types';
+
+const TOAST_DURATION = 8000;
+const TOAST_OPTIONS = {
+  buttons: ['got it']
+};
 
 @Component({
   selector: 'app-clues',
@@ -23,11 +29,14 @@ export class CluesComponent implements OnDestroy {
   constructor(
       private readonly clueService: ClueService,
       private readonly alertController: AlertController,
+      private readonly utilService: UtilService,
   ) {}
 
   async submitClue() {
     // Need to check if the clue is valid before submitting
-    if (!this.disableSubmitButton) {
+    if (this.disableSubmitButton) {
+      this.sendWittyToast();
+    } else {
       if (await this.isClueIllegalWord(this.clue)) {
         return;
       }
@@ -87,7 +96,7 @@ export class CluesComponent implements OnDestroy {
     // this.clueCount >= 0 didn't work when I put a number and then deleted the
     // number
     const hasAClue = (this.clueCount === 0 || this.clueCount > 0) &&
-        this.clue !== undefined && this.clue.trim().length;
+        !!this.clue && this.clue.trim().length;
     return !hasAClue || !this.isMyTurn || this.currentClueIsFromMyTeam;
   }
 
@@ -99,6 +108,29 @@ export class CluesComponent implements OnDestroy {
     } else {
       return clueCount.toFixed(0);
     }
+  }
+
+  sendWittyToast() {
+    // fallback
+    let message =
+        'Something went wrong. Double check that your clue is valid and that it\'s your turn.';
+
+    // handle validation
+    if (!this.isMyTurn) {
+      message =
+          'It\'s not your turn! I know the other team is taking forreeveeerrrr, but they\'ll mess up soon, I promise.';
+    } else if (this.currentClueIsFromMyTeam) {
+      message =
+          'You already gave your team a clue! Now just sit back, relax, and scream at your computer screen while they discuss clicking on the assassin.';
+    } else if (!this.clue || !this.clue.trim().length) {
+      message =
+          'You are very return-key-happy. Try again after you have typed a clue.';
+    } else if (!this.clueCount && this.clueCount !== 0) {
+      message =
+          'Nice clue! Now give your team some idea of how many tiles you want them to click on!';
+    }
+
+    return this.utilService.showToast(message, TOAST_DURATION, TOAST_OPTIONS);
   }
 
   ngOnDestroy() {
