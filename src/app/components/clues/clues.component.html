@@ -1,30 +1,25 @@
-<div>
-  <ion-item>
-    <ion-label for="clue-input"> Clue: </ion-label>
-    <ion-input name="clue-input"
-               type="text"
-               placeholder="CODETANGO"
-               (keyup.enter)="submitClue()"
-               [(ngModel)]="clue">
-    </ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-label for="clue-count-input"> Clue Count: </ion-label>
-    <ion-input name="clue-count-input"
-               type="number"
-               max="999"
-               placeholder="8"
-               (keyup.enter)="submitClue()"
-               [(ngModel)]="clueCount">
-    </ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-button name="give-clue-button"
-                (click)="submitClue()"
-                (keyup.enter)="submitClue()"
-                color="primary"
-                [disabled]="disableSubmitButton">
-      {{submitClueButtonText}}
-    </ion-button>
-  </ion-item>
+<div class="give-clue">
+  <input
+    class="clue"
+    type="text"
+    placeholder="Type your clue..."
+    [(ngModel)]="clue"
+    (keyup.enter)="submitClue()"
+  >
+  <input
+    class="count"
+    type="number"
+    placeholder="2"
+    max="999"
+    [(ngModel)]="clueCount"
+    (keyup.enter)="submitClue()"
+  >
+  <ion-button
+    (click)="submitClue()"
+    (keyup.enter)="submitClue()"
+    color="light"
+    [disabled]="disableSubmitButton"
+  >
+    Submit
+  </ion-button>
 </div>

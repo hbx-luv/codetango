@@ -25,25 +25,28 @@
     [game]="game">
   </app-team-lists>
   <!-- board in the middle -->
-  <app-game-board
-    class="game-board"
-    [room]="room"
-    [game]="game"
-    [currentClue]="currentClue"
-    [readonly]="disableGameBoard"
-    [spymaster]="spymaster">
-  </app-game-board>
+  <div class="game-board">
+    <app-game-board
+      class="game-board"
+      [room]="room"
+      [game]="game"
+      [currentClue]="currentClue"
+      [readonly]="disableGameBoard"
+      [spymaster]="spymaster">
+    </app-game-board>
+
+    <!-- spymaster clue interface -->
+    <app-clues
+      [game]="game"
+      [isMyTurn]="myTurn"
+      [currentClueIsFromMyTeam]="currentClueIsFromMyTeam"
+      *ngIf="spymaster && !game.completedAt">
+    </app-clues>
+  </div>
   <!-- word history on the right -->
   <app-word-history
     class="word-history"
     [game]="game">
   </app-word-history>
 </ion-row>
-
-<!-- spymaster clue interface -->
-<app-clues
-  [game]="game"
-  [isMyTurn]="myTurn"
-  *ngIf="spymaster && !game.completedAt">
-</app-clues>
 

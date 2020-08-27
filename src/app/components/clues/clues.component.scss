@@ -1,7 +1,22 @@
-.red {
-  color: lightcoral;
-}
+.give-clue {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-.blue {
-  color: lightskyblue;
+  input {
+    padding: 8px;
+    margin: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: var(--background);
+    outline: none;
+
+    &:focus {
+      border-color: var(--ion-color-primary);
+    }
+
+    &.count {
+      width: 70px;
+    }
+  }
 }
