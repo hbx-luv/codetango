@@ -2,12 +2,13 @@ import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil, tap} from 'rxjs/operators';
+import {confetti} from 'src/app/confetti.js';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UtilService} from 'src/app/services/util.service';
-import {Clue, Game, Room, RoomStatus} from 'types';
+import {Clue, Game, GameStatus, Room, RoomStatus} from 'types';
 
 @Component({
   selector: 'app-room',
@@ -24,6 +25,7 @@ export class RoomPage implements OnDestroy {
   currentClue$: Observable<Clue>;
 
   lastGame: string;
+  lastStatus: GameStatus;
 
   constructor(
       private readonly authService: AuthService,
@@ -36,9 +38,22 @@ export class RoomPage implements OnDestroy {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.currentGame$ =
         this.gameService.getCurrentGame(this.roomId).pipe(tap(currentGame => {
-          if (currentGame && this.lastGame !== currentGame.id) {
-            this.lastGame = currentGame.id;
-            this.currentClue$ = this.clueService.getCurrentClue(currentGame.id);
+          if (currentGame) {
+            // only change current clue subscription when you get to a new game
+            if (this.lastGame !== currentGame.id) {
+              this.lastGame = currentGame.id;
+              this.currentClue$ =
+                  this.clueService.getCurrentClue(currentGame.id);
+            }
+            // show confetti after a win for 5 seconds
+            // https://www.cssscript.com/confetti-falling-animation/
+            const {status} = currentGame;
+            if (this.lastStatus && this.lastStatus !== status &&
+                [GameStatus.BLUE_WON, GameStatus.RED_WON].includes(status)) {
+              confetti.start();
+              setTimeout(confetti.stop, 5000);
+            }
+            this.lastStatus = currentGame.status;
           }
         }));
 
