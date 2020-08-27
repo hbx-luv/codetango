@@ -41,6 +41,7 @@ export class RoomPage implements OnDestroy {
           if (currentGame) {
             // only change current clue subscription when you get to a new game
             if (this.lastGame !== currentGame.id) {
+              delete this.lastStatus;
               this.lastGame = currentGame.id;
               this.currentClue$ =
                   this.clueService.getCurrentClue(currentGame.id);
