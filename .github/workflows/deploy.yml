@@ -3,6 +3,8 @@ name: Deploy to Firebase
 on:
   push:
     branches: [ master ]
+  paths-ignore:
+    README.md
 
 jobs:
   deploy:
@@ -19,6 +21,10 @@ jobs:
         run: npm ci
       - name: Install functions dependencies
         run: cd functions && npm i && cd ..
+      - name: 'Bump the version'
+        uses: 'phips28/gh-action-bump-version@master'
+        with:
+          skip-tag:  'true'
       - name: Build prod app
         run: npm run build-app:prod
       - uses: w9jds/firebase-action@master
