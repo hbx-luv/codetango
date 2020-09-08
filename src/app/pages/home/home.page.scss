@@ -58,8 +58,15 @@
 
   .rooms-container {
     width: 100%;
-    margin-top: 20px;
+    margin: 20px 0 50px;
   }
+}
+
+.version {
+  position: fixed;
+  bottom: 5px;
+  right: 5px;
+  font-size: 12px;
 }
 
 @media (max-width: 500px) {

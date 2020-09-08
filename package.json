@@ -1,8 +1,8 @@
 {
   "name": "codetango",
-  "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "version": "1.0.0",
+  "author": "Matt, Alex, Ryan, Armin, Justin, Bob, Tyler",
+  "homepage": "https://codetango.web.dev",
   "scripts": {
     "serve": "ionic serve",
     "start": "ionic serve",

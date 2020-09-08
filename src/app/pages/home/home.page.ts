@@ -5,6 +5,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
+import {environment} from 'src/environments/environment';
 import {RoomStatus, WordList} from 'types';
 
 @Component({
@@ -13,6 +14,7 @@ import {RoomStatus, WordList} from 'types';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
+  version = environment.version;
   roomName: string;
   lists: Observable<WordList[]>;
   selectedWordList: WordList;
