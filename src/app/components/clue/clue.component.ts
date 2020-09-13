@@ -8,6 +8,7 @@ import {Clue, TeamTypes} from 'types';
 })
 export class ClueComponent {
   @Input() clue: Clue;
+  @Input() showTooltip: boolean;
 
   constructor() {}
 
