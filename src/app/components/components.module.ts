@@ -4,12 +4,12 @@ import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
 import {TooltipModule} from 'ng2-tooltip-directive';
 
-import {CluesComponent} from './clues/clues.component';
 import {EloChartComponent} from './elo-chart/elo-chart';
 import {GameBoardComponent} from './game-board/game-board.component';
 import {GameCardComponent} from './game-card/game-card.component';
 import {GameJoinButtonComponent} from './game-join-button/game-join-button.component';
 import {GameComponent} from './game/game.component';
+import {GiveClueComponent} from './give-clue/give-clue.component';
 import {PregameComponent} from './pregame/pregame.component';
 import {RoomListItemComponent} from './room-list-item/room-list-item.component';
 import {TeamListsComponent} from './team-lists/team-lists.component';
@@ -23,7 +23,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
   declarations: [
     GameBoardComponent,
     GameComponent,
-    CluesComponent,
+    GiveClueComponent,
     UsersComponent,
     GameJoinButtonComponent,
     PregameComponent,
@@ -49,7 +49,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
   exports: [
     GameBoardComponent,
     GameComponent,
-    CluesComponent,
+    GiveClueComponent,
     UsersComponent,
     GameJoinButtonComponent,
     PregameComponent,

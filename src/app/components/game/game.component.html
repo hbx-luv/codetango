@@ -35,12 +35,12 @@
     </app-game-board>
 
     <!-- spymaster clue interface -->
-    <app-clues
+    <app-give-clue
       [game]="game"
       [isMyTurn]="myTurn"
       [currentClueIsFromMyTeam]="currentClueIsFromMyTeam"
       *ngIf="spymaster && !game.completedAt">
-    </app-clues>
+    </app-give-clue>
   </div>
   <!-- word history on the right -->
   <app-word-history
