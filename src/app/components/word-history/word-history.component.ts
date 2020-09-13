@@ -4,7 +4,7 @@ import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Clue, Game, TileRole} from '../../../../types';
+import {Clue, Game, TeamTypes} from '../../../../types';
 
 @Component({
   selector: 'app-word-history',
@@ -50,14 +50,14 @@ export class WordHistoryComponent implements OnInit {
   /**
    * Return the Ionic color to render as the background of a given clue
    */
-  getColor(clue): string {
+  getColor(clue: Clue): string {
     if (!clue) {
       return null;
     }
     switch (clue.team) {
-      case TileRole.BLUE:
+      case TeamTypes.BLUE:
         return 'primary';
-      case TileRole.RED:
+      case TeamTypes.RED:
         return 'danger';
       default:
         return '';

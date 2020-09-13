@@ -3,16 +3,7 @@
     Clues
   </h3>
   <ion-list *ngIf="clues$ | async as clues; else loading">
-    <ion-item *ngFor="let clue of clues" [color]="getColor(clue)">
-      <span class="word">{{clue.word}}</span>
-      <span class="guess-count">{{clue.guessCount}}</span>
-      <span class="guesses" slot="end">
-        <ng-container *ngFor="let tile of clue.guessesMade">
-          <div class="guess-indicator {{tile.role}}" *ngIf="game.hasPictures"></div>
-          <div class="guess-indicator {{tile.role}}" [tooltip]="tile.word" *ngIf="!game.hasPictures"></div>
-        </ng-container>
-      </span>
-    </ion-item>
+    <app-clue [clue]="clue" *ngFor="let clue of clues"></app-clue>
     <ion-item *ngIf="clues.length === 0">
       No clues given yet!
     </ion-item>
