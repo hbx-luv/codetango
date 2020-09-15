@@ -28,7 +28,7 @@ export class RoomPage implements OnDestroy {
   lastGameStatus: GameStatus;
 
   constructor(
-      private readonly authService: AuthService,
+      public readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly route: ActivatedRoute,
