@@ -2,12 +2,12 @@
   <h3 class="ion-padding-start">
     Clues
   </h3>
-  <ion-list *ngIf="clues$ | async as clues; else loading">
+  <div *ngIf="clues$ | async as clues; else loading">
     <app-clue [clue]="clue" [showTooltip]="!game.hasPictures" *ngFor="let clue of clues"></app-clue>
     <ion-item *ngIf="clues.length === 0">
       No clues given yet!
     </ion-item>
-  </ion-list>
+  </div>
 </div>
 
 <ng-template #loading>
