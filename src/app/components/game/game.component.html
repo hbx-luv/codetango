@@ -19,13 +19,11 @@
 
 <ion-row class="game-row {{selectedTab}}">
   <!-- team lists on the left -->
-  <div class="teams-chat">
-    <app-team-lists
-      class="team-lists"
-      [room]="room"
-      [game]="game">
-    </app-team-lists>
-  </div>
+  <app-team-lists
+    class="team-lists"
+    [room]="room"
+    [game]="game">
+  </app-team-lists>
   <!-- board in the middle -->
   <div class="game-board">
     <app-game-board
