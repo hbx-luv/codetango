@@ -9,6 +9,7 @@ import {GameService} from 'src/app/services/game.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Clue, Game, GameStatus, Room, RoomStatus} from 'types';
+import {SoundService} from '../../services/sound.service'
 
 @Component({
   selector: 'app-room',
@@ -34,6 +35,7 @@ export class RoomPage implements OnDestroy {
       private readonly route: ActivatedRoute,
       private readonly clueService: ClueService,
       private readonly utilService: UtilService,
+      private readonly soundService: SoundService,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.currentGame$ =
@@ -148,6 +150,10 @@ export class RoomPage implements OnDestroy {
 
   selectTab($event: string) {
     this.selectedTab = $event;
+  }
+
+  toggleSound() {
+    this.soundService.toggleMute();
   }
 
   async backToLobby(game: Game) {

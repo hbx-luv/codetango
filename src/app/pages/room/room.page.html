@@ -8,6 +8,16 @@
     </ion-title>
     <ion-buttons slot="end" *ngIf="currentGame$ | async as game">
       <ng-container *ngIf="gameInProgress && userIsInRoom">
+        <ion-button
+          *ngIf="soundService.muted()"
+          tooltip="Toggle Sounds" (click)="toggleSound()">
+          <ion-icon name="volume-mute-outline"></ion-icon>
+        </ion-button>
+        <ion-button
+          *ngIf="!soundService.muted()"
+          tooltip="Toggle Sounds" (click)="toggleSound()">
+          <ion-icon name="volume-high-outline"></ion-icon>
+        </ion-button>
         <ion-button tooltip="New Teams" (click)="backToLobby(game)">
           <ion-icon name="people-outline"></ion-icon>
         </ion-button>
