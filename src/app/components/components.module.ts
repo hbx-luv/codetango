@@ -8,7 +8,6 @@ import {ClueComponent} from './clue/clue.component';
 import {EloChartComponent} from './elo-chart/elo-chart';
 import {GameBoardComponent} from './game-board/game-board.component';
 import {GameCardComponent} from './game-card/game-card.component';
-import {GameJoinButtonComponent} from './game-join-button/game-join-button.component';
 import {GameComponent} from './game/game.component';
 import {GiveClueComponent} from './give-clue/give-clue.component';
 import {MessageComponent} from './message/message.component';
@@ -16,7 +15,6 @@ import {PregameComponent} from './pregame/pregame.component';
 import {RoomListItemComponent} from './room-list-item/room-list-item.component';
 import {TeamListsComponent} from './team-lists/team-lists.component';
 import {TimerComponent} from './timer/timer.component';
-import {TitleBarComponent} from './title-bar/title-bar.component';
 import {UsersComponent} from './users/user.component';
 import {WordHistoryComponent} from './word-history/word-history.component';
 
@@ -27,11 +25,9 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     GameComponent,
     GiveClueComponent,
     UsersComponent,
-    GameJoinButtonComponent,
     PregameComponent,
     TimerComponent,
     UsersComponent,
-    TitleBarComponent,
     TeamListsComponent,
     WordHistoryComponent,
     GameCardComponent,
@@ -55,11 +51,9 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     GameComponent,
     GiveClueComponent,
     UsersComponent,
-    GameJoinButtonComponent,
     PregameComponent,
     TimerComponent,
     UsersComponent,
-    TitleBarComponent,
     TeamListsComponent,
     WordHistoryComponent,
     GameCardComponent,

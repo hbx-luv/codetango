@@ -1,5 +1,5 @@
 <!-- score and end turn -->
-<ion-row class="score-bar">
+<div class="score-bar">
   <app-timer [game]="game" [room]="room"></app-timer>
   <h4>
     <ion-text color="primary" class="ion-padding-end">{{game.blueAgents}}</ion-text>
@@ -15,15 +15,17 @@
   >
     End Turn
   </ion-button>
-</ion-row>
+</div>
 
 <ion-row class="game-row {{selectedTab}}">
   <!-- team lists on the left -->
-  <app-team-lists
-    class="team-lists"
-    [room]="room"
-    [game]="game">
-  </app-team-lists>
+  <div class="teams-chat">
+    <app-team-lists
+      class="team-lists"
+      [room]="room"
+      [game]="game">
+    </app-team-lists>
+  </div>
   <!-- board in the middle -->
   <div class="game-board">
     <app-game-board

@@ -1,8 +1,37 @@
 <ion-header>
-  <app-title-bar
-    [room]="room"
-    [game]="currentGame$ | async"
-  ></app-title-bar>
+  <ion-toolbar [color]="toolbarColor">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      {{ title }}
+    </ion-title>
+    <ion-buttons slot="end" *ngIf="currentGame$ | async as game">
+      <ng-container *ngIf="gameInProgress && userIsInRoom">
+        <ion-button tooltip="New Teams" (click)="backToLobby(game)">
+          <ion-icon name="people-outline"></ion-icon>
+        </ion-button>
+        <ion-button tooltip="Next Game" (click)="nextGame(game)">
+          <ion-icon name="play-skip-forward-outline"></ion-icon>
+        </ion-button>
+      </ng-container>
+      <ion-button
+        tooltip="Leave"
+        (click)="leave(game)"
+        *ngIf="showLeave">
+        <ion-icon name="exit-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <div
+      class="title-bar-end"
+      slot="end"
+    >
+      <app-user
+        *ngIf="authService.authenticated"
+        [userId]="authService.currentUserId">
+      </app-user>
+    </div>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content>
@@ -36,20 +65,6 @@
     </ng-container>
 
   </div>
-
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="gameInProgress && userIsInRoom">
-    <ion-fab-button color="medium" size="small">
-      <ion-icon name="settings-outline"></ion-icon>
-    </ion-fab-button>
-    <ion-fab-list side="top" *ngIf="currentGame$ | async as game">
-      <ion-fab-button tooltip="Next Game" (click)="nextGame(game)">
-        <ion-icon name="play-skip-forward-outline"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-button tooltip="New Teams" (click)="backToLobby(game)">
-        <ion-icon name="people-outline"></ion-icon>
-      </ion-fab-button>
-    </ion-fab-list>
-  </ion-fab>
 </ion-content>
 
 <ion-footer *ngIf="gameInProgress">
