@@ -1,0 +1,11 @@
+<div class="chat-box">
+  <div class="chat-box-header" (click)="toggleChat()">
+    Spymaster Chat
+  </div>
+  <div class="chat-box-content" [class.shown]="chatShown">
+    <div class="message" *ngFor="let message of messages">
+      {{ message }}
+    </div>
+    <input [(ngModel)]="newMessage" (keyup.enter)="sendMessage()">
+  </div>
+</div>
