@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        with:
+          ref: ${{ github.ref }}
       - name: Install @angular/cli
         run: npm i -D -E @angular/cli
       - name: Use coturiv/setup-ionic
@@ -23,6 +25,8 @@ jobs:
         uses: 'phips28/gh-action-bump-version@master'
         with:
           skip-tag:  'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build prod app
         run: npm run build-app:prod
       - uses: w9jds/firebase-action@master
