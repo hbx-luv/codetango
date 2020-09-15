@@ -68,7 +68,7 @@ export class ClueService {
 
   async approveClue(gameId: string, clue: ProposedClue) {
     await this.setClueStatus(gameId, clue.id, ClueStatus.APPROVED);
-    return this.addClue(gameId, omit(clue, 'status'));
+    return this.addClue(gameId, omit(clue, ['status', 'id']));
   }
 
   denyClue(gameId: string, clueId: string) {
