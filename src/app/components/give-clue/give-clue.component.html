@@ -5,15 +5,17 @@
       (click)="clueService.approveClue(game.id, proposed)"
       color="light"
       *ngIf="!isMyTurn"
+      tooltip="Approve"
     >
-      Approve
+      <ion-icon name="thumbs-up-outline"></ion-icon>
     </ion-button>
     <ion-button
       (click)="clueService.denyClue(game.id, proposed.id)"
-      color="light"
       *ngIf="!isMyTurn"
+      color="light"
+      tooltip="Deny"
     >
-      Deny
+      <ion-icon name="thumbs-down-outline"></ion-icon>
     </ion-button>
     <ion-button
       (click)="clueService.cancelClue(game.id, proposed.id)"
@@ -47,13 +49,15 @@
     color="light"
     [disabled]="disableSubmitButton"
   >
-    Submit
+    Give Clue
   </ion-button>
   <ion-button
     (click)="submitClue(true)"
-    color="light"
+    color="dark"
     [disabled]="disableSubmitButton"
+    fill="clear"
+    tooltip="Ask other spymaster if this clue is allowed"
   >
-    Ask
+    Ask First
   </ion-button>
 </ng-template>
