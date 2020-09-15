@@ -1,4 +1,31 @@
 <div class="give-clue">
+  <ng-container *ngIf="proposedClue$ | async as proposed; else giveClue">
+    <app-clue [clue]="proposed"></app-clue>
+    <ion-button
+      (click)="clueService.approveClue(game.id, proposed)"
+      color="light"
+      *ngIf="!isMyTurn"
+    >
+      Approve
+    </ion-button>
+    <ion-button
+      (click)="clueService.denyClue(game.id, proposed.id)"
+      color="light"
+      *ngIf="!isMyTurn"
+    >
+      Deny
+    </ion-button>
+    <ion-button
+      (click)="clueService.cancelClue(game.id, proposed.id)"
+      color="light"
+      *ngIf="isMyTurn"
+    >
+      Cancel
+    </ion-button>
+  </ng-container>
+</div>
+
+<ng-template #giveClue>
   <input
     class="clue"
     type="text"
@@ -22,4 +49,11 @@
   >
     Submit
   </ion-button>
-</div>
+  <ion-button
+    (click)="submitClue(true)"
+    color="light"
+    [disabled]="disableSubmitButton"
+  >
+    Ask
+  </ion-button>
+</ng-template>

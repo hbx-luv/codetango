@@ -1,10 +1,10 @@
 import {Component, Input, OnDestroy} from '@angular/core';
 import {AlertController} from '@ionic/angular';
-import {ReplaySubject} from 'rxjs';
+import {Observable, ReplaySubject} from 'rxjs';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, GameStatus, TeamTypes} from '../../../../types';
+import {Game, GameStatus, ProposedClue, TeamTypes} from '../../../../types';
 
 const TOAST_DURATION = 8000;
 const TOAST_OPTIONS = {
@@ -23,16 +23,28 @@ export class GiveClueComponent implements OnDestroy {
   @Input() isMyTurn: boolean;
   @Input() currentClueIsFromMyTeam: boolean;
 
+  proposedClue$: Observable<ProposedClue|null>;
+
   clue: string;
   clueCount: number;
 
   constructor(
-      private readonly clueService: ClueService,
+      public readonly clueService: ClueService,
       private readonly alertController: AlertController,
       private readonly utilService: UtilService,
   ) {}
 
-  async submitClue() {
+  ngOnInit() {
+    this.proposedClue$ = this.clueService.getProposedClue(this.game.id);
+  }
+
+  /**
+   * Submit the clue as a spymaster. If askFirst is true, double check with the
+   * opposing spymaster so they can approve the clue before it is shown to your
+   * operatives
+   * @param askFirst
+   */
+  async submitClue(askFirst = false) {
     // Need to check if the clue is valid before submitting
     if (this.disableSubmitButton) {
       this.sendWittyToast();
@@ -41,17 +53,23 @@ export class GiveClueComponent implements OnDestroy {
         return;
       }
 
-      const clue = this.clue != null ? this.clue.toUpperCase() : null;
+      const word = this.clue != null ? this.clue.toUpperCase() : null;
       const isBluesTurn = GameStatus.BLUES_TURN === this.game.status;
 
-      this.clueService.addClue(this.game.id, {
-        word: clue,
+      const clue = {
+        word,
         guessCount: this.getGuessCount(this.clueCount),
         maxGuesses: this.clueCount === 0 ? 999 : this.clueCount + 1,
         guessesMade: [],
         createdAt: Date.now(),
         team: isBluesTurn ? TeamTypes.BLUE : TeamTypes.RED,
-      });
+      };
+
+      if (askFirst) {
+        this.clueService.proposeClue(this.game.id, clue);
+      } else {
+        this.clueService.addClue(this.game.id, clue);
+      }
 
       this.clue = null;
       this.clueCount = null;

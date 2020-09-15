@@ -29,6 +29,14 @@ export enum RoomStatus {
   GAME_ENDED = 'GAME_ENDED',
 }
 
+// status to track a proposed clue's status
+export enum ClueStatus {
+  WAITING = 'WAITING',
+  CANCELED = 'CANCELED',
+  APPROVED = 'APPROVED',
+  DENIED = 'DENIED',
+}
+
 // the word/image to display on the board as well as information about
 // the team/role it's tied to and whether or not it has been selected
 export interface Tile {
@@ -57,6 +65,10 @@ export interface Clue {
 
   // assigned by client
   id?: string;
+}
+
+export interface ProposedClue extends Clue {
+  status: ClueStatus;
 }
 
 export interface Room {
