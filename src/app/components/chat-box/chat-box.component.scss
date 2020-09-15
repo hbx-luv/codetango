@@ -1,0 +1,38 @@
+.chat-box {
+  width: 300px;
+  border: 1px solid #7f7f7f;
+  max-height: 500px;
+  background: var(--background);
+
+  .chat-box-header {
+    background: #333;
+    color: #fff;
+    padding: 8px 12px;
+    font-weight: bold;
+    border-bottom: 1px solid #7f7f7f;
+    cursor: pointer;
+  }
+
+  .chat-box-content {
+    display: none;
+    min-height: 100px;
+    overflow: auto;
+    max-height: 300px;
+
+    &.shown {
+      display: block;
+    }
+
+    .message {
+      background: #7f7f7f;
+      margin: 8px 4px;
+      padding: 4px;
+      border-radius: 4px;
+      width: auto;
+    }
+
+    input {
+      background: var(--background);
+    }
+  }
+}
