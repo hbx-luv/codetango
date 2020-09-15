@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { GameJoinButtonComponent } from './game-join-button.component';
+import { MessageComponent } from './message.component';
 
-describe('GameJoinButtonComponent', () => {
-  let component: GameJoinButtonComponent;
-  let fixture: ComponentFixture<GameJoinButtonComponent>;
+describe('MessageComponent', () => {
+  let component: MessageComponent;
+  let fixture: ComponentFixture<MessageComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GameJoinButtonComponent ],
+      declarations: [ MessageComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(GameJoinButtonComponent);
+    fixture = TestBed.createComponent(MessageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

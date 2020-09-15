@@ -7,6 +7,20 @@
   }
 }
 
+ion-toolbar {
+  .title-bar-end {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .user {
+    --ion-color: #fff !important;
+    --ion-color-base: #fff !important;
+    --ion-color-base-rgb: #fff !important;
+  }
+}
+
 ion-footer {
   display: none;
 }

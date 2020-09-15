@@ -12,11 +12,11 @@ const TOAST_OPTIONS = {
 };
 
 @Component({
-  selector: 'app-clues',
-  templateUrl: './clues.component.html',
-  styleUrls: ['./clues.component.scss'],
+  selector: 'app-give-clue',
+  templateUrl: './give-clue.component.html',
+  styleUrls: ['./give-clue.component.scss'],
 })
-export class CluesComponent implements OnDestroy {
+export class GiveClueComponent implements OnDestroy {
   private destroyed = new ReplaySubject<never>();
 
   @Input() game: Game;

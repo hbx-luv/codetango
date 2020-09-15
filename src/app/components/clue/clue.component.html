@@ -1,0 +1,10 @@
+<ion-item class="clue" [color]="color">
+  <span class="word">{{clue.word}}</span>
+  <span class="guess-count">{{clue.guessCount}}</span>
+  <span class="guesses" slot="end">
+    <ng-container *ngFor="let tile of clue.guessesMade">
+      <div class="guess-indicator {{tile.role}}" *ngIf="!showTooltip"></div>
+      <div class="guess-indicator {{tile.role}}" [tooltip]="tile.word" *ngIf="showTooltip"></div>
+    </ng-container>
+  </span>
+</ion-item>

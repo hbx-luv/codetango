@@ -1,0 +1,44 @@
+.clue {
+  border-radius: 4px;
+  margin: 0 8px 8px;
+  --inner-padding-end: 8px;
+
+  .word {
+    text-transform: uppercase;
+    width: 140px;
+  }
+
+  .guess-count {
+    margin: 0 10px;
+    width: 10px;
+  }
+
+  .guesses {
+    display: flex;
+    align-items: center;
+    width: 125px;
+    flex-wrap: wrap;
+    margin: 0;
+
+    .guess-indicator {
+      border: 1px solid #fff;
+      border-radius: 4px;
+      height: 20px;
+      width: 20px;
+      margin: 2px;
+
+      &.BLUE {
+        background: blue;
+      }
+      &.RED {
+        background: red;
+      }
+      &.CIVILIAN {
+        background: #bbb29f;
+      }
+      &.ASSASSIN {
+        background: #000;
+      }
+    }
+  }
+}

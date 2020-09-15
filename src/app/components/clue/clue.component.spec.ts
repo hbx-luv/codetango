@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { TitleBarComponent } from './title-bar.component';
+import { ClueComponent } from './clue.component';
 
-describe('TitleBarComponent', () => {
-  let component: TitleBarComponent;
-  let fixture: ComponentFixture<TitleBarComponent>;
+describe('ClueComponent', () => {
+  let component: ClueComponent;
+  let fixture: ComponentFixture<ClueComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TitleBarComponent ],
+      declarations: [ ClueComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TitleBarComponent);
+    fixture = TestBed.createComponent(ClueComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
