@@ -152,6 +152,10 @@ export class RoomPage implements OnDestroy {
     this.selectedTab = $event;
   }
 
+  get soundIcon(): string {
+    return this.soundService.muted() ? 'volume-mute-outline' : 'volume-high-outline';
+  }
+
   toggleSound() {
     this.soundService.toggleMute();
   }
