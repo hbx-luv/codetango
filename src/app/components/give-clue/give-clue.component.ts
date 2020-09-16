@@ -5,6 +5,7 @@ import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
 import {Game, GameStatus, ProposedClue, TeamTypes} from '../../../../types';
+import {SoundService} from '../../services/sound.service';
 
 const TOAST_DURATION = 8000;
 const TOAST_OPTIONS = {
@@ -24,6 +25,8 @@ export class GiveClueComponent implements OnDestroy {
   @Input() currentClueIsFromMyTeam: boolean;
 
   proposedClue$: Observable<ProposedClue|null>;
+  proposedClue: ProposedClue;
+  alertTimerId;
 
   clue: string;
   clueCount: number;
@@ -32,10 +35,24 @@ export class GiveClueComponent implements OnDestroy {
       public readonly clueService: ClueService,
       private readonly alertController: AlertController,
       private readonly utilService: UtilService,
+      private readonly soundService: SoundService,
   ) {}
 
   ngOnInit() {
-    this.proposedClue$ = this.clueService.getProposedClue(this.game.id);
+    this.proposedClue$ = this.clueService.getProposedClue(this.game.id)
+    this.proposedClue$.subscribe(proposedClue => {
+      this.proposedClue = proposedClue;
+      if (this.proposedClue && !this.isMyTurn) {
+        this.alertTimerId = setInterval(() => {
+          if (this.proposedClue && !this.isMyTurn){
+            this.soundService.askFirstAlert();
+          } else {
+            clearInterval(this.alertTimerId);
+          }
+        }, 3000);
+        this.soundService.askFirstAlert();
+      }
+    });
   }
 
   /**
@@ -122,7 +139,7 @@ export class GiveClueComponent implements OnDestroy {
     if (clueCount < 0) {
       return '0';
     } else if (clueCount > 9) {
-      return '∞'
+      return '∞';
     } else {
       return clueCount.toFixed(0);
     }

@@ -31,7 +31,9 @@ export class WordHistoryComponent implements OnInit {
 
       // toast when we have a unique clue and the game isn't over
       if (clue && uniqueClue && !this.game.completedAt) {
-        this.soundService.newClueAlert();
+        if (!this.isRefreshingMidGame(clues, this.latestClue)) {
+          this.soundService.newClueAlert();
+        }
         this.latestClue = clues[0];
         this.utilService.showToast(
             `Clue from SpyMaster: ${clue.word} for ${clue.guessCount}`, 5000, {
@@ -40,6 +42,10 @@ export class WordHistoryComponent implements OnInit {
             });
       }
     }));
+  }
+
+  isRefreshingMidGame(clues: Clue[], latestClue: Clue): boolean {
+    return (clues.length > 1 && latestClue === undefined);
   }
 
   /**
