@@ -21,8 +21,7 @@ export class SoundService {
 
   play(sound: Sound) {
     if (!this.isMuted) {
-      const file = this.getSound(sound);
-      file.play();
+      this.getSound(sound).play();
     }
   }
 
