@@ -5,7 +5,7 @@ import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
 import {Clue, Game, TeamTypes} from '../../../../types';
-import {SoundService} from '../../services/sound.service';
+import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
   selector: 'app-word-history',
@@ -32,7 +32,7 @@ export class WordHistoryComponent implements OnInit {
       // toast when we have a unique clue and the game isn't over
       if (clue && uniqueClue && !this.game.completedAt) {
         if (!this.isRefreshingMidGame(clues, this.latestClue)) {
-          this.soundService.newClueAlert();
+          this.soundService.play(Sound.NEW_CLUE);
         }
         this.latestClue = clues[0];
         this.utilService.showToast(

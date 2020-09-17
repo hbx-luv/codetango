@@ -1,31 +1,25 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
+const BASE_PATH = '../../assets/sounds';
+
+export const enum Sound {
+  NEW_CLUE = 'new-clue-alert.wav',
+  PROPOSED_CLUE = 'ask-first-alert.wav',
+  WIN = 'win.mp3',
+  LOSE = 'lose.mp3',
+}
+
+@Injectable({providedIn: 'root'})
 export class SoundService {
+  private isMuted = false;
+  private loadedSounds: {[sound: string]: HTMLAudioElement} = {};
 
-  private newClueAudio;
-  private askFirstAlertAudio;
-  private isMuted: boolean;
+  constructor() {}
 
-  constructor() {
-    this.isMuted = false;
-    this.newClueAudio = new Audio('../../assets/sounds/new-clue-alert.wav');
-    this.newClueAudio.load();
-
-    this.askFirstAlertAudio = new Audio('../../assets/sounds/ask-first-alert.wav');
-    this.askFirstAlertAudio.load();
-  }
-
-  newClueAlert() {
+  play(sound: Sound) {
     if (!this.isMuted) {
-      this.newClueAudio.play();
-    }
-  }
-  askFirstAlert() {
-    if (!this.isMuted) {
-      this.askFirstAlertAudio.play();
+      const file = this.getSound(sound);
+      file.play();
     }
   }
 
@@ -35,5 +29,17 @@ export class SoundService {
 
   toggleMute() {
     this.isMuted = !this.isMuted;
+  }
+
+  private getSound(sound: Sound): HTMLAudioElement {
+    // look for the loaded sound in cache
+    let element = this.loadedSounds[sound];
+    if (element) return element;
+
+    // otherwise load the file, cache it, and return it
+    element = new Audio(`${BASE_PATH}/${sound}`);
+    element.load();
+    this.loadedSounds[sound] = element;
+    return element;
   }
 }

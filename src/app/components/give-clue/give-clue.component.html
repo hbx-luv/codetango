@@ -5,17 +5,15 @@
       (click)="clueService.approveClue(game.id, proposed)"
       color="light"
       *ngIf="!isMyTurn"
-      tooltip="Approve"
     >
-      <ion-icon name="thumbs-up-outline"></ion-icon>
+      Approve
     </ion-button>
     <ion-button
       (click)="clueService.denyClue(game.id, proposed.id)"
       *ngIf="!isMyTurn"
       color="light"
-      tooltip="Deny"
     >
-      <ion-icon name="thumbs-down-outline"></ion-icon>
+      Deny
     </ion-button>
     <ion-button
       (click)="clueService.cancelClue(game.id, proposed.id)"
