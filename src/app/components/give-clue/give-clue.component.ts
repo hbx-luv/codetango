@@ -1,11 +1,12 @@
 import {Component, Input, OnDestroy} from '@angular/core';
 import {AlertController} from '@ionic/angular';
 import {Observable, ReplaySubject} from 'rxjs';
+import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, GameStatus, ProposedClue, TeamTypes} from '../../../../types';
-import {SoundService} from '../../services/sound.service';
+import {Clue, Game, GameStatus, ProposedClue, TeamTypes} from '../../../../types';
+import {Sound, SoundService} from '../../services/sound.service';
 
 const TOAST_DURATION = 8000;
 const TOAST_OPTIONS = {
@@ -25,7 +26,7 @@ export class GiveClueComponent implements OnDestroy {
   @Input() currentClueIsFromMyTeam: boolean;
 
   proposedClue$: Observable<ProposedClue|null>;
-  proposedClue: ProposedClue;
+  latestClue: ProposedClue;
   alertTimerId;
 
   clue: string;
@@ -39,20 +40,24 @@ export class GiveClueComponent implements OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.proposedClue$ = this.clueService.getProposedClue(this.game.id)
-    this.proposedClue$.subscribe(proposedClue => {
-      this.proposedClue = proposedClue;
-      if (this.proposedClue && !this.isMyTurn) {
-        this.alertTimerId = setInterval(() => {
-          if (this.proposedClue && !this.isMyTurn){
-            this.soundService.askFirstAlert();
-          } else {
-            clearInterval(this.alertTimerId);
-          }
-        }, 3000);
-        this.soundService.askFirstAlert();
-      }
-    });
+    this.proposedClue$ =
+        this.clueService.getProposedClue(this.game.id)
+            .pipe(tap(proposedClue => {
+              this.latestClue = proposedClue;
+
+              // while the proposed clue is still needing spymaster attention,
+              // play the alert every 3 seconds until they respond to it
+              if (proposedClue && !this.isMyTurn) {
+                this.alertTimerId = setInterval(() => {
+                  if (this.latestClue && !this.isMyTurn) {
+                    this.soundService.play(Sound.PROPOSED_CLUE);
+                  } else {
+                    clearInterval(this.alertTimerId);
+                  }
+                }, 3000);
+                this.soundService.play(Sound.PROPOSED_CLUE);
+              }
+            }));
   }
 
   /**

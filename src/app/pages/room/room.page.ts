@@ -9,7 +9,7 @@ import {GameService} from 'src/app/services/game.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Clue, Game, GameStatus, Room, RoomStatus} from 'types';
-import {SoundService} from '../../services/sound.service'
+import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
   selector: 'app-room',
@@ -53,6 +53,22 @@ export class RoomPage implements OnDestroy {
             const {status} = currentGame;
             if (this.lastGameStatus && this.lastGameStatus !== status &&
                 [GameStatus.BLUE_WON, GameStatus.RED_WON].includes(status)) {
+              let blueWonIWon = status === GameStatus.BLUE_WON &&
+                  currentGame.blueTeam.userIds.includes(
+                      this.authService.currentUserId);
+              let redWonIWon = status === GameStatus.RED_WON &&
+                  currentGame.redTeam.userIds.includes(
+                      this.authService.currentUserId);
+
+              // play a win/lose sound when the game ends
+              if (blueWonIWon || redWonIWon) {
+                this.soundService.play(Sound.WIN);
+              } else {
+                this.soundService.play(Sound.LOSE);
+              }
+
+              // TODO: maybe do a separate animation for losers (other than
+              // confetti)
               confetti.start();
               setTimeout(confetti.stop, 5000);
             }
@@ -153,7 +169,8 @@ export class RoomPage implements OnDestroy {
   }
 
   get soundIcon(): string {
-    return this.soundService.muted() ? 'volume-mute-outline' : 'volume-high-outline';
+    return this.soundService.muted() ? 'volume-mute-outline' :
+                                       'volume-high-outline';
   }
 
   toggleSound() {
