@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 
 const BASE_PATH = '../../assets/sounds';
 
-export const enum Sound {
+export enum Sound {
   NEW_CLUE = 'new-clue-alert.wav',
   PROPOSED_CLUE = 'ask-first-alert.wav',
   WIN = 'win.mp3',
@@ -14,7 +14,10 @@ export class SoundService {
   private isMuted = false;
   private loadedSounds: {[sound: string]: HTMLAudioElement} = {};
 
-  constructor() {}
+  constructor() {
+    // load up each of the sounds into the cache
+    Object.values(Sound).forEach(this.getSound.bind(this));
+  }
 
   play(sound: Sound) {
     if (!this.isMuted) {
