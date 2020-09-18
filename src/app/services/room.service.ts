@@ -86,7 +86,7 @@ export class RoomService {
    */
   createRoomId(name: string = ''): string {
     return name.toLowerCase()
-        .replace(/[^a-zA-Z0-9 ]/g, '')  // remove illegal values
-        .replace(/[ ]/g, '-');          // spaces to dashes
+        .replace(/[^a-zA-Z0-9 \-]/g, '')  // remove illegal values
+        .replace(/[ ]/g, '-');            // spaces to dashes
   }
 }
