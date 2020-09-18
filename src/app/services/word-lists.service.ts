@@ -254,7 +254,6 @@ export class WordListsService {
     'WHISKEY',   'WHITE',      'WIENER',     'WINE',       'WOOD'
   ];
 
-
   getWordLists(): Observable<WordList[]> {
     return this.afs.collection<WordList>('wordlists').valueChanges();
   }
@@ -272,10 +271,16 @@ export class WordListsService {
     return this.afs.collection('wordlists').doc(id).update({words});
   }
 
-  // Checking this in in case our word list gets corrupted, we can refresh it
-  // with this.
-  private updateDefaultList(): Promise<void> {
-    return this.updateWordList(
-        'default', [...this.originalWords, ...this.duetWords]);
+  // Use this if you need to setup a new database with the word lists
+  setupDatabase() {
+    this.setWordList('default', [...this.originalWords, ...this.duetWords]);
+    this.setWordList('original', this.originalWords);
+    this.setWordList('deepUndercover', this.deepUndercover);
+    this.setWordList('duetWords', this.duetWords);
+    this.setWordList('pictures', this.getPicturesWordList());
+  }
+
+  private getPicturesWordList(): string[] {
+    return [...Array(100).keys()].map(a => ('00' + a).slice(-2));
   }
 }
