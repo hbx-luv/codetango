@@ -25,6 +25,12 @@ export class ChatBoxComponent {
     this.messages$ = this.messageService.getSpymasterMessages(this.game.id);
   }
 
+  ngOnChanges() {
+    if (this.game.completedAt) {
+      this.chatShown = true;
+    }
+  }
+
   get placeholder(): string {
     return this.game && this.game.completedAt ?
         'Click here to see the spymaster chat' :
@@ -37,8 +43,8 @@ export class ChatBoxComponent {
 
   sendMessage() {
     const {currentUserId: userId} = this.authService;
-    const team = this.game.blueTeam.spymaster === userId ? TeamTypes.BLUE :
-                                                           TeamTypes.RED;
+    const team = this.game.blueTeam.userIds.includes(userId) ? TeamTypes.BLUE :
+                                                               TeamTypes.RED;
 
     this.messageService.sendSpymasterMessage(this.game.id, {
       text: this.newMessage,
