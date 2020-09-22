@@ -1,8 +1,8 @@
 # CodeTango
 
-[Play codenames now!](https://codetango.web.app/)
+[Play codenames now!](https://play.hbx.vision/)
 
-[CodeTango](https://codetango.web.app/) is the result of a hackathon at [Tango Card](https://www.tangocard.com/careers/) on 6/26/20 but is still actively being developed. To play, you enter a room code from the home page and are then prompted to login (if you are not already logged in). You are required to have a Google account to play on [CodeTango](https://codetango.web.app/). Once signed in and you have enough players to play a game, you can assign teams, pick a spymaster, and begin playing. After each match, statistics are calculated and you can view these from the leaderboard pages or individual user scorecard pages. You can scroll back through the game history as well to see all completed games that affect your stats.
+[CodeTango](https://play.hbx.vision/) is the result of a hackathon at [Tango Card](https://www.tangocard.com/careers/) on 6/26/20 but is still actively being developed. To play, you enter a room code from the home page and are then prompted to login (if you are not already logged in). You are required to have a Google account to play on [CodeTango](https://codetango.web.app/). Once signed in and you have enough players to play a game, you can assign teams, pick a spymaster, and begin playing. After each match, statistics are calculated and you can view these from the leaderboard pages or individual user scorecard pages. You can scroll back through the game history as well to see all completed games that affect your stats.
 
 **A completed game:**
 ![A completed game](https://i.imgur.com/WwOUXJW.png)
