@@ -1,38 +1,49 @@
-.chat-box {
-  width: 300px;
-  border: 1px solid #7f7f7f;
-  max-height: 500px;
+.in-game-chat {
+  position: fixed;
+  bottom: 0;
+  right: 0;
   background: var(--background);
 
-  .chat-box-header {
-    background: #333;
-    color: #fff;
-    padding: 8px 12px;
-    font-weight: bold;
-    border-bottom: 1px solid #7f7f7f;
+  .chat-messages-container {
+    width: 300px;
+    max-height: 35px;
+    overflow-y: scroll;
     cursor: pointer;
-  }
-
-  .chat-box-content {
-    display: none;
-    min-height: 100px;
-    overflow: auto;
-    max-height: 300px;
+    transition: all .2s ease-in-out;
+    opacity: .5;
 
     &.shown {
-      display: block;
+      max-height: 240px;
+      opacity: 1;
     }
 
-    .message {
-      background: #7f7f7f;
-      margin: 8px 4px;
-      padding: 4px;
-      border-radius: 4px;
-      width: auto;
+    .chat-message {
+      margin: 0 8px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      word-wrap: break-word;
+
+      &.me {
+        flex-direction: row-reverse;
+      }
     }
 
-    input {
-      background: var(--background);
+    .server-chat-message {
+      font-weight: bold;
+      margin: 8px;
+    }
+  }
+  .chatroom-input {
+    width: 100%;
+    border: 1px solid lightgray;
+    transition: .2s all ease-in-out;
+    padding: 8px;
+    color: #000;
+    font-size: 14px;
+
+    &:focus {
+      border-radius: 0;
     }
   }
 }

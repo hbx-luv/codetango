@@ -178,3 +178,22 @@ export interface Stats extends UserStats {
   userId: string;
   timestamp: number;
 }
+
+export enum MessageType {
+  BLUE_TEAM = 'BLUE_TEAM',
+  RED_TEAM = 'RED_TEAM',
+  OBSERVER = 'OBSERVER',
+  EVENT = 'EVENT',
+}
+
+export interface Message {
+  text: string;
+  timestamp: number;
+
+  // server messages are styled differently
+  fromServer?: boolean;
+
+  // for messages created by users
+  userId?: string;
+  team?: TeamTypes;
+}
