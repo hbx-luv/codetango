@@ -1,0 +1,49 @@
+.in-game-chat {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background: var(--background);
+
+  .chat-messages-container {
+    width: 300px;
+    max-height: 35px;
+    overflow-y: scroll;
+    cursor: pointer;
+    transition: all .2s ease-in-out;
+    opacity: .5;
+
+    &.shown {
+      max-height: 240px;
+      opacity: 1;
+    }
+
+    .chat-message {
+      margin: 0 8px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      word-wrap: break-word;
+
+      &.me {
+        flex-direction: row-reverse;
+      }
+    }
+
+    .server-chat-message {
+      font-weight: bold;
+      margin: 8px;
+    }
+  }
+  .chatroom-input {
+    width: 100%;
+    border: 1px solid lightgray;
+    transition: .2s all ease-in-out;
+    padding: 8px;
+    color: #000;
+    font-size: 14px;
+
+    &:focus {
+      border-radius: 0;
+    }
+  }
+}

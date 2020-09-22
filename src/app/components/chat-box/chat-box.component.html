@@ -1,0 +1,31 @@
+<div class="in-game-chat">
+  <div>
+    <div class="chat-messages-container" [class.shown]="chatShown" (click)="toggleChat()">
+      <p class="chat-message server-chat-message" *ngIf="!game.completedAt">
+        This chat is secret during the game, but becomes visible to all afterward.
+      </p>
+      <p
+        class="chat-message"
+        [class.me]="message.userId && message.userId === authService.currentUserId"
+        [class.server-chat-message]="message.fromServer"
+        *ngFor="let message of messages$ | async"
+      >
+        <span class="inline-color-block {{message.team}}" *ngIf="message.team"></span>
+        <app-user
+          *ngIf="message.userId"
+          [userId]="message.userId"
+          [color]="message.team"
+          [showUserName]="false">
+        </app-user>
+        {{ message.text}}
+      </p>
+    </div>
+    <input
+      class="chatroom-input"
+      [placeholder]="placeholder"
+      [(ngModel)]="newMessage"
+      (keyup.enter)="sendMessage()"
+      (click)="chatShown = true"
+    >
+  </div>
+</div>
