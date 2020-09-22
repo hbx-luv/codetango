@@ -48,10 +48,10 @@ export class RoomPage implements OnDestroy {
               this.currentClue$ =
                   this.clueService.getCurrentClue(currentGame.id);
             }
-            // show confetti after a win for 5 seconds
-            // https://www.cssscript.com/confetti-falling-animation/
+            // detect game over
             const {status} = currentGame;
-            if (this.lastGameStatus && this.lastGameStatus !== status &&
+            if (this.userIsInRoom && this.lastGameStatus &&
+                this.lastGameStatus !== status &&
                 [GameStatus.BLUE_WON, GameStatus.RED_WON].includes(status)) {
               let blueWonIWon = status === GameStatus.BLUE_WON &&
                   currentGame.blueTeam.userIds.includes(
@@ -67,6 +67,8 @@ export class RoomPage implements OnDestroy {
                 this.soundService.play(Sound.LOSE);
               }
 
+              // show confetti after a win/loss for 5 seconds
+              // https://www.cssscript.com/confetti-falling-animation/
               // TODO: maybe do a separate animation for losers (other than
               // confetti)
               confetti.start();
