@@ -13,8 +13,16 @@ export class MessageService {
       Promise<DocumentReference> {
     return this.afs.collection('games')
         .doc(gameId)
-        .collection('spymaster-chat')
+        .collection<Message>('spymaster-chat')
         .add(message);
+  }
+
+  sendSpymasterServerMessage(gameId: string, text: string):
+      Promise<DocumentReference> {
+    return this.afs.collection('games')
+        .doc(gameId)
+        .collection<Message>('spymaster-chat')
+        .add({text, timestamp: Date.now(), fromServer: true});
   }
 
   getSpymasterMessages(gameId: string): Observable<Message[]> {
