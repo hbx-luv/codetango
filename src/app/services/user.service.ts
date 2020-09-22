@@ -21,8 +21,10 @@ export class UserService {
       if (observer && observer.uid) {
         this.subscribeToUser(observer.uid);
       } else {
-        this.currentUser$.unsubscribe();
-        delete this.currentUser$;
+        if (this.currentUser$) {
+          this.currentUser$.unsubscribe();
+          delete this.currentUser$;
+        }
         delete this.currentUser;
       }
     });

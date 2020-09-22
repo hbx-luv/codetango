@@ -80,7 +80,6 @@ export class ClueService {
   }
 
   setClueStatus(gameId: string, clueId: string, status: ClueStatus) {
-    console.log(`set ${gameId} ${clueId} clue to ${status}`);
     return this.afs.collection('games')
         .doc(gameId)
         .collection(PROPOSED_COLLECTION)

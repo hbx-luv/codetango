@@ -5,6 +5,7 @@ import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
 import {Clue, Game, TeamTypes} from '../../../../types';
+import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
   selector: 'app-word-history',
@@ -20,6 +21,7 @@ export class WordHistoryComponent implements OnInit {
   constructor(
       private readonly clueService: ClueService,
       private readonly utilService: UtilService,
+      private readonly soundService: SoundService,
   ) {}
 
   ngOnInit() {
@@ -29,6 +31,9 @@ export class WordHistoryComponent implements OnInit {
 
       // toast when we have a unique clue and the game isn't over
       if (clue && uniqueClue && !this.game.completedAt) {
+        if (!this.isRefreshingMidGame(clues, this.latestClue)) {
+          this.soundService.play(Sound.NEW_CLUE);
+        }
         this.latestClue = clues[0];
         this.utilService.showToast(
             `Clue from SpyMaster: ${clue.word} for ${clue.guessCount}`, 5000, {
@@ -37,6 +42,10 @@ export class WordHistoryComponent implements OnInit {
             });
       }
     }));
+  }
+
+  isRefreshingMidGame(clues: Clue[], latestClue: Clue): boolean {
+    return (clues.length > 1 && latestClue === undefined);
   }
 
   /**
