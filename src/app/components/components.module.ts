@@ -11,7 +11,6 @@ import {GameBoardComponent} from './game-board/game-board.component';
 import {GameCardComponent} from './game-card/game-card.component';
 import {GameComponent} from './game/game.component';
 import {GiveClueComponent} from './give-clue/give-clue.component';
-import {MessageThreadComponent} from './message-thread/message-thread.component';
 import {PregameComponent} from './pregame/pregame.component';
 import {RoomListItemComponent} from './room-list-item/room-list-item.component';
 import {TeamListsComponent} from './team-lists/team-lists.component';
@@ -36,7 +35,6 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     RoomListItemComponent,
     ClueComponent,
     ChatBoxComponent,
-    MessageThreadComponent,
   ],
   imports: [
     IonicModule,
@@ -63,7 +61,6 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     RoomListItemComponent,
     ClueComponent,
     ChatBoxComponent,
-    MessageThreadComponent,
   ]
 })
 export class ComponentsModule {
