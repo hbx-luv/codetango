@@ -21,11 +21,6 @@ jobs:
         run: npm ci
       - name: Install functions dependencies
         run: cd functions && npm i && cd ..
-      - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.26.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
       - name: Build prod app
         run: npm run build-app:prod
       - uses: w9jds/firebase-action@master
