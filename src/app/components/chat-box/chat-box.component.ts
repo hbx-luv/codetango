@@ -50,12 +50,6 @@ export class ChatBoxComponent {
             }));
   }
 
-  ngOnChanges() {
-    if (this.game.completedAt) {
-      this.chatShown = true;
-    }
-  }
-
   get placeholder(): string {
     return this.game && this.game.completedAt ?
         'Click here to see the spymaster chat' :
