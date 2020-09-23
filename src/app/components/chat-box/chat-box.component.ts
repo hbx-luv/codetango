@@ -3,6 +3,7 @@ import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {MessageService} from 'src/app/services/message.service';
+import {UtilService} from 'src/app/services/util.service';
 import {Game, Message, TeamTypes} from 'types';
 
 @Component({
@@ -22,6 +23,7 @@ export class ChatBoxComponent {
   constructor(
       public readonly authService: AuthService,
       private readonly messageService: MessageService,
+      private readonly utilService: UtilService,
   ) {}
 
   ngOnInit() {
@@ -57,16 +59,27 @@ export class ChatBoxComponent {
   }
 
   sendMessage() {
-    const {currentUserId: userId} = this.authService;
-    const team = this.game.blueTeam.userIds.includes(userId) ? TeamTypes.BLUE :
-                                                               TeamTypes.RED;
+    // when the game is over, just toast and don't send the message
+    if (this.game.completedAt) {
+      this.utilService.showToast(
+          'Messages cannot be sent after the game is over');
+    }
 
-    this.messageService.sendSpymasterMessage(this.game.id, {
-      text: this.newMessage,
-      timestamp: Date.now(),
-      userId,
-      team,
-    });
+    // when the game is ongoing, messages will be sent in the chat
+    else {
+      const {currentUserId: userId} = this.authService;
+      const team = this.game.blueTeam.userIds.includes(userId) ?
+          TeamTypes.BLUE :
+          TeamTypes.RED;
+
+      this.messageService.sendSpymasterMessage(this.game.id, {
+        text: this.newMessage,
+        timestamp: Date.now(),
+        userId,
+        team,
+      });
+    }
+
     delete this.newMessage;
   }
 
