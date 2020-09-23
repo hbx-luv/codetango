@@ -31,21 +31,25 @@ export class WordHistoryComponent implements OnInit {
 
       // toast when we have a unique clue and the game isn't over
       if (clue && uniqueClue && !this.game.completedAt) {
+        // but don't toast and play sound when refreshing mid game
         if (!this.isRefreshingMidGame(clues, this.latestClue)) {
           this.soundService.play(Sound.NEW_CLUE);
+
+          this.utilService.showToast(
+              `Clue from SpyMaster: ${clue.word} for ${clue.guessCount}`, 5000,
+              {
+                color: this.getColor(clue),
+                buttons: ['close'],
+              });
         }
+
         this.latestClue = clues[0];
-        this.utilService.showToast(
-            `Clue from SpyMaster: ${clue.word} for ${clue.guessCount}`, 5000, {
-              color: this.getColor(clue),
-              buttons: ['close'],
-            });
       }
     }));
   }
 
   isRefreshingMidGame(clues: Clue[], latestClue: Clue): boolean {
-    return (clues.length > 1 && latestClue === undefined);
+    return (clues.length > 0 && latestClue === undefined);
   }
 
   /**
