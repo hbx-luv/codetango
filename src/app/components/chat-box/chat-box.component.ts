@@ -3,6 +3,7 @@ import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {MessageService} from 'src/app/services/message.service';
+import {Sound, SoundService} from 'src/app/services/sound.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Game, Message, TeamTypes} from 'types';
 
@@ -17,6 +18,7 @@ export class ChatBoxComponent {
   @Input() game: Game;
 
   chatShown = false;
+  unreadMessages?: number;
   newMessage: string;
   messages$: Observable<Message[]>;
 
@@ -24,15 +26,28 @@ export class ChatBoxComponent {
       public readonly authService: AuthService,
       private readonly messageService: MessageService,
       private readonly utilService: UtilService,
+      private readonly soundService: SoundService,
   ) {}
 
   ngOnInit() {
-    this.messages$ = this.messageService.getSpymasterMessages(this.game.id)
-                         .pipe(tap(messages => {
-                           if (messages) {
-                             this.scrollToBottom();
-                           }
-                         }));
+    this.messages$ =
+        this.messageService.getSpymasterMessages(this.game.id)
+            .pipe(tap(messages => {
+              if (messages) {
+                // don't let the chat box make sounds on the first load
+                if (this.unreadMessages === undefined) {
+                  this.unreadMessages = 0;
+                }
+
+                // badge and play sound when the chat box is not shown
+                else if (!this.chatShown) {
+                  this.unreadMessages++;
+                  this.soundService.play(Sound.NEW_MESSAGE);
+                }
+
+                this.scrollToBottom();
+              }
+            }));
   }
 
   ngOnChanges() {
@@ -47,15 +62,24 @@ export class ChatBoxComponent {
         'Click here to chat with the other spymaster';
   }
 
-  toggleChat() {
-    this.chatShown = !this.chatShown;
+  setChatOpen(open = true) {
+    this.chatShown = open;
+
+    // clear the unread message count
+    if (open) {
+      this.unreadMessages = 0;
+    }
 
     // scroll the chat to the bottom when you hide it so you can still see the
     // newest message above the chat box
     // we need to wait to do this until after the hide animation completes
-    if (!this.chatShown) {
+    else {
       this.scrollToBottom(200);
     }
+  }
+
+  toggleChat() {
+    this.setChatOpen(!this.chatShown);
   }
 
   sendMessage() {

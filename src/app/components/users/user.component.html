@@ -7,10 +7,19 @@
     (click)="goToUser($event)"
   >
     <ng-container *ngIf="user$ | async as user; else loading">
-      <ion-avatar [tooltip]="userTemplate" content-type="template" [display]="!showUserName">
+
+      <!-- hovering on the avatar shows their full name in a tooltip -->
+      <ion-avatar [tooltip]="userTemplate" content-type="template" *ngIf="!showUserName && navToScorecard; else noTooltip">
         <ion-img [src]="user.photoURL"></ion-img>
       </ion-avatar>
+
+      <!-- unless show username is on or navToScorecard is off, then no tooltip -->
+      <ng-template #noTooltip>
+        <ion-avatar><ion-img [src]="user.photoURL"></ion-img></ion-avatar>
+      </ng-template>
+
       <ion-label *ngIf="showUserName">{{user.nickname || user.name}}</ion-label>
+
     </ng-container>
   </ion-chip>
 </ng-container>

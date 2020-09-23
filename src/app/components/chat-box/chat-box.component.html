@@ -1,4 +1,9 @@
 <div class="in-game-chat">
+
+  <ion-badge mode="ios" color="danger" *ngIf="unreadMessages" (click)="setChatOpen()">
+    {{ unreadMessages }}
+  </ion-badge>
+
   <div>
     <div #scrollMe class="chat-messages-container" [class.shown]="chatShown" (click)="toggleChat()">
       <p class="chat-message server-chat-message" *ngIf="!game.completedAt">
@@ -15,7 +20,8 @@
           *ngIf="message.userId"
           [userId]="message.userId"
           [color]="message.team"
-          [showUserName]="false">
+          [showUserName]="false"
+          [navToScorecard]="chatShown">
         </app-user>
         {{ message.text}}
       </p>
@@ -26,7 +32,7 @@
       [placeholder]="placeholder"
       [(ngModel)]="newMessage"
       (keyup.enter)="sendMessage()"
-      (click)="chatShown = true"
+      (click)="setChatOpen()"
     >
   </div>
 </div>

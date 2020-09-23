@@ -5,6 +5,7 @@ const BASE_PATH = '../../assets/sounds';
 export const enum Sound {
   NEW_CLUE = 'new-clue-alert.wav',
   PROPOSED_CLUE = 'ask-first-alert.wav',
+  NEW_MESSAGE = 'new-message.mp3',
   WIN = 'win.mp3',
   LOSE = 'lose.mp3',
 }
