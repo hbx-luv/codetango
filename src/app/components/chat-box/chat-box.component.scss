@@ -2,9 +2,10 @@
   position: fixed;
   bottom: 0;
   right: 0;
-  background: var(--background);
+  background: transparent;
 
   .chat-messages-container {
+    background: var(--background);
     width: 300px;
     max-height: 35px;
     overflow-y: scroll;
@@ -41,9 +42,16 @@
     padding: 8px;
     color: #000;
     font-size: 14px;
+    cursor: pointer;
 
-    &:focus {
-      border-radius: 0;
+    &.shown {
+      cursor: initial;
     }
+  }
+}
+
+@media (max-width: 1040px) {
+  .in-game-chat {
+    bottom: 48px;
   }
 }
