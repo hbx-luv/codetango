@@ -1,6 +1,6 @@
 <div class="in-game-chat">
   <div>
-    <div class="chat-messages-container" [class.shown]="chatShown" (click)="toggleChat()">
+    <div #scrollMe class="chat-messages-container" [class.shown]="chatShown" (click)="toggleChat()">
       <p class="chat-message server-chat-message" *ngIf="!game.completedAt">
         This chat is secret during the game, but becomes visible to all afterward.
       </p>

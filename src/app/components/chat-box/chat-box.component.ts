@@ -1,5 +1,6 @@
-import {Component, Input} from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs';
+import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {MessageService} from 'src/app/services/message.service';
 import {Game, Message, TeamTypes} from 'types';
@@ -10,6 +11,8 @@ import {Game, Message, TeamTypes} from 'types';
   styleUrls: ['./chat-box.component.scss'],
 })
 export class ChatBoxComponent {
+  @ViewChild('scrollMe') private myScrollContainer: ElementRef;
+
   @Input() game: Game;
 
   chatShown = false;
@@ -22,7 +25,12 @@ export class ChatBoxComponent {
   ) {}
 
   ngOnInit() {
-    this.messages$ = this.messageService.getSpymasterMessages(this.game.id);
+    this.messages$ = this.messageService.getSpymasterMessages(this.game.id)
+                         .pipe(tap(messages => {
+                           if (messages) {
+                             this.scrollToBottom();
+                           }
+                         }));
   }
 
   ngOnChanges() {
@@ -39,6 +47,13 @@ export class ChatBoxComponent {
 
   toggleChat() {
     this.chatShown = !this.chatShown;
+
+    // scroll the chat to the bottom when you hide it so you can still see the
+    // newest message above the chat box
+    // we need to wait to do this until after the hide animation completes
+    if (!this.chatShown) {
+      this.scrollToBottom(200);
+    }
   }
 
   sendMessage() {
@@ -53,5 +68,15 @@ export class ChatBoxComponent {
       team,
     });
     delete this.newMessage;
+  }
+
+  scrollToBottom(timeout = 0): void {
+    setTimeout(() => {
+      try {
+        this.myScrollContainer.nativeElement.scrollTop =
+            this.myScrollContainer.nativeElement.scrollHeight;
+      } catch (err) {
+      }
+    }, timeout);
   }
 }
