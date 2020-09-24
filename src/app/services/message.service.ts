@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
+import {firestore} from 'firebase';
 import {Observable} from 'rxjs';
 import {Message} from 'types';
 
@@ -9,20 +10,21 @@ export class MessageService {
       private readonly afs: AngularFirestore,
   ) {}
 
-  sendSpymasterMessage(gameId: string, message: Message):
+  sendSpymasterMessage(gameId: string, message: Partial<Message>):
       Promise<DocumentReference> {
     return this.afs.collection('games')
         .doc(gameId)
         .collection<Message>('spymaster-chat')
-        .add(message);
+        .add({
+          timestamp: firestore.FieldValue.serverTimestamp(),
+          text: message.text,
+          ...message,
+        });
   }
 
   sendSpymasterServerMessage(gameId: string, text: string):
       Promise<DocumentReference> {
-    return this.afs.collection('games')
-        .doc(gameId)
-        .collection<Message>('spymaster-chat')
-        .add({text, timestamp: Date.now(), fromServer: true});
+    return this.sendSpymasterMessage(gameId, {text, fromServer: true});
   }
 
   getSpymasterMessages(gameId: string): Observable<Message[]> {
