@@ -7,7 +7,7 @@ import {map} from 'rxjs/operators';
 import {Clue, ClueStatus, Game, ProposedClue, Tile} from 'types';
 
 const CLUES_COLLECTION = 'clues';
-const PROPOSED_COLLECTION = 'proposedClues';
+const PROPOSED_COLLECTION = 'proposed-clues';
 
 @Injectable({providedIn: 'root'})
 export class ClueService {

@@ -15,8 +15,8 @@ const db = admin.firestore();
  */
 export const onCreateClue =
     functions.firestore.document('games/{gameId}/clues/{clueId}')
-        .onCreate(async (snapshot, _context) => {
-          const gameId = _context.params.gameId;
+        .onCreate(async (snapshot, context) => {
+          const gameId = context.params.gameId;
 
           const clueReference = snapshot.ref;
           const clueSnapShot = await clueReference.get();
@@ -41,7 +41,8 @@ export const onCreateClue =
           return 'Done!';
         });
 
-async function getSpymasterName(gameId: string, clue: Clue): Promise<string> {
+export async function getSpymasterName(
+    gameId: string, clue: Clue): Promise<string> {
   if (clue && clue.team) {
     const game = await getGame(gameId);
     const spymasterId = getSpymasterId(game, clue);
