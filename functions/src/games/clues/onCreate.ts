@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {Clue, Game, TeamTypes, User} from '../../../../types';
+import {sendSpymasterMessage} from '../../util/message';
 
 try {
   admin.initializeApp();
@@ -25,17 +26,11 @@ export const onCreateClue =
           const name = await getSpymasterName(gameId, clue);
 
           if (name) {
-            await db.collection('games')
-                .doc(gameId)
-                .collection('spymaster-chat')
-                .add({
-                  text:
-                      `${name} gave the clue: ${clue.word}, ${clue.guessCount}`,
-                  timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                  fromServer: true,
-                });
+            await sendSpymasterMessage(
+                db, gameId,
+                `${name} gave the clue: ${clue.word}, ${clue.guessCount}`);
           } else {
-            // TODO: handle no spymaster for clue
+            console.log('no spymaster?!')
           }
 
           return 'Done!';

@@ -1,7 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
+
 import {ClueStatus, ProposedClue} from '../../../../types';
+import {sendSpymasterMessage} from '../../util/message';
 import {getSpymasterName} from '../clues';
 
 try {
@@ -16,16 +18,21 @@ export const onWriteProposedClues =
     functions.firestore.document('games/{gameId}/proposed-clues/{clueId}')
         .onWrite((clueDoc, context) => {
           const gameId = context.params.gameId;
-          return sendSpymasterMessage(gameId, clueDoc.before, clueDoc.after);
+          return sendMessage(gameId, clueDoc.before, clueDoc.after);
         });
 
-async function sendSpymasterMessage(
+async function sendMessage(
     gameId: string, before: DocumentSnapshot,
     after: DocumentSnapshot): Promise<void> {
   const clue = after.data() as ProposedClue;
 
-  let text = '';
   const name = await getSpymasterName(gameId, clue);
+  if (!name) {
+    console.log('No name for spymaster');
+    return;
+  }
+
+  let text = '';
   const {word, guessCount} = clue;
 
   // status change
@@ -42,9 +49,6 @@ async function sendSpymasterMessage(
     text = `${name} is proposing: ${word}, ${guessCount}`;
   }
 
-  await db.collection('games').doc(gameId).collection('spymaster-chat').add({
-    text,
-    timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    fromServer: true,
-  });
+  // add to spymaster chat
+  await sendSpymasterMessage(db, gameId, text);
 }
