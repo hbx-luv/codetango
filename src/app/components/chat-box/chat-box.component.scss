@@ -2,6 +2,8 @@
   position: fixed;
   bottom: 0;
   right: 0;
+  width: 342px;
+  max-width: 100%;
   background: transparent;
 
   ion-badge {
@@ -14,7 +16,6 @@
 
   .chat-messages-container {
     background: var(--background);
-    width: 300px;
     max-height: 40px;
     overflow-y: scroll;
     cursor: pointer;
