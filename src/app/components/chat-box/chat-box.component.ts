@@ -58,7 +58,7 @@ export class ChatBoxComponent {
 
   get placeholder(): string {
     return this.game && this.game.completedAt ?
-        'Click here to see the spymaster chat' :
+        'This is the spymaster chat' :
         'Click here to chat with the other spymaster';
   }
 
