@@ -5,15 +5,23 @@
   </ion-badge>
 
   <div>
-    <div #scrollMe class="chat-messages-container" [class.shown]="chatShown" (click)="toggleChat()">
+    <div #scrollMe
+      class="chat-messages-container"
+      [class.shown]="chatShown"
+      (click)="toggleChat()"
+      *ngIf="messages$ | async as messages"
+    >
       <p class="chat-message server-chat-message" *ngIf="!game.completedAt">
         This chat is secret during the game, but becomes visible to all afterward.
+      </p>
+      <p class="chat-message server-chat-message" *ngIf="game.completedAt && messages.length === 0">
+        No messages were sent during this game
       </p>
       <p
         class="chat-message"
         [class.me]="message.userId && message.userId === authService.currentUserId"
         [class.server-chat-message]="message.fromServer"
-        *ngFor="let message of messages$ | async"
+        *ngFor="let message of messages"
       >
         <span class="inline-color-block {{message.team}}" *ngIf="message.team"></span>
         <app-user
