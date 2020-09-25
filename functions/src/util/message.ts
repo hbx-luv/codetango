@@ -1,4 +1,4 @@
-import {firestore} from 'firebase';
+import {firestore} from 'firebase-admin';
 
 /**
  * Send any given text to the spymaster chat for a given gameId

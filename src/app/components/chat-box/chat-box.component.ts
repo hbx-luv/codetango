@@ -1,5 +1,4 @@
 import {Component, ElementRef, Input, ViewChild} from '@angular/core';
-import {firestore} from 'firebase';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
