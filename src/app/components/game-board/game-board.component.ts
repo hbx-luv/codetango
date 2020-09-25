@@ -152,7 +152,7 @@ export class GameBoardComponent {
   getGameStatus(tile: Tile) {
     const bluesTurn = this.game.status === GameStatus.BLUES_TURN;
     const maxGuessesReached =
-        this.currentClue.guessesMade.length + 1 === this.currentClue.maxGuesses;
+        this.currentClue.guessesMade.length + 1 >= this.currentClue.maxGuesses;
     switch (tile.role) {
       case TileRole.ASSASSIN:
         return bluesTurn ? GameStatus.RED_WON : GameStatus.BLUE_WON;

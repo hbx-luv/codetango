@@ -14,7 +14,7 @@ const db = admin.firestore();
 
 export const onCreateGame =
     functions.firestore.document('games/{gameId}')
-        .onCreate(async (snapshot, _context) => {
+        .onCreate(async (snapshot, context) => {
           // Add the random stuff to this game
           const gameReference = snapshot.ref;
           const gameSnapShot = await gameReference.get();
