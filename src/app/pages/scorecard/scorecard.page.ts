@@ -10,7 +10,7 @@ import {UserService} from 'src/app/services/user.service';
 import {Game, User} from 'types';
 
 const LIMIT = 3;
-const CHART_LIMIT = 20;
+const CHART_LIMIT = 30;
 
 @Component({
   selector: 'app-scorecard',

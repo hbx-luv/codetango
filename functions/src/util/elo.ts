@@ -4,7 +4,7 @@ import {toPairs} from 'lodash';
 import {Game, GameStatus, Stats, Team} from '../../../types';
 
 import {BigBatch} from './big-batch';
-import {eloDelta} from './elo-math';
+import {getChange} from './elo-math';
 
 // elo variables
 const BASE_ELO = 1200;
@@ -179,11 +179,9 @@ function setStats(game: Game, userMap: UserMap) {
   const winningTeam = blueWon ? game.blueTeam : game.redTeam;
   const losingTeam = blueWon ? game.redTeam : game.blueTeam;
 
-  // TODO: fancier scores for wider delta changes
   const winnersRating = getTeamElo(winningTeam, userMap);
   const losersRating = getTeamElo(losingTeam, userMap);
-  const {winnerScore, loserScore} = getScores(game);
-  const delta = eloDelta(winnersRating, losersRating, winnerScore, loserScore);
+  const delta = getChange(winnersRating, losersRating);
 
   // set stats for users on the winning team
   for (const winner of winningTeam.userIds) {
@@ -269,39 +267,4 @@ function getTeamElo(team: Team, userMap: UserMap) {
     totalElo += userMap[userId].elo || BASE_ELO;
   }
   return totalElo / team.userIds.length;
-}
-
-/**
- * Max score is 10 points for winning with all your words picked
- * - otherwise the score is 10 minus your remaining agents
- * - hitting the assassin is automatically 0 points
- */
-function getScores(game: Game) {
-  const max = 10;
-  const {blueAgents: blue, redAgents: red, status} = game;
-  const blueWon = status === GameStatus.BLUE_WON;
-
-  // default to 1 - 0
-  let winnerScore = 1;
-  let loserScore = 0;
-
-  // assassin
-  if (blue > 0 && red > 0) {
-    winnerScore = max - (blueWon ? blue : red);
-    loserScore = 0;
-  }
-
-  // blue won
-  else if (blue === 0) {
-    winnerScore = max;
-    loserScore = max - red;
-  }
-
-  // red won
-  else if (red === 0) {
-    winnerScore = max;
-    loserScore = max - blue;
-  }
-
-  return {winnerScore, loserScore};
 }
