@@ -18,7 +18,7 @@ export const onUpdateGame =
     functions.firestore.document('games/{gameId}')
         .onUpdate(async (gameDoc, context) => {
           await updateRemainingAgents(gameDoc.after);
-          await determineGameOver(gameDoc.before);
+          await determineGameOver(gameDoc.after);
           await sanitizeBoard(gameDoc.before, gameDoc.after);
 
           return 'Done';
