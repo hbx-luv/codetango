@@ -69,7 +69,10 @@ export class EloChartComponent implements OnChanges, OnDestroy {
         }]
       },
       options: {
-        elements: {point: {radius: 0}, line: {tension: 0}},
+        elements: {
+          point: {radius: 0},
+          line: {tension: 0.3},  // tension: 0 is no curves
+        },
         layout: {padding: {left: 0, right: 0, top: 0, bottom: 0}},
         legend: {display: false},
         scales: {
