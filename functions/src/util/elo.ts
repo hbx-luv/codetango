@@ -8,7 +8,8 @@ import {getChange} from './elo-math';
 
 // elo variables
 const BASE_ELO = 1200;
-const PROVISIONAL_GAMES = 16;
+// removed this for now (set to 0), not sure I like the results - MT
+const PROVISIONAL_GAMES = 0;
 
 interface UserMap {
   [field: string]: Stats;
