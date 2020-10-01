@@ -5,7 +5,7 @@ import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Clue, Game, GameStatus, ProposedClue, TeamTypes} from '../../../../types';
+import {Game, GameStatus, ProposedClue, TeamTypes, Tile} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
 
 const TOAST_DURATION = 8000;
@@ -34,7 +34,6 @@ export class GiveClueComponent implements OnDestroy {
 
   constructor(
       public readonly clueService: ClueService,
-      private readonly alertController: AlertController,
       private readonly utilService: UtilService,
       private readonly soundService: SoundService,
   ) {}
@@ -71,12 +70,17 @@ export class GiveClueComponent implements OnDestroy {
     if (this.disableSubmitButton) {
       this.sendWittyToast();
     } else {
-      if (await this.isClueIllegalWord(this.clue)) {
-        return;
-      }
+      const word = this.clue.toUpperCase();
 
-      const word = this.clue != null ? this.clue.toUpperCase() : null;
-      const isBluesTurn = GameStatus.BLUES_TURN === this.game.status;
+      // if the word is on the board, make the other spymaster confirm it
+      const overlap = this.getOverlapWord(this.game.tiles, word);
+      if (overlap) {
+        askFirst = true;
+        this.utilService.showToast(
+            `Your clue ${word} overlaps with ${
+                overlap} so we asked the other spymaster to confirm it`,
+            TOAST_DURATION, TOAST_OPTIONS);
+      }
 
       const clue = {
         word,
@@ -84,7 +88,8 @@ export class GiveClueComponent implements OnDestroy {
         maxGuesses: this.clueCount === 0 ? 999 : this.clueCount + 1,
         guessesMade: [],
         createdAt: Date.now(),
-        team: isBluesTurn ? TeamTypes.BLUE : TeamTypes.RED,
+        team: GameStatus.BLUES_TURN === this.game.status ? TeamTypes.BLUE :
+                                                           TeamTypes.RED,
       };
 
       if (askFirst) {
@@ -96,40 +101,6 @@ export class GiveClueComponent implements OnDestroy {
       this.clue = null;
       this.clueCount = null;
     }
-  }
-
-  async isClueIllegalWord(clue: string) {
-    clue = clue.toUpperCase().trim();
-
-    // Some clue tiles are 2 words - match those exactly?
-    let illegalWord =
-        this.game.tiles.find(tile => tile.word.toUpperCase().trim() === clue);
-
-    if (!illegalWord) {
-      // Check each individual word against the game tiles
-      const allWordsInClue = clue.split(' ');
-
-      allWordsInClue.some(individualWord => {
-        illegalWord = this.game.tiles.find(
-            tile => tile.word.toUpperCase().trim() === individualWord);
-        if (illegalWord) {
-          return true;
-        }
-      });
-    }
-
-    if (illegalWord) {
-      const alert = await this.alertController.create({
-        header: 'Try again',
-        message: `${
-            illegalWord
-                .word} is on the board, so you need to give a different clue!`,
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
-
-    return !!illegalWord;
   }
 
   get disableSubmitButton(): boolean {
@@ -171,6 +142,38 @@ export class GiveClueComponent implements OnDestroy {
     }
 
     return this.utilService.showToast(message, TOAST_DURATION, TOAST_OPTIONS);
+  }
+
+  /**
+   * If any of the words for the tiles on the board overlap with the any of the
+   * words within the clue return the first tile's word that overlaps
+   * @param tiles
+   * @param clue
+   */
+  getOverlapWord(tiles: Tile[], clue: string): string {
+    for (const tile of tiles) {
+      for (const subword of tile.word.split(' ')) {
+        for (const subclue of clue.split(' ')) {
+          if (this.lowerCaseIncludes(subword, subclue)) {
+            return tile.word;
+          }
+        }
+      }
+    }
+
+    return '';
+  }
+
+  /**
+   * Return true if either a includes b or b includes a, case agnostic
+   * @param a
+   * @param b
+   */
+  lowerCaseIncludes(a: string, b: string): boolean {
+    a = a.toLowerCase();
+    b = b.toLowerCase();
+    console.log(`comparing ${a} and ${b}`);
+    return a.includes(b) || b.includes(a);
   }
 
   ngOnDestroy() {
