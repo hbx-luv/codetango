@@ -72,14 +72,18 @@ export class GiveClueComponent implements OnDestroy {
     } else {
       const word = this.clue.toUpperCase();
 
-      // if the word is on the board, make the other spymaster confirm it
-      const overlap = this.getOverlapWord(this.game.tiles, word);
-      if (overlap) {
-        askFirst = true;
-        this.utilService.showToast(
-            `Your clue ${word} overlaps with ${
-                overlap} so we asked the other spymaster to confirm it`,
-            TOAST_DURATION, TOAST_OPTIONS);
+      // for non-picture games, in cases where they didn't ask first check for
+      // clue overlaps with tiles on the board, and make the other spymaster
+      // confirm it if there is an overlap
+      if (!askFirst && !this.game.hasPictures) {
+        const overlap = this.getOverlapWord(this.game.tiles, word);
+        if (overlap) {
+          askFirst = true;
+          this.utilService.showToast(
+              `Your clue ${word} overlaps with ${
+                  overlap} so we asked the other spymaster to confirm it`,
+              TOAST_DURATION, TOAST_OPTIONS);
+        }
       }
 
       const clue = {
