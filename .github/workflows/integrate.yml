@@ -16,4 +16,4 @@ jobs:
         with:
           cordova-version: 8
       - run: npm ci
-      - run: npm run build-app:prod
+      - run: npm run build:prod
