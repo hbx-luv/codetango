@@ -88,22 +88,23 @@ export class GameBoardComponent {
     tile.selected = true;
     tile.selectedBy = this.authService.currentUserId;
 
-    const updates: Partial<Game> = {
-      tiles: this.tiles,
-      status: this.getGameStatus(tile),
-    };
+    const updates: Partial<Game> = {tiles: this.tiles};
 
-    // set completedAt when the assassin is clicked
-    if (tile.role === TileRole.ASSASSIN) {
-      updates.completedAt = Date.now();
-    } else if (tile.role === TileRole.BLUE) {
+    // decrement the agents remaining if a red or blue tile was discovered
+    if (tile.role === TileRole.BLUE) {
       updates.blueAgents = this.game.blueAgents - 1;
     } else if (tile.role === TileRole.RED) {
       updates.redAgents = this.game.redAgents - 1;
     }
 
+    // get the game status and determine if the game is over
+    updates.status = this.getGameStatus(tile, updates);
+    if ([GameStatus.BLUE_WON, GameStatus.RED_WON].includes(updates.status)) {
+      updates.completedAt = Date.now();
+    }
+
     // set the timer if one exists
-    if (this.room && this.room.timer) {
+    if (this.room && this.room.timer && !updates.completedAt) {
       if (updates.status === this.game.status) {
         // the guess was correct, increment the timer if guessIncrement is set
         if (this.game.turnEnds && this.room.guessIncrement) {
@@ -153,7 +154,15 @@ export class GameBoardComponent {
     return 'Waiting for the other team';
   }
 
-  getGameStatus(tile: Tile) {
+  getGameStatus(tile: Tile, updates: Partial<Game>) {
+    // check for the win condition of all agents contacted
+    if (updates.blueAgents === 0) {
+      return GameStatus.BLUE_WON;
+    } else if (updates.redAgents === 0) {
+      return GameStatus.RED_WON;
+    }
+
+    // otherwise do it by tile clicked logic
     const bluesTurn = this.game.status === GameStatus.BLUES_TURN;
     const maxGuessesReached =
         this.currentClue.guessesMade.length + 1 >= this.currentClue.maxGuesses;

@@ -24,6 +24,13 @@ export const onUpdateGame =
           return 'Done';
         });
 
+/**
+ * This function serves as a sanity check to end the game if either team reaches
+ * 0 remaining agents. The client has this information as well, but in the case
+ * of double clicks, or anything else going wrong, this function will crawl the
+ * board to determine the number of remaining agents for each team
+ * @param snapshot
+ */
 async function updateRemainingAgents(snapshot: DocumentSnapshot):
     Promise<void> {
   const game = snapshot.data() as Game;
