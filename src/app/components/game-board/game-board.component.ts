@@ -96,6 +96,10 @@ export class GameBoardComponent {
     // set completedAt when the assassin is clicked
     if (tile.role === TileRole.ASSASSIN) {
       updates.completedAt = Date.now();
+    } else if (tile.role === TileRole.BLUE) {
+      updates.blueAgents = this.game.blueAgents - 1;
+    } else if (tile.role === TileRole.RED) {
+      updates.redAgents = this.game.redAgents - 1;
     }
 
     // set the timer if one exists

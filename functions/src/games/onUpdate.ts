@@ -44,11 +44,18 @@ async function updateRemainingAgents(snapshot: DocumentSnapshot):
       }
     });
 
-    // only update when the # of remaining agents goes down
-    if (blueAgents < game.blueAgents || redAgents < game.redAgents) {
-      const updates: Partial<Game> = {blueAgents, redAgents};
+    const updates: Partial<Game> = {};
 
-      // determine if the team won by getting all of their clues
+    // only update when the # of remaining agents when it changes
+    if (blueAgents !== game.blueAgents) {
+      updates.blueAgents = blueAgents;
+    }
+    if (redAgents !== game.redAgents) {
+      updates.redAgents = redAgents;
+    }
+
+    // determine if the team won by getting all of their clues
+    if (!game.completedAt) {
       if (blueAgents === 0) {
         updates.status = GameStatus.BLUE_WON;
         updates.completedAt = Date.now();
@@ -57,7 +64,10 @@ async function updateRemainingAgents(snapshot: DocumentSnapshot):
         updates.status = GameStatus.RED_WON;
         updates.completedAt = Date.now();
       }
+    }
 
+    // only make the request when there are updates
+    if (Object.keys(updates).length > 0) {
       await snapshot.ref.update(updates);
     }
   }
