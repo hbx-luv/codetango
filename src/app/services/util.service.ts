@@ -50,11 +50,13 @@ export class UtilService {
   /**
    * Show a confirmation popup, return true if they confirm
    */
-  confirm(headerText: string, confirmText: string, cancelText: string):
-      Promise<boolean> {
+  confirm(
+      header: string, message: string, confirmText: string,
+      cancelText: string): Promise<boolean> {
     return new Promise(async resolve => {
       const alert = await this.alertCtrl.create({
-        header: headerText,
+        header,
+        message,
         buttons: [
           {
             text: cancelText,

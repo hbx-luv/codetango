@@ -44,6 +44,7 @@ export class GameDetailPage implements OnDestroy {
   async deleteGame() {
     const doIt = await this.utilService.confirm(
         'Delete this game?',
+        'This action cannot be undone.',
         'Delete',
         'Nevermind',
     );

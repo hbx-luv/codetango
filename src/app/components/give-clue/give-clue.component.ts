@@ -1,5 +1,4 @@
 import {Component, Input, OnDestroy} from '@angular/core';
-import {AlertController} from '@ionic/angular';
 import {Observable, ReplaySubject} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
@@ -8,7 +7,7 @@ import {UtilService} from 'src/app/services/util.service';
 import {Game, GameStatus, ProposedClue, TeamTypes, Tile} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
 
-const TOAST_DURATION = 8000;
+const TOAST_DURATION = 10000;
 const TOAST_OPTIONS = {
   buttons: ['got it']
 };
@@ -70,20 +69,32 @@ export class GiveClueComponent implements OnDestroy {
     if (this.disableSubmitButton) {
       this.sendWittyToast();
     } else {
-      const word = this.clue.toUpperCase();
+      const word = this.clue.toUpperCase().trim();
 
       // for non-picture games, in cases where they didn't ask first check for
       // clue overlaps with tiles on the board, and make the other spymaster
       // confirm it if there is an overlap
       if (!askFirst && !this.game.hasPictures) {
-        const overlap = this.getOverlapWord(this.game.tiles, word);
-        if (overlap) {
-          askFirst = true;
-          this.utilService.showToast(
-              `Your clue ${word} overlaps with ${
-                  overlap} so we asked the other spymaster to confirm it`,
-              TOAST_DURATION, TOAST_OPTIONS);
+        const overlap = this.getOverlap(this.game.tiles, word);
+        if (overlap.length === 2) {
+          askFirst = await this.utilService.confirm(
+              'Questionable Clue',
+              `Your clue is questionable because ${overlap[0]} overlaps with ${
+                  overlap[1]}. Ask the other spymaster first?`,
+              'Ask First', 'Edit Clue');
+
+          // don't submit clue if they select "Edit Clue"
+          if (!askFirst) return;
         }
+      }
+
+      // clues that are more than one word should be approved by the other
+      // spymaster before proceeding
+      if (!askFirst && word.split(' ').length > 1) {
+        askFirst = true;
+        this.utilService.showToast(
+            'Clues should typically be only one word, but can sometimes be more than one word in the case of proper nouns. We sent the clue to be approved by the other spymaster.',
+            TOAST_DURATION, TOAST_OPTIONS)
       }
 
       const clue = {
@@ -150,22 +161,25 @@ export class GiveClueComponent implements OnDestroy {
 
   /**
    * If any of the words for the tiles on the board overlap with the any of the
-   * words within the clue return the first tile's word that overlaps
+   * words within the clue return the overlapping parts
    * @param tiles
    * @param clue
    */
-  getOverlapWord(tiles: Tile[], clue: string): string {
+  getOverlap(tiles: Tile[], clue: string): string[] {
     for (const tile of tiles) {
       for (const subword of tile.word.split(' ')) {
         for (const subclue of clue.split(' ')) {
-          if (this.lowerCaseIncludes(subword, subclue)) {
-            return tile.word;
+          // only check subparts of the clue that are 3 characters or more
+          // for example "WELCOME TO THE JUNGLE" should not match "PISTOL" just
+          // because "PISTOL" includes "TO" (that clue is still debatable)
+          if (subclue.length > 2 && this.lowerCaseIncludes(subword, subclue)) {
+            return [subclue, tile.word];
           }
         }
       }
     }
 
-    return '';
+    return [];
   }
 
   /**

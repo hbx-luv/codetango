@@ -186,6 +186,7 @@ export class RoomPage implements OnDestroy {
     if (!game.completedAt) {
       doIt = await this.utilService.confirm(
           'Are you sure you want to pick new teams?',
+          'This game will be abandoned and everyone will be redirected back to the lobby.',
           'New Teams',
           'Nevermind',
       );
@@ -212,6 +213,7 @@ export class RoomPage implements OnDestroy {
     if (!game.completedAt) {
       doIt = await this.utilService.confirm(
           'Are you sure you want to start a new game?',
+          'This game will be abandoned, but the teams will remain the same.',
           'New Game',
           'Nevermind',
       );
