@@ -12,6 +12,9 @@ const TOAST_OPTIONS = {
   buttons: ['got it']
 };
 
+// the list of small words to ignore for screening clues
+const SMALL_WORDS = ['A', 'AN', 'AND', 'TO', 'THE'];
+
 @Component({
   selector: 'app-give-clue',
   templateUrl: './give-clue.component.html',
@@ -172,7 +175,9 @@ export class GiveClueComponent implements OnDestroy {
           // only check subparts of the clue that are 3 characters or more
           // for example "WELCOME TO THE JUNGLE" should not match "PISTOL" just
           // because "PISTOL" includes "TO" (that clue is still debatable)
-          if (subclue.length > 2 && this.lowerCaseIncludes(subword, subclue)) {
+          // ignore the hardcoded list of small words too
+          if (subclue.length > 2 && !SMALL_WORDS.includes(subclue) &&
+              this.lowerCaseIncludes(subword, subclue)) {
             return [subclue, tile.word];
           }
         }
