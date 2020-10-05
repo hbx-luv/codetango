@@ -6,6 +6,7 @@ import {TooltipModule} from 'ng2-tooltip-directive';
 import {ChatBoxComponent} from './chat-box/chat-box.component';
 
 import {ClueComponent} from './clue/clue.component';
+import {EloChangeComponent} from './elo-change/elo-change.component';
 import {EloChartComponent} from './elo-chart/elo-chart';
 import {GameBoardComponent} from './game-board/game-board.component';
 import {GameCardComponent} from './game-card/game-card.component';
@@ -35,6 +36,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     RoomListItemComponent,
     ClueComponent,
     ChatBoxComponent,
+    EloChangeComponent,
   ],
   imports: [
     IonicModule,
@@ -61,6 +63,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     RoomListItemComponent,
     ClueComponent,
     ChatBoxComponent,
+    EloChangeComponent,
   ]
 })
 export class ComponentsModule {

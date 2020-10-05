@@ -175,6 +175,7 @@ export interface UserStats {
 
 // Snapshot in time of a player's elo rating and other stats after a game has
 // been completed
+// /eloHistory collection
 export interface Stats extends UserStats {
   gameId: string;
   userId: string;

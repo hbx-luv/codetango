@@ -5,9 +5,10 @@ import * as moment from 'moment';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
+import {EloHistoryService} from 'src/app/services/elo-history.service';
 import {GameService} from 'src/app/services/game.service';
 import {UserService} from 'src/app/services/user.service';
-import {Game, User} from 'types';
+import {Game, User, UserStats} from 'types';
 
 const LIMIT = 3;
 const CHART_LIMIT = 30;
@@ -22,6 +23,10 @@ export class ScorecardPage {
   user$: Observable<User>;
   recentGames$: Observable<Game[]>;
   chartLimit = CHART_LIMIT;
+
+  // elos several days ago
+  elo7DaysAgo?: number;
+  elo30DaysAgo?: number;
 
   overallStats = [
     {title: 'Elo Rating', field: 'elo'},
@@ -40,6 +45,8 @@ export class ScorecardPage {
       private readonly userService: UserService,
       private readonly route: ActivatedRoute,
       private readonly alertController: AlertController,
+      private readonly eloHistoryService: EloHistoryService,
+
   ) {
     this.userId = this.route.snapshot.paramMap.get('id');
     this.recentGames$ = this.gameService.getUserGames(this.userId, LIMIT);
@@ -47,7 +54,10 @@ export class ScorecardPage {
       if (user.stats && typeof user.stats.lastPlayed === 'number') {
         user.stats.lastPlayed =
             moment(user.stats.lastPlayed).format('MMM D, YYYY');
+
+        this.getRecentChanges(user.stats);
       }
+
       return user;
     }));
   }
@@ -85,5 +95,23 @@ export class ScorecardPage {
       ]
     });
     await alert.present();
+  }
+
+  async getRecentChanges(userStats: UserStats) {
+    const midnight7DaysAgo = this.eloHistoryService.getMidnight(7);
+    this.eloHistoryService.getEloAt(midnight7DaysAgo, this.userId)
+        .then(stats => {
+          if (stats) {
+            this.elo7DaysAgo = userStats.elo - stats.elo;
+          }
+        });
+
+    const midnight30DaysAgo = this.eloHistoryService.getMidnight(30);
+    this.eloHistoryService.getEloAt(midnight30DaysAgo, this.userId)
+        .then(stats => {
+          if (stats) {
+            this.elo30DaysAgo = userStats.elo - stats.elo;
+          }
+        });
   }
 }

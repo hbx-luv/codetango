@@ -1,8 +1,10 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
 import * as _ from 'lodash';
+import {DateTime} from 'luxon';
 import * as moment from 'moment';
 import {map, take} from 'rxjs/operators';
+import {Stats} from 'types';
 
 // set this to true to hide provisional games
 const NO_PROVISIONAL = false;
@@ -54,10 +56,10 @@ export class EloHistoryService {
    * @param timestamp
    * @param userId
    */
-  getEloAt(timestamp: number, userId: string) {
+  getEloAt(timestamp: number, userId: string): Promise<Stats|undefined> {
     return new Promise(resolve => {
       this.afs
-          .collection(
+          .collection<Stats>(
               'eloHistory',
               ref => {
                 return ref.where('userId', '==', userId)
@@ -104,5 +106,9 @@ export class EloHistoryService {
 
   sanitize(dataPoint) {
     return _.omit(dataPoint, ['date']);
+  }
+
+  getMidnight(daysAgo: number = 0) {
+    return DateTime.local().minus({days: daysAgo}).startOf('day').toMillis();
   }
 }

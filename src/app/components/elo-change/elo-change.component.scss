@@ -1,0 +1,16 @@
+.elo-change {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+
+  &.trending-down {
+    color: #ac524f;
+  }
+  &.trending-up {
+    color: #759900;
+  }
+
+  ion-icon {
+    margin-right: 5px;
+  }
+}
