@@ -87,7 +87,9 @@ export class GiveClueComponent implements OnDestroy {
               'Ask First', 'Edit Clue');
 
           // don't submit clue if they select "Edit Clue"
-          if (!askFirst) return;
+          if (!askFirst) {
+            return;
+          }
         }
       }
 
@@ -97,7 +99,7 @@ export class GiveClueComponent implements OnDestroy {
         askFirst = true;
         this.utilService.showToast(
             'Clues should typically be only one word, but can sometimes be more than one word in the case of proper nouns. We sent the clue to be approved by the other spymaster.',
-            TOAST_DURATION, TOAST_OPTIONS)
+            TOAST_DURATION, TOAST_OPTIONS);
       }
 
       const clue = {

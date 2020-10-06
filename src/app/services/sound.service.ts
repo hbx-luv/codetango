@@ -35,7 +35,9 @@ export class SoundService {
   private getSound(sound: Sound): HTMLAudioElement {
     // look for the loaded sound in cache
     let element = this.loadedSounds[sound];
-    if (element) return element;
+    if (element) {
+      return element;
+    }
 
     // otherwise load the file, cache it, and return it
     element = new Audio(`${BASE_PATH}/${sound}`);

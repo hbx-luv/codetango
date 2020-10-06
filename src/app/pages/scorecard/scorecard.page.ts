@@ -89,7 +89,7 @@ export class ScorecardPage {
         {
           text: 'Ok',
           handler: (data) => {
-            this.userService.updateUser(this.userId, {nickname: data.name})
+            this.userService.updateUser(this.userId, {nickname: data.name});
           }
         }
       ]

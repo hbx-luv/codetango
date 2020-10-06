@@ -28,7 +28,7 @@ export class EloHistoryService {
               }
 
               if (limit) {
-                query = query.limit(limit)
+                query = query.limit(limit);
               }
 
               return query;

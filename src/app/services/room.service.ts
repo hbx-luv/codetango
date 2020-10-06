@@ -68,7 +68,7 @@ export class RoomService {
       // fetch the existing rooms for the authenticaterd user
       const userRef = this.db.collection('users').doc(currentUserId);
       const userSnapshot = await userRef.get();
-      let {rooms = []} = userSnapshot.data();
+      const {rooms = []} = userSnapshot.data();
 
       // put the room id first, then add all the others behind
       await userRef.update({rooms: [roomId].concat(without(rooms, roomId))});

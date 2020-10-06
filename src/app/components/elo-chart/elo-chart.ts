@@ -26,7 +26,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
 
   ngOnChanges() {
     // always kill the previous observable
-    this.destroyed$.next()
+    this.destroyed$.next();
 
     // if the id is undefined, return
     if (this.userId === undefined) {
@@ -44,7 +44,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
 
   updateChart(dataPoints) {
     // prevent the chart from updating if there is nothing different
-    var dataString = JSON.stringify(dataPoints);
+    let dataString = JSON.stringify(dataPoints);
     if (this.lastDataString === dataString) {
       return;
     }

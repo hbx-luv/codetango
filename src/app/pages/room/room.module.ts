@@ -16,9 +16,11 @@ import {RoomPage} from './room.page';
     RoomPageRoutingModule,
     ComponentsModule,
     TooltipModule.forRoot({
+      /* tslint:disable object-literal-key-quotes */
       'placement': 'bottom',
       'hide-delay': 0,
       'displayTouchscreen': false,
+      /* tslint:enable */
     }),
   ],
   declarations: [RoomPage]
