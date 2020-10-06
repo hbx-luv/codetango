@@ -97,7 +97,7 @@ export class GiveClueComponent implements OnInit, OnDestroy {
       if (!askFirst && word.split(' ').length > 1) {
         askFirst = true;
         this.utilService.showToast(
-            'Clues should typically be only one word, but can sometimes be more than one word in the case of proper nouns. We sent the clue to be approved by the other spymaster.',
+            'The other spymaster needs to approve this clue. Clues should typically be only one word, but that is up to the discrection of the group you are playing with.',
             TOAST_DURATION, TOAST_OPTIONS);
       }
 
