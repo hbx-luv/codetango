@@ -72,7 +72,8 @@ export class GameComponent {
     // If no guesses have been made, double check that they really want to end
     // the turn. Codenames rules don't allow ending a turn without making any
     // guesses, but sometimes there's a good reason
-    if (this.currentClue.guessesMade.length === 0) {
+    if (this.currentClue.guessesMade.length === 0 ||
+        !this.currentClueIsFromMyTeam) {
       const shouldEndTurn = await this.utilService.confirm(
           'End turn?',
           'You are normally not allowed to end the turn without making a guess first, but you can if you must.',
