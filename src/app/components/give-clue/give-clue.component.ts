@@ -192,7 +192,6 @@ export class GiveClueComponent implements OnInit, OnDestroy {
   lowerCaseIncludes(a: string, b: string): boolean {
     a = a.toLowerCase();
     b = b.toLowerCase();
-    console.log(`comparing ${a} and ${b}`);
     return a.includes(b) || b.includes(a);
   }
 
