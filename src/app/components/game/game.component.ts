@@ -70,7 +70,7 @@ export class GameComponent {
 
   async endCurrentTeamsTurn() {
     // If no guesses have been made, double check that they really want to end
-    // the turn Codenames rules don't allow ending a turn without making any
+    // the turn. Codenames rules don't allow ending a turn without making any
     // guesses, but sometimes there's a good reason
     if (this.currentClue.guessesMade.length === 0) {
       const shouldEndTurn = await this.utilService.confirm(
