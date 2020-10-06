@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
+import {UtilService} from 'src/app/services/util.service';
 import {Clue, Game, GameStatus, Room, TeamTypes} from 'types';
 
 @Component({
@@ -18,6 +19,7 @@ export class GameComponent {
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
+      private readonly utilService: UtilService,
   ) {}
 
   // Do not allow a player to click when:
@@ -66,7 +68,21 @@ export class GameComponent {
         get(this.game, 'blueTeam.spymaster') === currentUserId;
   }
 
-  endCurrentTeamsTurn() {
+  async endCurrentTeamsTurn() {
+    // If no guesses have been made, double check that they really want to end
+    // the turn Codenames rules don't allow ending a turn without making any
+    // guesses, but sometimes there's a good reason
+    if (this.currentClue.guessesMade.length === 0) {
+      const shouldEndTurn = await this.utilService.confirm(
+          'End the turn?',
+          'You are normally not allowed to end the turn without making a guess first, but you can if you must.',
+          'End the turn', 'Nevermind');
+
+      if (!shouldEndTurn) {
+        return;
+      }
+    }
+
     const updates: Partial<Game> = {};
 
     if (this.game.status === GameStatus.REDS_TURN) {

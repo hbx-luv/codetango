@@ -1,8 +1,8 @@
 {
   "name": "codetango",
   "version": "1.0.0",
-  "author": "Matt, Alex, Ryan, Armin, Justin, Bob, Tyler",
-  "homepage": "https://codetango.web.dev",
+  "author": "Matt, Alex, Ryan, Armin, Justin, Bob, Tyler, Brik",
+  "homepage": "https://play.hbx.vision/",
   "scripts": {
     "serve": "ionic serve",
     "start": "ionic serve",
