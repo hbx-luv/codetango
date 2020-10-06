@@ -74,9 +74,9 @@ export class GameComponent {
     // guesses, but sometimes there's a good reason
     if (this.currentClue.guessesMade.length === 0) {
       const shouldEndTurn = await this.utilService.confirm(
-          'End the turn?',
+          'End turn?',
           'You are normally not allowed to end the turn without making a guess first, but you can if you must.',
-          'End the turn', 'Nevermind');
+          'End turn', 'Nevermind');
 
       if (!shouldEndTurn) {
         return;
