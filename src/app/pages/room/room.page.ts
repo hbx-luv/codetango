@@ -53,10 +53,10 @@ export class RoomPage implements OnDestroy {
             if (this.userIsInRoom && this.lastGameStatus &&
                 this.lastGameStatus !== status &&
                 [GameStatus.BLUE_WON, GameStatus.RED_WON].includes(status)) {
-              let blueWonIWon = status === GameStatus.BLUE_WON &&
+              const blueWonIWon = status === GameStatus.BLUE_WON &&
                   currentGame.blueTeam.userIds.includes(
                       this.authService.currentUserId);
-              let redWonIWon = status === GameStatus.RED_WON &&
+              const redWonIWon = status === GameStatus.RED_WON &&
                   currentGame.redTeam.userIds.includes(
                       this.authService.currentUserId);
 
@@ -114,7 +114,9 @@ export class RoomPage implements OnDestroy {
   }
 
   get title(): string {
-    if (!this.room) return 'Loading...';
+    if (!this.room) {
+      return 'Loading...';
+    }
 
     switch (this.room.status) {
       case RoomStatus.PREGAME:

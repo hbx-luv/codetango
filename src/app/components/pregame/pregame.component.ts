@@ -123,7 +123,7 @@ export class PregameComponent {
       await this.gameService.updateGame(this.game.id, {
         'blueTeam.userIds': this.sortSpymasterFirst(this.game.blueTeam),
         'redTeam.userIds': this.sortSpymasterFirst(this.game.redTeam),
-        turnEnds: Date.now() + (timer * 1000),
+        'turnEnds': Date.now() + (timer * 1000),
       });
     }
     await loader.dismiss();

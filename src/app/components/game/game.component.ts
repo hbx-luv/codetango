@@ -13,7 +13,7 @@ import {Clue, Game, GameStatus, Room, TeamTypes} from 'types';
 export class GameComponent {
   @Input() game: Game;
   @Input() room?: Room;
-  @Input() selectedTab?: string = 'board-tab';
+  @Input() selectedTab = 'board-tab';
   @Input() currentClue?: Clue;
 
   constructor(

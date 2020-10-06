@@ -1,11 +1,11 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 
 @Component({
   selector: 'app-elo-change',
   templateUrl: './elo-change.component.html',
   styleUrls: ['./elo-change.component.scss'],
 })
-export class EloChangeComponent {
+export class EloChangeComponent implements OnChanges {
   @Input() change: number;
   trend: string;
 

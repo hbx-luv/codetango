@@ -28,7 +28,7 @@ export class EloHistoryService {
               }
 
               if (limit) {
-                query = query.limit(limit)
+                query = query.limit(limit);
               }
 
               return query;
@@ -53,8 +53,6 @@ export class EloHistoryService {
   /**
    * Returns either the first record for a player before a given
    * timestamp, or undefined if none are found before the timestamp
-   * @param timestamp
-   * @param userId
    */
   getEloAt(timestamp: number, userId: string): Promise<Stats|undefined> {
     return new Promise(resolve => {

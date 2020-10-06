@@ -37,7 +37,7 @@ export class GameHistoryPage {
    */
   async loadMore(event?) {
     // determine startAfter from the last game in thge collection
-    let startAfter = undefined;
+    let startAfter;
     if (this.games && this.games.length) {
       startAfter = this.games[this.games.length - 1].completedAt;
     }
@@ -49,7 +49,9 @@ export class GameHistoryPage {
             .toPromise();
 
     // instantiate the games array if undefined
-    if (this.games === undefined) this.games = [];
+    if (this.games === undefined) {
+      this.games = [];
+    }
 
     // push all new games into this array
     for (const game of moreGames) {

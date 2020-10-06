@@ -8,7 +8,7 @@ import {Room} from 'types';
   templateUrl: './room-list-item.component.html',
   styleUrls: ['./room-list-item.component.scss'],
 })
-export class RoomListItemComponent {
+export class RoomListItemComponent implements OnInit {
   BASE_WIDTH = 75;
 
   @Input() roomId: string;

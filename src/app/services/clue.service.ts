@@ -54,7 +54,7 @@ export class ClueService {
         .doc(gameId)
         .collection(CLUES_COLLECTION)
         .doc(clueId)
-        .update({'guessesMade': firestore.FieldValue.arrayUnion(tile)});
+        .update({guessesMade: firestore.FieldValue.arrayUnion(tile)});
   }
 
   proposeClue(gameId: string, clue: Partial<ProposedClue>):
