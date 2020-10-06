@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Observable, ReplaySubject} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
@@ -20,7 +20,7 @@ const SMALL_WORDS = ['A', 'AN', 'AND', 'TO', 'THE'];
   templateUrl: './give-clue.component.html',
   styleUrls: ['./give-clue.component.scss'],
 })
-export class GiveClueComponent implements OnDestroy {
+export class GiveClueComponent implements OnInit, OnDestroy {
   private destroyed = new ReplaySubject<never>();
 
   @Input() game: Game;
@@ -65,7 +65,6 @@ export class GiveClueComponent implements OnDestroy {
    * Submit the clue as a spymaster. If askFirst is true, double check with the
    * opposing spymaster so they can approve the clue before it is shown to your
    * operatives
-   * @param askFirst
    */
   async submitClue(askFirst = false) {
     // Need to check if the clue is valid before submitting
@@ -167,8 +166,6 @@ export class GiveClueComponent implements OnDestroy {
   /**
    * If any of the words for the tiles on the board overlap with the any of the
    * words within the clue return the overlapping parts
-   * @param tiles
-   * @param clue
    */
   getOverlap(tiles: Tile[], clue: string): string[] {
     for (const tile of tiles) {
@@ -191,8 +188,6 @@ export class GiveClueComponent implements OnDestroy {
 
   /**
    * Return true if either a includes b or b includes a, case agnostic
-   * @param a
-   * @param b
    */
   lowerCaseIncludes(a: string, b: string): boolean {
     a = a.toLowerCase();

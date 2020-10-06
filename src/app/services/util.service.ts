@@ -81,7 +81,6 @@ export class UtilService {
   /**
    * Present a loader with the given message, then return the loader
    * so the caller can dismiss it with loading.dismiss();
-   * @param message
    */
   async presentLoader(message: string) {
     const loading = await this.loadingCtrl.create({message});

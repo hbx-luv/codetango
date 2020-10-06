@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
 import {Game, GameStatus, Room} from 'types';
 import {GameService} from '../../services/game.service';
 
@@ -7,7 +7,7 @@ import {GameService} from '../../services/game.service';
   templateUrl: './timer.component.html',
   styleUrls: ['./timer.component.scss'],
 })
-export class TimerComponent {
+export class TimerComponent implements OnChanges, OnDestroy {
   @Input() room: Room;
   @Input() game: Game;
 
@@ -78,9 +78,9 @@ export class TimerComponent {
     }
 
     // Hours, minutes and seconds
-    const hrs = ~~(seconds / 3600);
-    const mins = ~~((seconds % 3600) / 60);
-    const secs = ~~seconds % 60;
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds) % 60;
 
     // Output like '1:01' or '4:03:59' or '123:03:59'
     let ret = '';

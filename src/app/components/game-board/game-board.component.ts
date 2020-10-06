@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
@@ -11,7 +11,7 @@ import {Clue, Game, GameStatus, Room, TeamTypes, Tile, TileRole} from '../../../
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss'],
 })
-export class GameBoardComponent {
+export class GameBoardComponent implements OnChanges {
   // readonly versions of the game board won't user the room
   @Input() room?: Room;
 

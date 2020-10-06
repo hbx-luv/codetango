@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
@@ -12,7 +12,7 @@ import {Game, Message, TeamTypes} from 'types';
   templateUrl: './chat-box.component.html',
   styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent {
+export class ChatBoxComponent implements OnInit, OnChanges {
   @ViewChild('scrollMe') private myScrollContainer: ElementRef;
 
   @Input() game: Game;

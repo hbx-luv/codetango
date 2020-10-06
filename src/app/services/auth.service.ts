@@ -95,7 +95,8 @@ export class AuthService {
    * Handle AngularFireAuth errors and present toasts
    */
   errorHandler(error: {code: string, message: string}) {
-    let {code, message} = error;
+    const {code} = error;
+    let {message} = error;
     switch (code) {
       case 'auth/invalid-email':
         message = 'Please enter a valid email address';

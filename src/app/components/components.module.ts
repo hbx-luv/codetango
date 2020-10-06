@@ -44,11 +44,9 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     CommonModule,
     FormsModule,
     TooltipModule.forRoot({
-      /* tslint:disable object-literal-key-quotes */
       'placement': 'bottom',
       'hide-delay': 0,
       'displayTouchscreen': false,
-      /* tslint:enable */
     }),
   ],
   exports: [

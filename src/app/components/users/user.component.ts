@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
@@ -11,7 +11,7 @@ import {UserService} from '../../services/user.service';
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss'],
 })
-export class UsersComponent {
+export class UsersComponent implements OnChanges {
   BASE_WIDTH = 75;
 
   @Input() userId: string;

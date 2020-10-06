@@ -44,7 +44,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
 
   updateChart(dataPoints) {
     // prevent the chart from updating if there is nothing different
-    let dataString = JSON.stringify(dataPoints);
+    const dataString = JSON.stringify(dataPoints);
     if (this.lastDataString === dataString) {
       return;
     }
