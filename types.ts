@@ -170,6 +170,8 @@ export interface UserStats {
   currentStreak: number;
   bestStreak: number;
   provisional: boolean;
+  ally?: string;
+  nemesis?: string;
   lastPlayed?: number|string;
 }
 

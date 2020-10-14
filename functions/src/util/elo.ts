@@ -54,7 +54,7 @@ export async function recalcElo(
   if (deletedGame) {
     console.log('adding users from deleted game', deletedGame);
     await populateUserMap(db, userMap, deletedGame);
-    await populateUserToUserMap(db, userToUserMap, deletedGame);
+    await populateUserToUserMap(db, userToUserMap, userMap, deletedGame);
   }
 
   for (let i = 0; i < games.size; i++) {
@@ -65,10 +65,13 @@ export async function recalcElo(
     const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
     batch.update(games.docs[i].ref, {userIds});
 
-    // ensure all of the users are in the userMap and userToUserMap before
+    // ensure all of the users are in the userMap before
     // passing that off to the elo function
     await populateUserMap(db, userMap, game);
-    await populateUserToUserMap(db, userToUserMap, game);
+
+    // populate the userToUserMap as well, using the userMap to get the record
+    // for current nemesis and ally for each player
+    await populateUserToUserMap(db, userToUserMap, userMap, game);
 
     // the setStats method will update several stats in the userMap and
     // userToUserMap for each user that played in the game
@@ -113,7 +116,7 @@ export async function recalcElo(
     const userId: string = pair[0];
     const data = pair[1];
 
-    batch.update(db.collection('users').doc(userId), {
+    const updateData: firebase.firestore.UpdateData = {
       'stats.elo': data.elo,
       'stats.gamesPlayed': data.gamesPlayed,
       'stats.gamesWon': data.gamesWon,
@@ -126,7 +129,18 @@ export async function recalcElo(
       'stats.bestStreak': data.bestStreak,
       'stats.provisional': data.provisional,
       'stats.lastPlayed': data.timestamp
-    });
+    };
+
+    // we have to do these outside, because you cannot set undefined as a value
+    // in firestore
+    if (data.ally) {
+      updateData['stats.ally'] = data.ally;
+    }
+    if (data.nemesis) {
+      updateData['stats.nemesis'] = data.nemesis;
+    }
+
+    batch.update(db.collection('users').doc(userId), updateData);
   }
 
   // wait for the batches to commit in order
@@ -201,22 +215,32 @@ export async function getEloHistoryForUser(
   };
 }
 
-async function populateUserToUserMap(db: any, map: UserToUserMap, game: Game) {
+async function populateUserToUserMap(
+    db: any,
+    userTouserMap: UserToUserMap,
+    userMap: UserMap,
+    game: Game,
+) {
   const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
 
   // build up all combinations of users to each other
   for (const myUserId of userIds) {
-    for (const theirUserId of userIds) {
-      // ignore self
-      if (myUserId !== theirUserId) {
-        if (map[myUserId] === undefined) {
-          map[myUserId] = {};
-        }
+    // instantiate map if needed
+    if (userTouserMap[myUserId] === undefined) {
+      userTouserMap[myUserId] = {};
+    }
 
+    // get ally and nemesis userIds as well
+    const {ally = '', nemesis = ''} = userMap[myUserId];
+
+    for (const theirUserId of userIds.concat([ally, nemesis])) {
+      // ignore self
+      if (theirUserId && myUserId !== theirUserId) {
         // if missing relationship between me and them, get the last known doc
-        if (map[myUserId][theirUserId] === undefined) {
-          map[myUserId][theirUserId] = await getUserToUserHistoryForUser(
-              db, myUserId, theirUserId, game.id!, game.completedAt!);
+        if (userTouserMap[myUserId][theirUserId] === undefined) {
+          userTouserMap[myUserId][theirUserId] =
+              await getUserToUserHistoryForUser(
+                  db, myUserId, theirUserId, game.id!, game.completedAt!);
         }
       }
     }
@@ -295,6 +319,7 @@ function setStats(game: Game, userMap: UserMap, userToUserMap: UserToUserMap) {
         thisUserToUserMap[theirUserId].totalGames++;
         thisUserToUserMap[theirUserId].totalWith++;
         thisUserToUserMap[theirUserId].wonWith++;
+        maybeSetAlly(winner, theirUserId, userMap, userToUserMap);
       }
     }
     for (const theirUserId of losingTeam.userIds) {
@@ -331,19 +356,58 @@ function setStats(game: Game, userMap: UserMap, userToUserMap: UserToUserMap) {
 
     // just update the totals for userToUserStats
     const thisUserToUserMap = userToUserMap[loser];
-    for (const theirUserId of winningTeam.userIds) {
+    for (const theirUserId of losingTeam.userIds) {
       if (loser !== theirUserId) {
         thisUserToUserMap[theirUserId].totalGames++;
         thisUserToUserMap[theirUserId].totalWith++;
       }
     }
-    for (const theirUserId of losingTeam.userIds) {
+    for (const theirUserId of winningTeam.userIds) {
       if (loser !== theirUserId) {
         thisUserToUserMap[theirUserId].totalGames++;
         thisUserToUserMap[theirUserId].totalAgainst++;
+        maybeSetNemesis(loser, theirUserId, userMap, userToUserMap);
       }
     }
   }
+}
+
+function maybeSetAlly(
+    myUserId: string,
+    theirUserId: string,
+    userMap: UserMap,
+    userToUserMap: UserToUserMap,
+) {
+  // if the user currently has an ally, break out early if theirUserId's ally
+  // stat isn't as good as the current ally
+  const me = userMap[myUserId];
+  const theirStats = userToUserMap[myUserId][theirUserId];
+  const allyStats = userToUserMap[myUserId][me.ally || ''];
+  if (allyStats && allyStats.wonWith >= theirStats.wonWith) {
+    return;
+  }
+
+  // if we get here, either ally isn't set or this ally is better
+  me.ally = theirUserId;
+}
+
+function maybeSetNemesis(
+    myUserId: string,
+    theirUserId: string,
+    userMap: UserMap,
+    userToUserMap: UserToUserMap,
+) {
+  // if the user currently has an nemesis, break out early if theirUserId's
+  // nemesis stat isn't as good as the current nemesis
+  const me = userMap[myUserId];
+  const theirStats = userToUserMap[myUserId][theirUserId];
+  const nemesisStats = userToUserMap[myUserId][me.nemesis || ''];
+  if (nemesisStats && nemesisStats.wonWith >= theirStats.wonWith) {
+    return;
+  }
+
+  // if we get here, either nemesis isn't set or this nemesis is better
+  me.nemesis = theirUserId;
 }
 
 /**
