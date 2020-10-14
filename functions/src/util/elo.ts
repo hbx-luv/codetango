@@ -402,7 +402,7 @@ function maybeSetNemesis(
   const me = userMap[myUserId];
   const theirStats = userToUserMap[myUserId][theirUserId];
   const nemesisStats = userToUserMap[myUserId][me.nemesis || ''];
-  if (nemesisStats && nemesisStats.wonWith >= theirStats.wonWith) {
+  if (nemesisStats && nemesisStats.wonAgainst >= theirStats.wonAgainst) {
     return;
   }
 
