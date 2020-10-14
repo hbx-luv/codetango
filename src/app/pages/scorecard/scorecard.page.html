@@ -49,6 +49,9 @@
           <!-- versus card -->
           <app-versus *ngIf="!isMe" [myUserId]="authService.currentUserId" [theirUserId]="userId"></app-versus>
 
+          <!-- same team card -->
+          <app-same-team *ngIf="!isMe" [myUserId]="authService.currentUserId" [theirUserId]="userId"></app-same-team>
+
           <!-- overall stats -->
           <ion-card class="user-card">
             <ion-card-header class="space-between">

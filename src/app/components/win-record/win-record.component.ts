@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {UserToUserStats} from 'types';
 
 @Component({
   selector: 'app-win-record',
@@ -7,23 +6,20 @@ import {UserToUserStats} from 'types';
   styleUrls: ['./win-record.component.scss'],
 })
 export class WinRecordComponent {
-  @Input() record: UserToUserStats;
+  @Input() wins: number;
+  @Input() losses: number;
 
   constructor() {}
 
-  ngOnChanges() {
-    console.log(this.record);
+  get total(): number {
+    return this.wins + this.losses;
   }
 
   get winsPercent(): string {
-    return `${
-        (this.record.wonAgainst / this.record.totalAgainst * 100).toFixed(1)}%`;
+    return `${(this.wins / this.total * 100).toFixed(1)}%`;
   }
 
   get lossesPercent(): string {
-    return `${
-        ((this.record.totalAgainst - this.record.wonAgainst) /
-         this.record.totalAgainst * 100)
-            .toFixed(1)}%`;
+    return `${(this.losses / this.total * 100).toFixed(1)}%`;
   }
 }

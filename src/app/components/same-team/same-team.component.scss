@@ -1,0 +1,15 @@
+ion-card {
+  margin: 20px 0;
+
+  .players-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    ion-icon {
+      font-weight: bold;
+      font-size: 18px;
+      color: var(--ion-color-dark);
+    }
+  }
+}

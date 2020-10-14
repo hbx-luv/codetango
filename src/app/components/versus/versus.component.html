@@ -14,6 +14,9 @@
       </h2>
       <app-user [userId]="theirUserId" [showUserName]="false" color="red"></app-user>
     </div>
-    <app-win-record [record]="record"></app-win-record>
+    <app-win-record
+      [wins]="record.wonAgainst"
+      [losses]="record.totalAgainst - record.wonAgainst">
+    </app-win-record>
   </ion-card-content>
 </ion-card>
