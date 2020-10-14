@@ -1,0 +1,14 @@
+<div>
+  <div class="bar-chart">
+    <div class="wins" [style.width]="winsPercent" [tooltip]="winsPercent">
+      {{ wins }}
+    </div>
+    <div class="losses" [style.width]="lossesPercent" [tooltip]="lossesPercent">
+      {{ losses }}
+    </div>
+  </div>
+  <div class="win-loss-bar space-between">
+    <div>Wins</div>
+    <div>Losses</div>
+  </div>
+</div>

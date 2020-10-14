@@ -14,9 +14,12 @@ import {GameComponent} from './game/game.component';
 import {GiveClueComponent} from './give-clue/give-clue.component';
 import {PregameComponent} from './pregame/pregame.component';
 import {RoomListItemComponent} from './room-list-item/room-list-item.component';
+import {SameTeamComponent} from './same-team/same-team.component';
 import {TeamListsComponent} from './team-lists/team-lists.component';
 import {TimerComponent} from './timer/timer.component';
 import {UsersComponent} from './users/user.component';
+import {VersusComponent} from './versus/versus.component';
+import {WinRecordComponent} from './win-record/win-record.component';
 import {WordHistoryComponent} from './word-history/word-history.component';
 
 
@@ -37,6 +40,9 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     ClueComponent,
     ChatBoxComponent,
     EloChangeComponent,
+    SameTeamComponent,
+    VersusComponent,
+    WinRecordComponent,
   ],
   imports: [
     IonicModule,
@@ -64,6 +70,9 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     ClueComponent,
     ChatBoxComponent,
     EloChangeComponent,
+    SameTeamComponent,
+    VersusComponent,
+    WinRecordComponent,
   ]
 })
 export class ComponentsModule {

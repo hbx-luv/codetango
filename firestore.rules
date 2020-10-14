@@ -18,6 +18,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /userToUserHistory/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /games/{document=**} {
       // TODO: get to the bottom of doc mmmNCiIPKhnU0qiYxeYO beign written to over and over
       allow read: if true;
