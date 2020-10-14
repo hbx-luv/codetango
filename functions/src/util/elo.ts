@@ -32,7 +32,7 @@ export async function recalcElo(
       await db.collection('games')
           .where('completedAt', '>=', timestamp)
           .orderBy('completedAt', 'asc')
-          .limit(500)  // only do 500 games at a time so we don't timeout
+          .limit(100)  // only do 100 games at a time so we don't timeout
           .get();
 
   console.log(`${games.size} games got got. starting calc`);
