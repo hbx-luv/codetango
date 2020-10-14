@@ -1,19 +1,21 @@
-<ion-card *ngIf="record$ | async as record">
-  <ion-card-header class="space-between">
-    <ion-card-title>Same Team</ion-card-title>
-    <ion-card-subtitle>
-      {{ record.totalWith }} {{ record.totalWith === 1 ? 'game' : 'games'}}
-    </ion-card-subtitle>
-  </ion-card-header>
-  <ion-card-content>
-    <div class="players-row">
-      <app-user [userId]="myUserId" [showUserName]="false" color="blue"></app-user>
-      <ion-icon name="add"></ion-icon>
-      <app-user [userId]="theirUserId" [showUserName]="false" color="blue"></app-user>
-    </div>
-    <app-win-record
-      [wins]="record.wonWith"
-      [losses]="record.totalWith - record.wonWith">
-    </app-win-record>
-  </ion-card-content>
-</ion-card>
+<ng-container *ngIf="record$ | async as record">
+  <ion-card *ngIf="record.totalWith">
+    <ion-card-header class="space-between">
+      <ion-card-title>Same Team</ion-card-title>
+      <ion-card-subtitle>
+        {{ record.totalWith }} {{ record.totalWith === 1 ? 'game' : 'games'}}
+      </ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="players-row">
+        <app-user [userId]="myUserId" [showUserName]="false" color="blue"></app-user>
+        <ion-icon name="add"></ion-icon>
+        <app-user [userId]="theirUserId" [showUserName]="false" color="blue"></app-user>
+      </div>
+      <app-win-record
+        [wins]="record.wonWith"
+        [losses]="record.totalWith - record.wonWith">
+      </app-win-record>
+    </ion-card-content>
+  </ion-card>
+</ng-container>
