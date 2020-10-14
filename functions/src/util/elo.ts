@@ -358,21 +358,18 @@ function deltaWithProvisional(gamesPlayed: number, eloChange: number): number {
   return eloChange * multiplier;
 }
 
-export async function nukeEloHistoryForGame(
-    db: any, gameId: string): Promise<void[]> {
+export async function nukeHistoryForGame(
+    db: any, collection: string, gameId: string): Promise<void> {
+  const batch = new BigBatch(db);
   const snapshot =
-      await db.collection('eloHistory').where('gameId', '==', gameId).get();
+      await db.collection(collection).where('gameId', '==', gameId).get();
 
   // delete every document with a timestamp >= to the one provided
-  // wait for every snapshot to be removed before continuing
-  return await Promise.all(
-      snapshot.docs.map((doc: firestore.DocumentSnapshot) => {
-        return removeEloHistoryRecord(db, doc.id);
-      }));
-}
+  snapshot.docs.forEach((doc: firestore.DocumentSnapshot) => {
+    batch.delete(db.collection(collection).doc(doc.id));
+  });
 
-function removeEloHistoryRecord(db: any, docId: string): Promise<void> {
-  return db.collection('eloHistory').doc(docId).delete();
+  return batch.commit();
 }
 
 function getTeamElo(team: Team, userMap: UserMap) {
