@@ -1,7 +1,7 @@
 import {firestore} from 'firebase-admin';
 import {toPairs} from 'lodash';
 
-import {Game, GameStatus, Stats, Team} from '../../../types';
+import {Game, GameStatus, Stats, Team, UserToUserStats} from '../../../types';
 
 import {BigBatch} from './big-batch';
 import {getChange} from './elo-math';
@@ -15,6 +15,15 @@ interface UserMap {
   [field: string]: Stats;
 }
 
+// each key in this map is a given user's id
+// the value is a map of other users' ids pointing to UserToUserStats
+// this map should hold the latest stats between users
+interface UserToUserMap {
+  [field: string]: {
+    [field: string]: UserToUserStats,
+  };
+}
+
 export async function recalcElo(
     db: any,  // RIP, tried to import firestore.Firestore
     timestamp: number,
@@ -26,8 +35,6 @@ export async function recalcElo(
   //      users collection with all affected users
   //          -> update the relevant stats for each user affected
 
-  const userMap: UserMap = {};
-
   const games =
       await db.collection('games')
           .where('completedAt', '>=', timestamp)
@@ -37,6 +44,8 @@ export async function recalcElo(
 
   console.log(`${games.size} games got got. starting calc`);
 
+  const userMap: UserMap = {};
+  const userToUserMap: UserToUserMap = {};
   const batch = new BigBatch(db);
   let lastTimestamp = 0;
 
@@ -45,6 +54,7 @@ export async function recalcElo(
   if (deletedGame) {
     console.log('adding users from deleted game', deletedGame);
     await populateUserMap(db, userMap, deletedGame);
+    await populateUserToUserMap(db, userToUserMap, deletedGame);
   }
 
   for (let i = 0; i < games.size; i++) {
@@ -55,25 +65,42 @@ export async function recalcElo(
     const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
     batch.update(games.docs[i].ref, {userIds});
 
-    // ensure all of the users are in the userMap before passing that off to
-    // the elo function
+    // ensure all of the users are in the userMap and userToUserMap before
+    // passing that off to the elo function
     await populateUserMap(db, userMap, game);
+    await populateUserToUserMap(db, userToUserMap, game);
 
-    // the setStats method will update several stats in the user map for each
-    // user that played in the game
-    setStats(game, userMap);
+    // the setStats method will update several stats in the userMap and
+    // userToUserMap for each user that played in the game
+    setStats(game, userMap, userToUserMap);
 
-    // update elo history for all users involved
-    for (const userId of game.blueTeam.userIds.concat(game.redTeam.userIds)) {
+    // update eloHistory and userToUserHistory for all users involved
+    for (const myUserId of userIds) {
       batch.set(
-          db.collection('eloHistory').doc(`${userId}_${game.id}`),
+          db.collection('eloHistory').doc(`${myUserId}_${game.id}`),
           {
             // clone the object and set gameId and timestamp
-            ...userMap[userId],
+            ...userMap[myUserId],
             gameId: game.id,
             timestamp: game.completedAt,
           },
       );
+
+      // save each combination of the users to the userToUserHistoryCollection
+      for (const theirUserId of userIds) {
+        if (myUserId !== theirUserId) {
+          batch.set(
+              db.collection('userToUserHistory')
+                  .doc(`${myUserId}_${theirUserId}_${game.id}`),
+              {
+                // clone the object and set gameId and timestamp
+                ...userToUserMap[myUserId][theirUserId],
+                gameId: game.id,
+                timestamp: game.completedAt,
+              },
+          );
+        }
+      }
     }
 
     lastTimestamp = game.completedAt!;
@@ -174,7 +201,62 @@ export async function getEloHistoryForUser(
   };
 }
 
-function setStats(game: Game, userMap: UserMap) {
+async function populateUserToUserMap(db: any, map: UserToUserMap, game: Game) {
+  const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
+
+  // build up all combinations of users to each other
+  for (const myUserId of userIds) {
+    for (const theirUserId of userIds) {
+      // ignore self
+      if (myUserId !== theirUserId) {
+        if (map[myUserId] === undefined) {
+          map[myUserId] = {};
+        }
+
+        // if missing relationship between me and them, get the last known doc
+        if (map[myUserId][theirUserId] === undefined) {
+          map[myUserId][theirUserId] = await getUserToUserHistoryForUser(
+              db, myUserId, theirUserId, game.id!, game.completedAt!);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Get the last known stats between two users before the given timestamp
+ */
+export async function getUserToUserHistoryForUser(
+    db: any,
+    myUserId: string,
+    theirUserId: string,
+    gameId: string,
+    timestamp: number,
+    ): Promise<UserToUserStats> {
+  const snapshot = await db.collection('userToUserHistory')
+                       .orderBy('timestamp', 'desc')  // desc is most recent
+                       .where('myUserId', '==', myUserId)
+                       .where('theirUserId', '==', theirUserId)
+                       .where('timestamp', '<', timestamp)
+                       .limit(1)
+                       .get();
+
+  // there should only be 1 document per user
+  // if there are none, then set up a base UserToUserStats object
+  return snapshot.size === 1 ? snapshot.docs[0].data() as UserToUserStats : {
+    myUserId,
+    theirUserId,
+    gameId,
+    timestamp,
+    totalGames: 0,
+    totalWith: 0,
+    totalAgainst: 0,
+    wonWith: 0,
+    wonAgainst: 0,
+  };
+}
+
+function setStats(game: Game, userMap: UserMap, userToUserMap: UserToUserMap) {
   // update the stats for each user in the userMap
   const blueWon = game.status === GameStatus.BLUE_WON;
   const winningTeam = blueWon ? game.blueTeam : game.redTeam;
@@ -205,6 +287,23 @@ function setStats(game: Game, userMap: UserMap) {
       user.spymasterBestStreak =
           Math.max(user.spymasterBestStreak, user.spymasterStreak);
     }
+
+    // update the userToUserStats for my teammates and my opponents
+    const thisUserToUserMap = userToUserMap[winner];
+    for (const theirUserId of winningTeam.userIds) {
+      if (winner !== theirUserId) {
+        thisUserToUserMap[theirUserId].totalGames++;
+        thisUserToUserMap[theirUserId].totalWith++;
+        thisUserToUserMap[theirUserId].wonWith++;
+      }
+    }
+    for (const theirUserId of losingTeam.userIds) {
+      if (winner !== theirUserId) {
+        thisUserToUserMap[theirUserId].totalGames++;
+        thisUserToUserMap[theirUserId].totalAgainst++;
+        thisUserToUserMap[theirUserId].wonAgainst++;
+      }
+    }
   }
 
   // set stats for users on the losing team
@@ -227,6 +326,21 @@ function setStats(game: Game, userMap: UserMap) {
       // assassin as spymaster
       if (game.blueAgents > 0 && game.redAgents > 0) {
         user.assassinsAsSpymaster++;
+      }
+    }
+
+    // just update the totals for userToUserStats
+    const thisUserToUserMap = userToUserMap[loser];
+    for (const theirUserId of winningTeam.userIds) {
+      if (loser !== theirUserId) {
+        thisUserToUserMap[theirUserId].totalGames++;
+        thisUserToUserMap[theirUserId].totalWith++;
+      }
+    }
+    for (const theirUserId of losingTeam.userIds) {
+      if (loser !== theirUserId) {
+        thisUserToUserMap[theirUserId].totalGames++;
+        thisUserToUserMap[theirUserId].totalAgainst++;
       }
     }
   }

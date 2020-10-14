@@ -200,3 +200,15 @@ export interface Message {
   userId?: string;
   team?: TeamTypes;
 }
+
+export interface UserToUserStats {
+  myUserId: string;
+  theirUserId: string;
+  gameId: string;
+  timestamp: number;
+  totalGames: number;
+  totalWith: number;
+  totalAgainst: number;
+  wonWith: number;
+  wonAgainst: number;
+}
