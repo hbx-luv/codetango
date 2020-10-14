@@ -40,7 +40,7 @@ export class ScorecardPage {
   ];
 
   constructor(
-      private readonly authService: AuthService,
+      public readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly userService: UserService,
       private readonly route: ActivatedRoute,

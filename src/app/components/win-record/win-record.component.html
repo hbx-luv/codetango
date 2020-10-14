@@ -1,0 +1,14 @@
+<div>
+  <div class="bar-chart">
+    <div class="wins" [style.width]="winsPercent" [tooltip]="winsPercent">
+      {{ record.wonAgainst }}
+    </div>
+    <div class="losses" [style.width]="lossesPercent" [tooltip]="lossesPercent">
+      {{ record.totalAgainst - record.wonAgainst }}
+    </div>
+  </div>
+  <div class="win-loss-bar space-between">
+    <div>Wins</div>
+    <div>Losses</div>
+  </div>
+</div>

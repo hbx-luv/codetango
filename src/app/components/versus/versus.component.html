@@ -1,3 +1,19 @@
-<p>
-  versus works!
-</p>
+<ion-card *ngIf="record$ | async as record">
+  <ion-card-header class="space-between">
+    <ion-card-title>Versus</ion-card-title>
+    <ion-card-subtitle>
+      {{ record.totalAgainst }} {{ record.totalAgainst === 1 ? 'game' : 'games'}}
+    </ion-card-subtitle>
+  </ion-card-header>
+  <ion-card-content>
+    <div class="players-row">
+      <app-user [userId]="myUserId" [showUserName]="false" color="blue"></app-user>
+      <h2>
+        <div>GAMES</div>
+        <div>HEAD TO HEAD</div>
+      </h2>
+      <app-user [userId]="theirUserId" [showUserName]="false" color="red"></app-user>
+    </div>
+    <app-win-record [record]="record"></app-win-record>
+  </ion-card-content>
+</ion-card>
