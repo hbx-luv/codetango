@@ -170,6 +170,8 @@ export interface UserStats {
   currentStreak: number;
   bestStreak: number;
   provisional: boolean;
+  ally?: string;
+  nemesis?: string;
   lastPlayed?: number|string;
 }
 
@@ -199,4 +201,16 @@ export interface Message {
   // for messages created by users
   userId?: string;
   team?: TeamTypes;
+}
+
+export interface UserToUserStats {
+  myUserId: string;
+  theirUserId: string;
+  gameId: string;
+  timestamp: number;
+  totalGames: number;
+  totalWith: number;
+  totalAgainst: number;
+  wonWith: number;
+  wonAgainst: number;
 }
