@@ -101,17 +101,13 @@ export class ScorecardPage {
     const midnight7DaysAgo = this.eloHistoryService.getMidnight(7);
     this.eloHistoryService.getEloAt(midnight7DaysAgo, this.userId)
         .then(stats => {
-          if (stats) {
-            this.elo7DaysAgo = userStats.elo - stats.elo;
-          }
+          this.elo7DaysAgo = userStats.elo - (stats ? stats.elo : 1200);
         });
 
     const midnight30DaysAgo = this.eloHistoryService.getMidnight(30);
     this.eloHistoryService.getEloAt(midnight30DaysAgo, this.userId)
         .then(stats => {
-          if (stats) {
-            this.elo30DaysAgo = userStats.elo - stats.elo;
-          }
+          this.elo30DaysAgo = userStats.elo - (stats ? stats.elo : 1200);
         });
   }
 }
