@@ -64,15 +64,21 @@
                 </ion-item>
                 <ion-item>
                   <h2>Last 7 Days</h2>
-                  <h2 slot="end">
-                    <app-elo-change [change]="elo7DaysAgo"></app-elo-change>
-                  </h2>
+                  <app-elo-change slot="end" [change]="elo7DaysAgo"></app-elo-change>
                 </ion-item>
                 <ion-item>
                   <h2>Last 30 Days</h2>
-                  <h2 slot="end">
-                    <app-elo-change [change]="elo30DaysAgo"></app-elo-change>
-                  </h2>
+                  <app-elo-change slot="end" [change]="elo30DaysAgo"></app-elo-change>
+                </ion-item>
+                <ion-item *ngIf="stats.ally">
+                  <h2>Ally</h2>
+                  <ion-icon name="help-circle-outline" tooltip="The player you have won with the most"></ion-icon>
+                  <app-user slot="end" [userId]="stats.ally"></app-user>
+                </ion-item>
+                <ion-item *ngIf="stats.nemesis">
+                  <h2>Nemesis</h2>
+                  <ion-icon name="help-circle-outline" tooltip="The player you have lost against the most"></ion-icon>
+                  <app-user slot="end" [userId]="stats.nemesis"></app-user>
                 </ion-item>
                 <ng-container *ngFor="let stat of overallStats">
                   <ion-item *ngIf="stats[stat.field] !== undefined">

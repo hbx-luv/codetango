@@ -23,6 +23,10 @@
       .user-item {
         --ion-item-border-color: transparent;
       }
+
+      app-user {
+        margin-right: -5px;
+      }
     }
   }
 
