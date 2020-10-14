@@ -62,13 +62,13 @@
                     {{ stats.gamesWon }} <b>({{ (stats.gamesWon / stats.gamesPlayed * 100).toFixed(1) }}%)</b>
                   </h2>
                 </ion-item>
-                <ion-item *ngIf="elo7DaysAgo">
+                <ion-item>
                   <h2>Last 7 Days</h2>
                   <h2 slot="end">
                     <app-elo-change [change]="elo7DaysAgo"></app-elo-change>
                   </h2>
                 </ion-item>
-                <ion-item *ngIf="elo30DaysAgo">
+                <ion-item>
                   <h2>Last 30 Days</h2>
                   <h2 slot="end">
                     <app-elo-change [change]="elo30DaysAgo"></app-elo-change>
