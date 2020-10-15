@@ -11,6 +11,8 @@ const BASE_ELO = 1200;
 // removed this for now (set to 0), not sure I like the results - MT
 const PROVISIONAL_GAMES = 0;
 
+const MIN_ALLY_NEMESIS = 5;
+
 interface UserMap {
   [field: string]: Stats;
 }
@@ -378,13 +380,24 @@ function maybeSetAlly(
     userMap: UserMap,
     userToUserMap: UserToUserMap,
 ) {
-  // if the user currently has an ally, break out early if theirUserId's ally
-  // stat isn't as good as the current ally
   const me = userMap[myUserId];
   const theirStats = userToUserMap[myUserId][theirUserId];
   const allyStats = userToUserMap[myUserId][me.ally || ''];
-  if (allyStats && allyStats.wonWith >= theirStats.wonWith) {
-    return;
+
+  // require a minimum # of games played with this person
+  if (theirStats.totalWith < MIN_ALLY_NEMESIS) {
+    return
+  }
+
+  // if the user currently has an ally, break out early if theirUserId's ally
+  // stat isn't as good as the current ally
+  if (allyStats) {
+    const theirRate = theirStats.wonWith / theirStats.totalWith;
+    const allyRate = allyStats.wonWith / allyStats.totalWith;
+
+    if (allyRate >= theirRate) {
+      return;
+    }
   }
 
   // if we get here, either ally isn't set or this ally is better
@@ -397,13 +410,24 @@ function maybeSetNemesis(
     userMap: UserMap,
     userToUserMap: UserToUserMap,
 ) {
-  // if the user currently has an nemesis, break out early if theirUserId's
-  // nemesis stat isn't as good as the current nemesis
   const me = userMap[myUserId];
   const theirStats = userToUserMap[myUserId][theirUserId];
   const nemesisStats = userToUserMap[myUserId][me.nemesis || ''];
-  if (nemesisStats && nemesisStats.wonAgainst >= theirStats.wonAgainst) {
-    return;
+
+  // require a minimum # of games played against this person
+  if (theirStats.totalAgainst < MIN_ALLY_NEMESIS) {
+    return
+  }
+
+  // if the user currently has an nemesis, break out early if theirUserId's
+  // nemesis stat isn't as good as the current nemesis
+  if (nemesisStats) {
+    const theirRate = theirStats.wonAgainst / theirStats.totalAgainst;
+    const nemesisRate = nemesisStats.wonAgainst / nemesisStats.totalAgainst;
+
+    if (nemesisRate >= theirRate) {
+      return;
+    }
   }
 
   // if we get here, either nemesis isn't set or this nemesis is better
