@@ -422,10 +422,8 @@ function maybeSetNemesis(
   // if the user currently has an nemesis, break out early if theirUserId's
   // nemesis stat isn't as good as the current nemesis
   if (nemesisStats) {
-    const theirRate = (theirStats.totalAgainst - theirStats.wonAgainst) /
-        theirStats.totalAgainst;
-    const nemesisRate = (nemesisStats.totalAgainst - nemesisStats.wonAgainst) /
-        nemesisStats.totalAgainst;
+    const theirRate = theirStats.wonAgainst / theirStats.totalAgainst;
+    const nemesisRate = nemesisStats.wonAgainst / nemesisStats.totalAgainst;
 
     if (nemesisRate >= theirRate) {
       return;
