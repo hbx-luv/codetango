@@ -33,13 +33,15 @@
     &:not(.selected) {
       &.RED {
         --ion-color-contrast: var(--ion-color-danger) !important;
-        &.pictures {
+        &.pictures,
+        &.emojis {
           border: 4px solid var(--ion-color-danger);
         }
       }
       &.BLUE {
         --ion-color-contrast: var(--ion-color-primary) !important;
-        &.pictures {
+        &.pictures,
+        &.emojis {
           border: 4px solid var(--ion-color-primary);
         }
       }
@@ -51,6 +53,10 @@
     &.pictures {
       max-height: 130px;
       height: 16vw;
+    }
+
+    &.emojis {
+      font-size: 60px;
     }
   }
 }

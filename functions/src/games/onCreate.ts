@@ -29,6 +29,7 @@ export const onCreateGame =
             const wordList = await getWordList(game.roomId);
 
             updates.hasPictures = wordList === 'pictures';
+            updates.hasEmojis = wordList === 'emojis';
 
             updates.tiles = await generateNewGameTiles(wordList);
             const blueTeamTiles = updates.tiles.filter(

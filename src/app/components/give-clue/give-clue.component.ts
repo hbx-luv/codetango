@@ -76,7 +76,7 @@ export class GiveClueComponent implements OnInit, OnDestroy {
       // for non-picture games, in cases where they didn't ask first check for
       // clue overlaps with tiles on the board, and make the other spymaster
       // confirm it if there is an overlap
-      if (!askFirst && !this.game.hasPictures) {
+      if (!askFirst && !this.game.hasPictures && !this.game.hasEmojis) {
         const overlap = this.getOverlap(this.game.tiles, word);
         if (overlap.length === 2) {
           askFirst = await this.utilService.confirm(

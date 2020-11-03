@@ -118,6 +118,7 @@ export interface Game {
 
   // true for games that are using pictures
   hasPictures?: boolean;
+  hasEmojis?: boolean;
 
   // set by the server for querying
   userIds?: string[];

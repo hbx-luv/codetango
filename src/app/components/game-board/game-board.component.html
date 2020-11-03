@@ -6,6 +6,7 @@
       [class.selected]="tile.selected"
       [class.readonly]="readonly"
       [class.pictures]="game.hasPictures"
+      [class.emojis]="game.hasEmojis"
       [color]="getColor(tile)"
       class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
       (click)="selectTile(tile)">

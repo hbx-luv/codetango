@@ -29,6 +29,7 @@ export class PregameComponent {
     {url: './assets/duet.png', id: 'duetWords'},
     {url: './assets/deep-undercover.png', id: 'deepUndercover'},
     {url: './assets/pictures.png', id: 'pictures'},
+    {url: './assets/emojis.png', id: 'emojis'},
   ];
 
   constructor(
