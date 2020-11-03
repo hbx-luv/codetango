@@ -1,6 +1,10 @@
 ion-chip {
   white-space: nowrap;
 
+  ion-label {
+    overflow: initial;
+  }
+
   &.avatar-only {
     max-width: 33px;
     padding: 4px;
