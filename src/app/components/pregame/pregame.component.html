@@ -38,7 +38,8 @@
         [class.soon]="list.comingSoon"
         (click)="selectWordList(list.id)"
       >
-        <ion-img [src]="list.url"></ion-img>
+        <ion-img [src]="list.url" *ngIf="list.warning" [tooltip]="list.warning"></ion-img>
+        <ion-img [src]="list.url" *ngIf="!list.warning"></ion-img>
         <span *ngIf="list.comingSoon">COMING SOON</span>
       </ion-card>
     </div>

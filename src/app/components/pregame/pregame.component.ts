@@ -25,9 +25,13 @@ export class PregameComponent {
 
   wordLists = [
     {url: './assets/original.png', id: 'default'},
-    {url: './assets/deep-undercover.png', id: 'deepUndercover'},
-    {url: './assets/pictures.png', id: 'pictures'},
     {url: './assets/emojis.png', id: 'emojis'},
+    {
+      url: './assets/deep-undercover.png',
+      id: 'deepUndercover',
+      warning: 'Note: This version is NSFW. We advise playing with adults only.'
+    },
+    {url: './assets/pictures.png', id: 'pictures'},
   ];
 
   constructor(
