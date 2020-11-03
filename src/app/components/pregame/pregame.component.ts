@@ -24,9 +24,7 @@ export class PregameComponent {
   debounce = 500;
 
   wordLists = [
-    {url: './assets/default.png', id: 'default'},
-    {url: './assets/original.png', id: 'original'},
-    {url: './assets/duet.png', id: 'duetWords'},
+    {url: './assets/original.png', id: 'default'},
     {url: './assets/deep-undercover.png', id: 'deepUndercover'},
     {url: './assets/pictures.png', id: 'pictures'},
     {url: './assets/emojis.png', id: 'emojis'},
