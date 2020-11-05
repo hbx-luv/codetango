@@ -1,7 +1,8 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {Clue, Game, TeamTypes, User} from '../../../../types';
+import {Clue, Game, TeamTypes} from '../../../../types';
 import {sendSpymasterMessage} from '../../util/message';
+import {getUserName} from '../../util/user';
 
 try {
   admin.initializeApp();
@@ -30,7 +31,7 @@ export const onCreateClue =
                 db, gameId,
                 `${name} gave the clue: ${clue.word}, ${clue.guessCount}`);
           } else {
-            console.log('no spymaster?!')
+            console.log('no spymaster?!');
           }
 
           return 'Done!';
@@ -43,13 +44,7 @@ export async function getSpymasterName(
     const spymasterId = getSpymasterId(game, clue);
 
     if (spymasterId) {
-      const userSnapshot = await db.collection('users').doc(spymasterId).get();
-      const user = userSnapshot.data() as User;
-
-      if (user) {
-        // coallesce nickname and name
-        return user.nickname || user.name;
-      }
+      return await getUserName(db, spymasterId);
     }
   }
 
