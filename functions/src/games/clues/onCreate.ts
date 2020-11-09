@@ -1,8 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
+
 import {Clue, Game, TeamTypes} from '../../../../types';
+import {getGame, getUserName} from '../../util/getters';
 import {sendSpymasterMessage} from '../../util/message';
-import {getUserName} from '../../util/user';
 
 try {
   admin.initializeApp();
@@ -40,7 +41,7 @@ export const onCreateClue =
 export async function getSpymasterName(
     gameId: string, clue: Clue): Promise<string> {
   if (clue && clue.team) {
-    const game = await getGame(gameId);
+    const game = await getGame(db, gameId);
     const spymasterId = getSpymasterId(game, clue);
 
     if (spymasterId) {
@@ -49,11 +50,6 @@ export async function getSpymasterName(
   }
 
   return '';
-}
-
-async function getGame(gameId: string): Promise<Game> {
-  const snapshot = await db.collection('games').doc(gameId).get();
-  return snapshot.data() as Game;
 }
 
 function getSpymasterId(game: Game, clue: Clue): string|undefined {

@@ -9,11 +9,20 @@
       [class.emojis]="game.hasEmojis"
       [color]="getColor(tile)"
       class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
-      (click)="selectTile(tile)">
-      <span *ngIf="!game.hasPictures">{{ tile.word }}</span>
-      <span *ngIf="game.hasPictures">
-        <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
-      </span>
+      (click)="selectTile(tile)"
+    >
+      <ng-container [ngSwitch]="type">
+        <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
+        <span *ngSwitchCase="GameType.PICTURES">
+          <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
+        </span>
+        <span *ngSwitchCase="GameType.EMOJIS">
+          <ion-img src="https://twitter.github.io/twemoji/2/72x72/{{tile.word}}.png"></ion-img>
+        </span>
+        <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
+          {{ tile.word }}
+        </span>
+      </ng-container>
     </ion-button>
   </ion-grid>
   <ion-row class="advice-row">

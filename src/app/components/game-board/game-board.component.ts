@@ -6,6 +6,15 @@ import {GameService} from 'src/app/services/game.service';
 
 import {Clue, Game, GameStatus, Room, TeamTypes, Tile, TileRole} from '../../../../types';
 
+enum GameType {
+  WORDS = 'WORDS',
+  PICTURES = 'PICTURES',
+  EMOJIS = 'EMOJIS',
+
+  // first version of emojis RIP
+  LEGACY_EMOJIS = 'LEGACY_EMOJIS'
+}
+
 @Component({
   selector: 'app-game-board',
   templateUrl: './game-board.component.html',
@@ -19,6 +28,8 @@ export class GameBoardComponent implements OnChanges {
   @Input() readonly: boolean;
   @Input() spymaster: boolean;
   @Input() currentClue?: Clue;
+
+  GameType = GameType;
 
   tiles: Tile[];
   advice: string;
@@ -42,6 +53,26 @@ export class GameBoardComponent implements OnChanges {
         this.tiles = this.game.tiles;
       }
     }
+  }
+
+  get type(): GameType {
+    if (this.game) {
+      if (this.game.hasPictures) {
+        return GameType.PICTURES;
+      } else if (this.game.hasEmojis) {
+        // hardcoded legacy timestamp of the last game to play with the initial
+        // (legacy) version of codenames emojis
+        if (this.game.createdAt < 1604606378903) {
+          return GameType.LEGACY_EMOJIS;
+        } else {
+          return GameType.EMOJIS;
+        }
+      } else {
+        return GameType.WORDS;
+      }
+    }
+
+    return null;
   }
 
   get isGameOver(): boolean {

@@ -55,7 +55,10 @@
       height: 16vw;
     }
 
-    &.emojis {
+    // First gen of the emojis word list was the unicode characters, but
+    // emojis look differently across platforms so we moved to images
+    // This line makes the old games still render nicely
+    .legacy-emojis {
       font-size: 60px;
     }
   }
