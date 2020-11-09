@@ -1,4 +1,4 @@
-import {User} from '../../../types';
+import {Game, User} from '../../../types';
 
 export async function getUserName(
     db: any,  // RIP, tried to import firestore.Firestore
@@ -18,4 +18,12 @@ export async function getUserName(
   }
 
   return '';
+}
+
+export async function getGame(
+    db: any,  // RIP, tried to import firestore.Firestore
+    gameId: string,
+    ): Promise<Game> {
+  const snapshot = await db.collection('games').doc(gameId).get();
+  return snapshot.data() as Game;
 }

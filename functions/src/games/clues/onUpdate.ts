@@ -4,8 +4,8 @@ import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
 import {map, uniqBy} from 'lodash';
 
 import {Clue, Tile} from '../../../../types';
+import {getGame, getUserName} from '../../util/getters';
 import {sendSpymasterMessage} from '../../util/message';
-import {getUserName} from '../../util/user';
 
 try {
   admin.initializeApp();
@@ -25,7 +25,12 @@ export const onUpdateClue =
 
           if (after) {
             await sanitizeGuessesMade(after, doc.after);
-            await sendGuessMessage(before, after, gameId);
+
+            // don't send the guess message for games with picture tiles
+            const game = await getGame(db, gameId);
+            if (!game.hasPictures && !game.hasEmojis) {
+              await sendGuessMessage(before, after, gameId);
+            }
           }
           return 'Done';
         });
@@ -87,11 +92,6 @@ async function sendGuessMessage(
   const newGuess = getNewGuess(before, after);
 
   if (newGuess) {
-    // if this clue had a number as the word, then it's just a pictures game
-    if (!newGuess.word || isNumeric(newGuess.word)) {
-      return;
-    }
-
     const name = await getUserName(db, newGuess.selectedBy);
     if (name) {
       await sendSpymasterMessage(
@@ -121,12 +121,4 @@ function getNewGuess(before: Clue|null, after: Clue): Tile|null {
 
   // no new guess
   return null;
-}
-
-// https://stackoverflow.com/a/175787/2943405
-function isNumeric(str?: string) {
-  if (typeof str != 'string') return false  // we only process strings!
-    return !isNaN(+str) &&  // use type coercion to parse the _entirety_ of the
-                            // string (`parseFloat` alone does not do this)...
-        !isNaN(parseFloat(str))  // ...and ensure strings of whitespace fail
 }
