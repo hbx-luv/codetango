@@ -37,6 +37,11 @@ const routes: Routes = [
     loadChildren: () => import('./pages/game-history/game-history.module')
                             .then(m => m.GameHistoryPageModule)
   },
+  {
+    path: 'stats/compare/:first/:second',
+    loadChildren: () =>
+        import('./pages/compare/compare.module').then(m => m.ComparePageModule)
+  },
 ];
 
 @NgModule({

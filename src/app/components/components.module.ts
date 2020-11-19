@@ -12,6 +12,7 @@ import {GameBoardComponent} from './game-board/game-board.component';
 import {GameCardComponent} from './game-card/game-card.component';
 import {GameComponent} from './game/game.component';
 import {GiveClueComponent} from './give-clue/give-clue.component';
+import {PerformanceComparisonChartComponent} from './performance-comparison-chart/performance-comparison-chart';
 import {PregameComponent} from './pregame/pregame.component';
 import {RoomListItemComponent} from './room-list-item/room-list-item.component';
 import {SameTeamComponent} from './same-team/same-team.component';
@@ -43,6 +44,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     SameTeamComponent,
     VersusComponent,
     WinRecordComponent,
+    PerformanceComparisonChartComponent,
   ],
   imports: [
     IonicModule,
@@ -73,6 +75,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     SameTeamComponent,
     VersusComponent,
     WinRecordComponent,
+    PerformanceComparisonChartComponent,
   ]
 })
 export class ComponentsModule {
