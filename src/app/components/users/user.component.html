@@ -1,4 +1,4 @@
-<ng-container>
+<div class="user-container">
   <ion-chip
     [class.avatar-only]="!showUserName"
     [class.you]="you"
@@ -22,7 +22,15 @@
 
     </ng-container>
   </ion-chip>
-</ng-container>
+
+  <ion-icon
+    [class.shown]="popoverOpen"
+    class="options-icon"
+    name="ellipsis-vertical"
+    (click)="showOptions($event)"
+    *ngIf="showActions">
+  </ion-icon>
+</div>
 
 <ng-template #loading>
   <ion-label *ngIf="showUserName; else spinner">
