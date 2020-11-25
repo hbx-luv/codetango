@@ -3,6 +3,8 @@ import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
 import {TooltipModule} from 'ng2-tooltip-directive';
+import {ActionsPopoverPageComponent} from './actions-popover/actions-popover-page.component';
+import {ActionsPopoverComponent} from './actions-popover/actions-popover.component';
 import {ChatBoxComponent} from './chat-box/chat-box.component';
 
 import {ClueComponent} from './clue/clue.component';
@@ -25,24 +27,16 @@ import {WordHistoryComponent} from './word-history/word-history.component';
 
 @NgModule({
   declarations: [
-    GameBoardComponent,
-    GameComponent,
-    GiveClueComponent,
-    UsersComponent,
-    PregameComponent,
-    TimerComponent,
-    UsersComponent,
-    TeamListsComponent,
-    WordHistoryComponent,
-    GameCardComponent,
-    EloChartComponent,
-    RoomListItemComponent,
-    ClueComponent,
-    ChatBoxComponent,
-    EloChangeComponent,
-    SameTeamComponent,
-    VersusComponent,
-    WinRecordComponent,
+    GameBoardComponent,      GameComponent,
+    GiveClueComponent,       UsersComponent,
+    PregameComponent,        TimerComponent,
+    UsersComponent,          TeamListsComponent,
+    WordHistoryComponent,    GameCardComponent,
+    EloChartComponent,       RoomListItemComponent,
+    ClueComponent,           ChatBoxComponent,
+    EloChangeComponent,      SameTeamComponent,
+    VersusComponent,         WinRecordComponent,
+    ActionsPopoverComponent, ActionsPopoverPageComponent,
   ],
   imports: [
     IonicModule,
@@ -55,24 +49,16 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     }),
   ],
   exports: [
-    GameBoardComponent,
-    GameComponent,
-    GiveClueComponent,
-    UsersComponent,
-    PregameComponent,
-    TimerComponent,
-    UsersComponent,
-    TeamListsComponent,
-    WordHistoryComponent,
-    GameCardComponent,
-    EloChartComponent,
-    RoomListItemComponent,
-    ClueComponent,
-    ChatBoxComponent,
-    EloChangeComponent,
-    SameTeamComponent,
-    VersusComponent,
-    WinRecordComponent,
+    GameBoardComponent,      GameComponent,
+    GiveClueComponent,       UsersComponent,
+    PregameComponent,        TimerComponent,
+    UsersComponent,          TeamListsComponent,
+    WordHistoryComponent,    GameCardComponent,
+    EloChartComponent,       RoomListItemComponent,
+    ClueComponent,           ChatBoxComponent,
+    EloChangeComponent,      SameTeamComponent,
+    VersusComponent,         WinRecordComponent,
+    ActionsPopoverComponent, ActionsPopoverPageComponent,
   ]
 })
 export class ComponentsModule {

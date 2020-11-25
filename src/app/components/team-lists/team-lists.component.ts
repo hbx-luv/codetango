@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
+import {UtilService} from 'src/app/services/util.service';
 
 import {Game, Room, RoomStatus} from '../../../../types';
 import {RoomService} from '../../services/room.service';
@@ -19,6 +20,7 @@ export class TeamListsComponent {
       private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
+      private readonly utilService: UtilService,
   ) {}
 
   get loggedInAndInRoom(): boolean {
@@ -51,7 +53,47 @@ export class TeamListsComponent {
 
   userClicked(userId: string, team: 'redTeam'|'blueTeam') {
     if (this.setSpymaster) {
+      this.assignSpymaster(userId, team);
+    }
+  }
+
+  async assignSpymaster(userId: string, team: 'redTeam'|'blueTeam') {
+    let proceed = true;
+
+    // when not in the set spymaster phase, confirm the change of spymaster
+    if (!this.setSpymaster) {
+      proceed = await this.utilService.confirm(
+          'Change Spymaster?',
+          'Are you sure you want to change the spymaster in the middle of a game?',
+          'Set Spymaster', 'Nevermind');
+    }
+
+    if (proceed) {
       this.gameService.assignSpymaster(this.game.id, userId, team);
+    }
+  }
+
+  async remove(userId: string, team: 'redTeam'|'blueTeam') {
+    let proceed = true;
+
+    // when not in the set spymaster phase, confirm the removal
+    if (!this.setSpymaster) {
+      proceed = await this.utilService.confirm(
+          'Remove Player?',
+          'Are you sure you want to remove this player in the middle of a game?',
+          'Remove', 'Nevermind');
+    }
+
+    // quit early if they choose nevermind
+    if (!proceed) return;
+
+    this.gameService.removePlayerFromGame(this.game.id, userId);
+
+    // in the case that the player being removed is the current spymaster,
+    // delete the spymaster field
+    const thisTeam = this.game[team];
+    if (userId === thisTeam.spymaster) {
+      thisTeam.spymaster = null;
     }
   }
 

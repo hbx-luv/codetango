@@ -15,9 +15,13 @@
     </div>
     <app-user
       [navToScorecard]="!setSpymaster"
+      [showActions]="!game.completedAt && loggedInAndInRoom"
       [userId]="member"
       color="blue"
-      (click)="userClicked(member, 'blueTeam')">
+      (click)="userClicked(member, 'blueTeam')"
+      (remove)="remove(member, 'blueTeam')"
+      (setSpymaster)="assignSpymaster(member, 'blueTeam')"
+    >
     </app-user>
   </div>
   <h3 class="team-title">
@@ -36,9 +40,13 @@
     </div>
     <app-user
       [navToScorecard]="!setSpymaster"
+      [showActions]="!game.completedAt && loggedInAndInRoom"
       [userId]="member"
       color="red"
-      (click)="userClicked(member, 'redTeam')">
+      (click)="userClicked(member, 'redTeam')"
+      (remove)="remove(member, 'redTeam')"
+      (setSpymaster)="assignSpymaster(member, 'redTeam')"
+    >
     </app-user>
   </div>
 </div>

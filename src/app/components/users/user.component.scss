@@ -1,27 +1,42 @@
-ion-chip {
-  white-space: nowrap;
+.user-container {
+  display: flex;
+  align-items: center;
 
-  ion-label {
-    overflow: initial;
-  }
+  ion-chip {
+    white-space: nowrap;
 
-  &.avatar-only {
-    max-width: 33px;
-    padding: 4px;
+    ion-label {
+      overflow: initial;
+    }
 
-    ion-avatar {
-      margin: 0;
+    &.avatar-only {
+      max-width: 33px;
+      padding: 4px;
+
+      ion-avatar {
+        margin: 0;
+      }
+    }
+
+    &.you {
+      &.ion-color-primary {
+        background: var(--ion-color-primary);
+        color: #fff;
+      }
+      &.ion-color-danger {
+        background: var(--ion-color-danger);
+        color: #fff;
+      }
     }
   }
 
-  &.you {
-    &.ion-color-primary {
-      background: var(--ion-color-primary);
-      color: #fff;
-    }
-    &.ion-color-danger {
-      background: var(--ion-color-danger);
-      color: #fff;
-    }
+  app-actions-popover {
+    opacity: 0;
+    transition: 300ms;
+    cursor: pointer;
+  }
+
+  &:hover app-actions-popover {
+    opacity: 1;
   }
 }

@@ -1,10 +1,11 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 
 import {User} from '../../../../types';
 import {UserService} from '../../services/user.service';
+import {PopoverAction} from '../actions-popover/actions-popover.component';
 
 @Component({
   selector: 'app-user',
@@ -18,8 +19,28 @@ export class UsersComponent implements OnChanges {
   @Input() color: string;
   @Input() showUserName = true;
   @Input() navToScorecard = true;
+  @Input() showActions = false;
+
+  @Output() remove = new EventEmitter<void>();
+  @Output() setSpymaster = new EventEmitter<void>();
+
   user$: Observable<User>;
   style: {width: string};
+
+  actions: PopoverAction[] = [
+    {
+      label: 'Remove from Team',
+      onClick: () => this.remove.emit(),
+    },
+    {
+      label: 'Set Spymaster',
+      onClick: () => this.setSpymaster.emit(),
+    },
+    {
+      label: 'See Scorecard',
+      onClick: () => this.router.navigate(['scorecard', this.userId]),
+    },
+  ];
 
   constructor(
       readonly authService: AuthService,
