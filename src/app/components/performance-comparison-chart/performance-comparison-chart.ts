@@ -5,6 +5,15 @@ import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {EloHistoryService} from 'src/app/services/elo-history.service';
 
+interface EloComparisonMap {
+  // each user has map of elo ratings for given days
+  [userId: string]: {
+    // each key is the number of days back from today. 0 is today, 1 is
+    // yesterday, etc. each value is the elo at midnight on that day
+    [day: number]: number;
+  }
+}
+
 @Component({
   selector: 'app-performance-comparison-chart',
   templateUrl: './performance-comparison-chart.html',
@@ -35,10 +44,10 @@ export class PerformanceComparisonChartComponent implements OnChanges,
       return;
     }
 
-    this.buildPerformanceComparison();
+    const map = this.getEloComparisonMap();
   }
 
-  async buildPerformanceComparison() {
+  async getEloComparisonMap(): Promise<EloComparisonMap> {
     const performance = {};
     const promises = [];
 
@@ -46,19 +55,26 @@ export class PerformanceComparisonChartComponent implements OnChanges,
       // instantiate empty array
       performance[userId] = {};
 
-      for (let i = 0; i < this.limit; i++) {
-        const midnightIDaysAgo = this.eloHistoryService.getMidnight(i);
+      for (let day = 0; day < this.limit; day++) {
+        const midnightIDaysAgo = this.eloHistoryService.getMidnight(day);
 
         promises.push(this.eloHistoryService.getEloAt(midnightIDaysAgo, userId)
                           .then(stats => {
-                            performance[userId][i] =
+                            performance[userId][day] =
                                 stats && stats.elo ? stats.elo : null;
                           }));
       }
     }
 
     await Promise.all(promises);
-    console.log(performance);
+    return performance;
+  }
+
+  buildPerformanceComparison(map: EloComparisonMap) {
+    for (let day = 0; day < this.limit; day++) {
+      // TODO: build up some series we can graph that show the performance gain
+      // since the first elo rating in the range
+    }
   }
 
   updateChart(dataPoints) {
