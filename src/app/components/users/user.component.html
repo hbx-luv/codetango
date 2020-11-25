@@ -23,13 +23,7 @@
     </ng-container>
   </ion-chip>
 
-  <ion-icon
-    [class.shown]="popoverOpen"
-    class="options-icon"
-    name="ellipsis-vertical"
-    (click)="showOptions($event)"
-    *ngIf="showActions">
-  </ion-icon>
+  <app-actions-popover [actions]="actions" *ngIf="showActions"></app-actions-popover>
 </div>
 
 <ng-template #loading>

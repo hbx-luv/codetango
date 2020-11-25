@@ -30,14 +30,13 @@
     }
   }
 
-  .options-icon {
+  app-actions-popover {
     opacity: 0;
     transition: 300ms;
     cursor: pointer;
   }
 
-  &:hover .options-icon,
-  .options-icon.shown {
+  &:hover app-actions-popover {
     opacity: 1;
   }
 }
