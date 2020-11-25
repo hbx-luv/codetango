@@ -89,7 +89,7 @@ export class TeamListsComponent {
 
     this.gameService.removePlayerFromGame(this.game.id, userId);
 
-    // in the case of the player being removed being the spymaster at the time,
+    // in the case that the player being removed is the current spymaster,
     // delete the spymaster field
     const thisTeam = this.game[team];
     if (userId === thisTeam.spymaster) {
