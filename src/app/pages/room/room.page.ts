@@ -156,10 +156,6 @@ export class RoomPage implements OnDestroy {
     return this.room && this.authService.authenticated;
   }
 
-  get showLeave(): boolean {
-    return this.loggedIn && this.userIsInRoom;
-  }
-
   setActions() {
     const actions = [];
 
