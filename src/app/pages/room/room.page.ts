@@ -1,5 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil, tap} from 'rxjs/operators';
 import {confetti} from 'src/app/confetti.js';
@@ -21,6 +21,7 @@ export class RoomPage implements OnDestroy {
 
   selectedTab = 'board-tab';
   roomId: string;
+  roomName?: string;
   room: Room;
   currentGame$: Observable<Game>;
   currentClue$: Observable<Clue>;
@@ -33,11 +34,13 @@ export class RoomPage implements OnDestroy {
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly route: ActivatedRoute,
+      private readonly router: Router,
       private readonly clueService: ClueService,
       private readonly utilService: UtilService,
       private readonly soundService: SoundService,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
+    this.roomName = this.route.snapshot.paramMap.get('name');
     this.currentGame$ =
         this.gameService.getCurrentGame(this.roomId).pipe(tap(currentGame => {
           if (currentGame) {
@@ -78,11 +81,7 @@ export class RoomPage implements OnDestroy {
           }
         }));
 
-    this.roomService.getRoom(this.roomId)
-        .pipe(takeUntil(this.destroyed))
-        .subscribe(room => {
-          this.room = room;
-        });
+    this.subscribeToRoom();
   }
 
   get userIsInRoom(): boolean {
@@ -148,6 +147,21 @@ export class RoomPage implements OnDestroy {
     return this.loggedIn && this.userIsInRoom;
   }
 
+  subscribeToRoom() {
+    this.roomService.getRoom(this.roomId)
+        .pipe(takeUntil(this.destroyed))
+        .subscribe(async room => {
+          this.room = room;
+
+          // if this room doesn't exist, create a new room with the id
+          if (!room.exists) {
+            const name = localStorage.getItem(`roomName-${room.id}`);
+            const id =
+                await this.roomService.createRoom({name: name || room.id});
+            this.router.navigate([id]);
+          }
+        });
+  }
 
   leave(game: Game) {
     // remove them from the room

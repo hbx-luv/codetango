@@ -29,7 +29,7 @@ export class HomePage {
   ) {}
 
   get disabled(): boolean {
-    return this.roomService.createRoomId(this.roomName).length === 0;
+    return this.roomService.getRoomId(this.roomName).length === 0;
   }
 
   get roomIds(): string[] {
@@ -55,32 +55,13 @@ export class HomePage {
 
   async createRoom() {
     if (this.roomName) {
-      let loader;
-      if (!this.authService.authenticated) {
-        loader = await this.utilService.presentLoader('Logging in...');
-        await this.authService.loginWithGoogle();
-        await loader.dismiss();
-      }
-
-      loader = await this.utilService.presentLoader('Joining room...');
-      const id = await this.roomService.createRoom({
-        name: this.roomName,
-        status: RoomStatus.PREGAME,
-        timer: 120,
-        firstTurnTimer: 180,
-        guessIncrement: 30,
-        wordList: 'original',
-        enforceTimer: false,
-        userIds: []
-      });
-
+      const id = this.roomService.getRoomId(this.roomName);
+      localStorage.setItem(`roomName-${id}`, this.roomName);
       this.joinRoom(id);
-      await loader.dismiss();
     }
   }
 
   joinRoom(id: string) {
-    this.roomService.joinRoom(id);
     this.router.navigate([id]);
   }
 }

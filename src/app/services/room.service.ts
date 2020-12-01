@@ -4,9 +4,19 @@ import {firestore} from 'firebase';
 import {without} from 'lodash';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {Room} from 'types';
+import {Room, RoomStatus} from 'types';
 
 import {AuthService} from './auth.service';
+
+const defaultRoom = {
+  status: RoomStatus.PREGAME,
+  timer: 120,
+  firstTurnTimer: 180,
+  guessIncrement: 30,
+  wordList: 'original',
+  enforceTimer: false,
+  userIds: []
+};
 
 @Injectable({providedIn: 'root'})
 export class RoomService {
@@ -21,13 +31,14 @@ export class RoomService {
     this.db = firestore();
   }
 
-  async createRoom(room: Partial<Room>): Promise<string> {
-    const id = this.createRoomId(room.name);
-    const game = await this.db.collection('rooms').doc(id).get();
+  async createRoom(partial: Partial<Room>): Promise<string> {
+    const id = this.getRoomId(partial.name);
+    const room = await this.db.collection('rooms').doc(id).get();
 
     // if the game doesn't exist, create it
-    if (!game.exists) {
-      await this.afs.collection('rooms').doc(id).set({id, ...room});
+    if (!room.exists) {
+      await this.afs.collection('rooms').doc(id).set(
+          {...defaultRoom, ...partial, id});
     }
 
     // return the doc id
@@ -48,7 +59,8 @@ export class RoomService {
     const room$ =
         this.afs.collection('rooms').doc<Room>(id).snapshotChanges().pipe(
             map(room => {
-              return {id: room.payload.id, ...room.payload.data()};
+              const {id: docId, exists} = room.payload;
+              return {...room.payload.data(), id: docId, exists};
             }));
 
     // save to cache and return
@@ -84,7 +96,7 @@ export class RoomService {
   /**
    * "Suh dude!" turns into "suh-dude"
    */
-  createRoomId(name: string = ''): string {
+  getRoomId(name: string = ''): string {
     return name.toLowerCase()
         .replace(/[^a-zA-Z0-9 \-]/g, '')  // remove illegal values
         .replace(/[ ]/g, '-');            // spaces to dashes
