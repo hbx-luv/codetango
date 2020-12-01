@@ -8,7 +8,7 @@
     </ion-title>
 
     <!-- toolbar buttons on larger devices -->
-    <ion-buttons class="hide-small" slot="end" *ngIf="game">
+    <ion-buttons class="hide-small" slot="end">
       <ion-button
         *ngFor="let action of actions"
         [tooltip]="action.label"
@@ -24,7 +24,7 @@
     </div>
 
     <!-- toolbar buttons on smaller devices -->
-    <ion-buttons class="show-small" slot="end" *ngIf="game && actions.length">
+    <ion-buttons class="show-small" slot="end" *ngIf="actions.length">
       <app-actions-popover slot="icon-only" [actions]="actions"></app-actions-popover>
     </ion-buttons>
     <div class="title-bar-end show-small" slot="end">

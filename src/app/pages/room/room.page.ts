@@ -1,7 +1,8 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {get} from 'lodash';
 import {Observable, ReplaySubject} from 'rxjs';
-import {takeUntil, tap} from 'rxjs/operators';
+import {takeUntil} from 'rxjs/operators';
 import {PopoverAction} from 'src/app/components/actions-popover/actions-popover.component';
 import {confetti} from 'src/app/confetti.js';
 import {AuthService} from 'src/app/services/auth.service';
@@ -164,7 +165,7 @@ export class RoomPage implements OnDestroy {
     const actions = [];
 
     if (this.userIsInRoom) {
-      if (this.gameInProgress) {
+      if (this.game && this.gameInProgress) {
         actions.push(
             {
               label: this.soundService.muted() ? 'Unmute Sounds' :
@@ -226,7 +227,7 @@ export class RoomPage implements OnDestroy {
   }
 
   isUserInRoom(userId: string): boolean {
-    return this.room && this.room.userIds.includes(userId);
+    return get(this.room, 'userIds', []).includes(userId);
   }
 
   selectTab($event: string) {
