@@ -1,33 +1,59 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
+import {Router} from '@angular/router';
 import {firestore} from 'firebase';
 import {without} from 'lodash';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {Room} from 'types';
+import {Room, RoomStatus} from 'types';
 
 import {AuthService} from './auth.service';
+
+const defaultRoom = {
+  status: RoomStatus.PREGAME,
+  timer: 120,
+  firstTurnTimer: 180,
+  guessIncrement: 30,
+  wordList: 'default',
+  enforceTimer: false,
+  userIds: [],
+};
 
 @Injectable({providedIn: 'root'})
 export class RoomService {
   private db: firestore.Firestore;
+
+  // the purpose of this map is to allow room generation with a fun name that
+  // isn't just the id. when a user navs to a room via the input on the home
+  // page, we'll save that name and use it if we end up needing to create the
+  // room
+  private roomNames: {[roomId: string]: string} = {};
 
   roomObservables: {[roomId: string]: Observable<Room>} = {};
 
   constructor(
       private readonly authService: AuthService,
       private readonly afs: AngularFirestore,
+      private readonly router: Router,
   ) {
     this.db = firestore();
   }
 
-  async createRoom(room: Partial<Room>): Promise<string> {
-    const id = this.createRoomId(room.name);
-    const game = await this.db.collection('rooms').doc(id).get();
+  async createRoom(partial: Partial<Room>): Promise<string> {
+    const id = this.getRoomId(partial.id);
+    const room = await this.db.collection('rooms').doc(id).get();
 
     // if the game doesn't exist, create it
-    if (!game.exists) {
-      await this.afs.collection('rooms').doc(id).set({id, ...room});
+    if (!room.exists) {
+      // see if there is a stored room name from navigating to a new room,
+      // otherwise default the name to the id
+      if (!partial.name) {
+        partial.name = this.roomNames[id] || id;
+      }
+
+      // create the new room with default settings and any values passed in
+      await this.afs.collection('rooms').doc(id).set(
+          {...defaultRoom, ...partial, id});
     }
 
     // return the doc id
@@ -48,7 +74,8 @@ export class RoomService {
     const room$ =
         this.afs.collection('rooms').doc<Room>(id).snapshotChanges().pipe(
             map(room => {
-              return {id: room.payload.id, ...room.payload.data()};
+              const {id: docId, exists} = room.payload;
+              return {...room.payload.data(), id: docId, exists};
             }));
 
     // save to cache and return
@@ -82,9 +109,20 @@ export class RoomService {
   }
 
   /**
+   * Given a room's name or id, nav to that room and save the parameter as the
+   * name of the room so we can use this when creating the room if need be
+   * @param nameOrId either the room name or id
+   */
+  navToRoom(nameOrId: string) {
+    const id = this.getRoomId(nameOrId);
+    this.roomNames[id] = nameOrId;
+    this.router.navigate([id]);
+  }
+
+  /**
    * "Suh dude!" turns into "suh-dude"
    */
-  createRoomId(name: string = ''): string {
+  getRoomId(name: string = ''): string {
     return name.toLowerCase()
         .replace(/[^a-zA-Z0-9 \-]/g, '')  // remove illegal values
         .replace(/[ ]/g, '-');            // spaces to dashes

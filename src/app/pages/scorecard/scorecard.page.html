@@ -1,24 +1,26 @@
 <ion-header>
-  <ion-toolbar *ngIf="user$ | async as user">
+  <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
       <ion-button class="custom-back" [routerLink]="['/']">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>
-      <span *ngIf="user.nickname && user.nickname !== user.name" [tooltip]="user.name">
-        {{ user.nickname }}
-      </span>
-      <span *ngIf="!user.nickname">
-        {{ user.name }}
-      </span>
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="promptForName(user)" *ngIf="isMe">
-        <ion-icon name="settings" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <ng-container *ngIf="user$ | async as user">
+      <ion-title>
+        <span *ngIf="user.nickname && user.nickname !== user.name" [tooltip]="user.name">
+          {{ user.nickname }}
+        </span>
+        <span *ngIf="!user.nickname">
+          {{ user.name }}
+        </span>
+      </ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="promptForName(user)" *ngIf="isMe">
+          <ion-icon name="settings" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ng-container>
   </ion-toolbar>
 </ion-header>
 

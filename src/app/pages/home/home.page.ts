@@ -1,51 +1,52 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
-import {Observable} from 'rxjs';
+import {Component, OnDestroy} from '@angular/core';
+import {Observable, ReplaySubject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
-import {UtilService} from 'src/app/services/util.service';
 import {environment} from 'src/environments/environment';
-import {RoomStatus, WordList} from 'types';
+import {User, WordList} from 'types';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnDestroy {
+  private destroyed$ = new ReplaySubject<void>();
+
   version = environment.version;
   roomName: string;
   lists: Observable<WordList[]>;
   selectedWordList: WordList;
   userHasTyped = false;
+  roomIds: string[] = [];
 
   constructor(
       public readonly authService: AuthService,
-      private readonly roomService: RoomService,
-      private readonly router: Router,
-      private readonly utilService: UtilService,
+      public readonly roomService: RoomService,
       private readonly userService: UserService,
-  ) {}
-
-  get disabled(): boolean {
-    return this.roomService.createRoomId(this.roomName).length === 0;
+  ) {
+    this.userService.userChanged$.pipe(takeUntil(this.destroyed$))
+        .subscribe(user => {
+          if (user) {
+            this.setRoomIds(user);
+          }
+        });
   }
 
-  get roomIds(): string[] {
-    if (this.userService.currentUser) {
-      const {rooms} = this.userService.currentUser;
-      if (!this.userHasTyped) {
-        // An ExpressionChangedAfterItHasBeenCheckedError expection is thrown if
-        // there is no timeout here
-        // https://blog.angular-university.io/angular-debugging/
-        setTimeout(() => {
-          this.roomName = rooms[0];
-        });
-      }
-      return rooms.slice(0, 5);
-    } else {
-      return [];
+  get disabled(): boolean {
+    return this.roomService.getRoomId(this.roomName).length === 0;
+  }
+
+  setRoomIds(user: User) {
+    const {rooms} = user;
+    this.roomIds = rooms.slice(0, 5);
+
+    // if the user hasn't already started typing in the input, replace it with
+    // the last room they were in for quick access
+    if (!this.userHasTyped) {
+      this.roomName = rooms[0];
     }
   }
 
@@ -54,33 +55,15 @@ export class HomePage {
   }
 
   async createRoom() {
-    if (this.roomName) {
-      let loader;
-      if (!this.authService.authenticated) {
-        loader = await this.utilService.presentLoader('Logging in...');
-        await this.authService.loginWithGoogle();
-        await loader.dismiss();
+    // ion-input updates the value after the keyup event, so we need to delay
+    setTimeout(() => {
+      if (this.roomName) {
+        this.roomService.navToRoom(this.roomName);
       }
-
-      loader = await this.utilService.presentLoader('Joining room...');
-      const id = await this.roomService.createRoom({
-        name: this.roomName,
-        status: RoomStatus.PREGAME,
-        timer: 120,
-        firstTurnTimer: 180,
-        guessIncrement: 30,
-        wordList: 'original',
-        enforceTimer: false,
-        userIds: []
-      });
-
-      this.joinRoom(id);
-      await loader.dismiss();
-    }
+    })
   }
 
-  joinRoom(id: string) {
-    this.roomService.joinRoom(id);
-    this.router.navigate([id]);
+  ngOnDestroy() {
+    this.destroyed$.next();
   }
 }

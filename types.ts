@@ -101,6 +101,7 @@ export interface Room {
 
   // client fields
   id?: string;
+  exists?: boolean;
 }
 
 // Stored at /games
