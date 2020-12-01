@@ -47,7 +47,7 @@ export class RoomPage implements OnDestroy {
     this.roomName = this.route.snapshot.paramMap.get('name');
   }
 
-  ngOnInit() {
+  ionViewDidEnter() {
     // update icons when the user observable fires
     this.userService.userChanged$.pipe(takeUntil(this.destroyed))
         .subscribe(this.setActions.bind(this));

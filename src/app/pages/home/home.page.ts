@@ -28,7 +28,7 @@ export class HomePage implements OnDestroy {
       private readonly userService: UserService,
   ) {}
 
-  ngOnInit() {
+  ionViewDidEnter() {
     this.userService.userChanged$.pipe(takeUntil(this.destroyed$))
         .subscribe(user => {
           if (user) {
