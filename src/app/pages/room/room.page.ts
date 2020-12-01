@@ -48,6 +48,8 @@ export class RoomPage implements OnDestroy {
   }
 
   ionViewDidEnter() {
+    this.setActions();
+
     // update icons when the user observable fires
     this.userService.userChanged$.pipe(takeUntil(this.destroyed))
         .subscribe(this.setActions.bind(this));
@@ -183,13 +185,11 @@ export class RoomPage implements OnDestroy {
             },
         )
       }
-      if (this.loggedIn) {
-        actions.push({
-          label: 'Leave',
-          icon: 'exit-outline',
-          onClick: this.leave.bind(this),
-        });
-      }
+      actions.push({
+        label: 'Leave',
+        icon: 'exit-outline',
+        onClick: this.leave.bind(this),
+      });
     }
 
     this.actions = actions;

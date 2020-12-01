@@ -29,6 +29,10 @@ export class HomePage implements OnDestroy {
   ) {}
 
   ionViewDidEnter() {
+    if (this.userService.currentUser) {
+      this.setRoomIds(this.userService.currentUser);
+    }
+
     this.userService.userChanged$.pipe(takeUntil(this.destroyed$))
         .subscribe(user => {
           if (user) {
