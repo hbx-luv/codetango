@@ -26,7 +26,9 @@ export class HomePage implements OnDestroy {
       public readonly authService: AuthService,
       public readonly roomService: RoomService,
       private readonly userService: UserService,
-  ) {
+  ) {}
+
+  ngOnInit() {
     this.userService.userChanged$.pipe(takeUntil(this.destroyed$))
         .subscribe(user => {
           if (user) {

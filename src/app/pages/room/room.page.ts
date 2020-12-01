@@ -45,7 +45,9 @@ export class RoomPage implements OnDestroy {
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.roomName = this.route.snapshot.paramMap.get('name');
+  }
 
+  ngOnInit() {
     // update icons when the user observable fires
     this.userService.userChanged$.pipe(takeUntil(this.destroyed))
         .subscribe(this.setActions.bind(this));
@@ -198,6 +200,7 @@ export class RoomPage implements OnDestroy {
         .pipe(takeUntil(this.destroyed))
         .subscribe(async room => {
           this.room = room;
+          this.setActions();
 
           // if this room doesn't exist, create a new room with the id
           if (!room.exists) {
