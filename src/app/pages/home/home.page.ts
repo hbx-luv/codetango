@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
@@ -21,8 +20,7 @@ export class HomePage {
 
   constructor(
       public readonly authService: AuthService,
-      private readonly roomService: RoomService,
-      private readonly router: Router,
+      public readonly roomService: RoomService,
       private readonly userService: UserService,
   ) {}
 
@@ -52,14 +50,11 @@ export class HomePage {
   }
 
   async createRoom() {
-    if (this.roomName) {
-      const id = this.roomService.getRoomId(this.roomName);
-      localStorage.setItem(`roomName-${id}`, this.roomName);
-      this.joinRoom(id);
-    }
-  }
-
-  joinRoom(id: string) {
-    this.router.navigate([id]);
+    // ion-input updates the value after the keyup event, so we need to delay
+    setTimeout(() => {
+      if (this.roomName) {
+        this.roomService.navToRoom(this.roomName);
+      }
+    })
   }
 }

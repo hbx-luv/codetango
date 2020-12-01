@@ -19,7 +19,7 @@
         *ngFor="let roomId of roomIds"
         [roomId]="roomId"
       >
-        <ion-button size="small" slot="end" (click)="joinRoom(roomId)">Join</ion-button>
+        <ion-button size="small" slot="end" (click)="roomService.navToRoom(roomId)">Join</ion-button>
       </app-room-list-item>
     </div>
   </div>

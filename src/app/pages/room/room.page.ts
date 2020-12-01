@@ -155,10 +155,8 @@ export class RoomPage implements OnDestroy {
 
           // if this room doesn't exist, create a new room with the id
           if (!room.exists) {
-            const name = localStorage.getItem(`roomName-${room.id}`);
-            const id =
-                await this.roomService.createRoom({name: name || room.id});
-            this.router.navigate([id]);
+            const id = await this.roomService.createRoom({id: room.id});
+            this.roomService.navToRoom(id);
           }
         });
   }
