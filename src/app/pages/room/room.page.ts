@@ -1,12 +1,14 @@
 import {Component, OnDestroy} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil, tap} from 'rxjs/operators';
+import {PopoverAction} from 'src/app/components/actions-popover/actions-popover.component';
 import {confetti} from 'src/app/confetti.js';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {RoomService} from 'src/app/services/room.service';
+import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Clue, Game, GameStatus, Room, RoomStatus} from 'types';
 import {Sound, SoundService} from '../../services/sound.service';
@@ -23,26 +25,37 @@ export class RoomPage implements OnDestroy {
   roomId: string;
   roomName?: string;
   room: Room;
-  currentGame$: Observable<Game>;
+  game: Game;
   currentClue$: Observable<Clue>;
 
   lastGame: string;
   lastGameStatus: GameStatus;
+
+  actions: PopoverAction[] = [];
 
   constructor(
       public readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly route: ActivatedRoute,
-      private readonly router: Router,
       private readonly clueService: ClueService,
       private readonly utilService: UtilService,
       private readonly soundService: SoundService,
+      private readonly userService: UserService,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.roomName = this.route.snapshot.paramMap.get('name');
-    this.currentGame$ =
-        this.gameService.getCurrentGame(this.roomId).pipe(tap(currentGame => {
+
+    // update icons when the user observable fires
+    this.userService.userChanged$.pipe(takeUntil(this.destroyed))
+        .subscribe(this.setActions.bind(this));
+
+    this.gameService.getCurrentGame(this.roomId)
+        .pipe(takeUntil(this.destroyed))
+        .subscribe(currentGame => {
+          this.game = currentGame;
+          this.setActions();
+
           if (currentGame) {
             // only change current clue subscription when you get to a new game
             if (this.lastGame !== currentGame.id) {
@@ -79,7 +92,7 @@ export class RoomPage implements OnDestroy {
             }
             this.lastGameStatus = currentGame.status;
           }
-        }));
+        });
 
     this.subscribeToRoom();
   }
@@ -147,6 +160,43 @@ export class RoomPage implements OnDestroy {
     return this.loggedIn && this.userIsInRoom;
   }
 
+  setActions() {
+    const actions = [];
+
+    if (this.userIsInRoom) {
+      if (this.gameInProgress) {
+        actions.push(
+            {
+              label: this.soundService.muted() ? 'Unmute Sounds' :
+                                                 'Mute Sounds',
+              icon: this.soundService.muted() ? 'volume-mute-outline' :
+                                                'volume-high-outline',
+              onClick: this.toggleSound.bind(this),
+            },
+            {
+              label: 'New Teams',
+              icon: 'people-outline',
+              onClick: this.backToLobby.bind(this),
+            },
+            {
+              label: 'Next Game',
+              icon: 'play-skip-forward-outline',
+              onClick: this.nextGame.bind(this),
+            },
+        )
+      }
+      if (this.loggedIn) {
+        actions.push({
+          label: 'Leave',
+          icon: 'exit-outline',
+          onClick: this.leave.bind(this),
+        });
+      }
+    }
+
+    this.actions = actions;
+  }
+
   subscribeToRoom() {
     this.roomService.getRoom(this.roomId)
         .pipe(takeUntil(this.destroyed))
@@ -161,16 +211,16 @@ export class RoomPage implements OnDestroy {
         });
   }
 
-  leave(game: Game) {
+  leave() {
     // remove them from the room
     this.roomService.removeUserFromRoom(
         this.room.id,
         this.authService.currentUserId,
     );
     // remove them from the game, so long as it hasn't already completed
-    if (!game.completedAt) {
+    if (!this.game.completedAt) {
       this.gameService.removePlayerFromGame(
-          game.id,
+          this.game.id,
           this.authService.currentUserId,
       );
     }
@@ -184,20 +234,16 @@ export class RoomPage implements OnDestroy {
     this.selectedTab = $event;
   }
 
-  get soundIcon(): string {
-    return this.soundService.muted() ? 'volume-mute-outline' :
-                                       'volume-high-outline';
-  }
-
   toggleSound() {
     this.soundService.toggleMute();
+    this.setActions();
   }
 
-  async backToLobby(game: Game) {
+  async backToLobby() {
     let doIt = true;
 
     // if game is in progress, double check before proceeding
-    if (!game.completedAt) {
+    if (!this.game.completedAt) {
       doIt = await this.utilService.confirm(
           'Are you sure you want to pick new teams?',
           'This game will be abandoned and everyone will be redirected back to the lobby.',
@@ -207,7 +253,7 @@ export class RoomPage implements OnDestroy {
 
       // delete this incomplete game before proceeding
       if (doIt) {
-        await this.gameService.deleteGame(game.id);
+        await this.gameService.deleteGame(this.game.id);
       }
     }
 
@@ -220,11 +266,11 @@ export class RoomPage implements OnDestroy {
     }
   }
 
-  async nextGame(game: Game) {
+  async nextGame() {
     let doIt = true;
 
     // if game is in progress, double check before proceeding
-    if (!game.completedAt) {
+    if (!this.game.completedAt) {
       doIt = await this.utilService.confirm(
           'Are you sure you want to start a new game?',
           'This game will be abandoned, but the teams will remain the same.',
@@ -234,14 +280,14 @@ export class RoomPage implements OnDestroy {
 
       // delete this incomplete game before proceeding
       if (doIt) {
-        await this.gameService.deleteGame(game.id);
+        await this.gameService.deleteGame(this.game.id);
       }
     }
 
     if (doIt) {
       const loader =
           await this.utilService.presentLoader('Creating the next game...');
-      const {redTeam, blueTeam, roomId} = game;
+      const {redTeam, blueTeam, roomId} = this.game;
 
       // ensure the users are still in the room
       redTeam.userIds = redTeam.userIds.filter(this.isUserInRoom.bind(this));

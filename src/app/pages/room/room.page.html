@@ -6,35 +6,35 @@
     <ion-title>
       {{ title }}
     </ion-title>
-    <ion-buttons slot="end" *ngIf="currentGame$ | async as game">
-      <ng-container *ngIf="gameInProgress && userIsInRoom">
-        <ion-button
-          tooltip="Toggle Sounds" (click)="toggleSound()">
-          <ion-icon [name]="soundIcon"></ion-icon>
-        </ion-button>
-        <ion-button tooltip="New Teams" (click)="backToLobby(game)">
-          <ion-icon name="people-outline"></ion-icon>
-        </ion-button>
-        <ion-button tooltip="Next Game" (click)="nextGame(game)">
-          <ion-icon name="play-skip-forward-outline"></ion-icon>
-        </ion-button>
-      </ng-container>
+
+    <!-- toolbar buttons on larger devices -->
+    <ion-buttons class="hide-small" slot="end" *ngIf="game">
       <ion-button
-        tooltip="Leave"
-        (click)="leave(game)"
-        *ngIf="showLeave">
-        <ion-icon name="exit-outline"></ion-icon>
+        *ngFor="let action of actions"
+        [tooltip]="action.label"
+        (click)="action.onClick()">
+        <ion-icon [name]="action.icon"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <div
-      class="title-bar-end"
-      slot="end"
-    >
+    <div class="title-bar-end hide-small" slot="end">
       <app-user
         *ngIf="authService.authenticated"
         [userId]="authService.currentUserId">
       </app-user>
     </div>
+
+    <!-- toolbar buttons on smaller devices -->
+    <ion-buttons class="show-small" slot="end" *ngIf="game && actions.length">
+      <app-actions-popover slot="icon-only" [actions]="actions"></app-actions-popover>
+    </ion-buttons>
+    <div class="title-bar-end show-small" slot="end">
+      <app-user
+        *ngIf="authService.authenticated"
+        [userId]="authService.currentUserId"
+        [showUserName]="false">
+      </app-user>
+    </div>
+
   </ion-toolbar>
 </ion-header>
 
@@ -43,12 +43,12 @@
 
     <!-- we're in a lobby waiting for players and assigning teams -->
     <ng-container *ngIf="!gameInProgress">
-      <app-pregame [room]="room" [game]="currentGame$ | async"></app-pregame>
+      <app-pregame [room]="room" [game]="game"></app-pregame>
     </ng-container>
 
     <!-- there is a game in progress or it just ended -->
     <ng-container *ngIf="gameInProgress">
-      <ng-container *ngIf="currentGame$ | async as game">
+      <ng-container *ngIf="game">
         <app-game
           [game]="game"
           [room]="room"
@@ -58,10 +58,10 @@
 
         <!-- end game buttons -->
         <ion-row class="bottom-buttons" *ngIf="game.completedAt">
-          <ion-button color="medium" fill="outline" (click)="backToLobby(game)">
+          <ion-button color="medium" fill="outline" (click)="backToLobby()">
             New Teams
           </ion-button>
-          <ion-button color="primary" fill="outline" (click)="nextGame(game)">
+          <ion-button color="primary" fill="outline" (click)="nextGame()">
             Next Game
           </ion-button>
         </ion-row>

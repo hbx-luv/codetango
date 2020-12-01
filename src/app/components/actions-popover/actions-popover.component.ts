@@ -4,6 +4,7 @@ import {ActionsPopoverPageComponent} from './actions-popover-page.component';
 
 export interface PopoverAction {
   label: string;
+  icon?: string;
   onClick(): void;
 }
 

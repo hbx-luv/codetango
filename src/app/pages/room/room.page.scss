@@ -25,8 +25,21 @@ ion-footer {
   display: none;
 }
 
+.show-small {
+  display: none !important;
+}
+
 @media (max-width: 1040px) {
   ion-footer {
     display: initial;
+  }
+}
+
+@media (max-width: 550px) {
+  .show-small {
+    display: initial !important;
+  }
+  .hide-small {
+    display: none !important;
   }
 }
