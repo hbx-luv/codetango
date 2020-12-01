@@ -4,9 +4,8 @@ import {Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
-import {UtilService} from 'src/app/services/util.service';
 import {environment} from 'src/environments/environment';
-import {RoomStatus, WordList} from 'types';
+import {WordList} from 'types';
 
 @Component({
   selector: 'app-home',
@@ -24,7 +23,6 @@ export class HomePage {
       public readonly authService: AuthService,
       private readonly roomService: RoomService,
       private readonly router: Router,
-      private readonly utilService: UtilService,
       private readonly userService: UserService,
   ) {}
 

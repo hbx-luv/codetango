@@ -15,7 +15,7 @@ const defaultRoom = {
   guessIncrement: 30,
   wordList: 'default',
   enforceTimer: false,
-  userIds: []
+  userIds: [],
 };
 
 @Injectable({providedIn: 'root'})
