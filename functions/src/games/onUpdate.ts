@@ -1,8 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
+import {without} from 'lodash';
 
-import {Game, GameStatus, TileRole} from '../../../types';
+import {Game, GameStatus, TileRole, User} from '../../../types';
 import {recalcElo} from '../util/elo';
 import {sendSpymasterMessage} from '../util/message';
 
@@ -86,7 +87,24 @@ async function determineGameOver(after: DocumentSnapshot) {
   if (postGameUpdate.completedAt) {
     // Process Endgame analytics if the game is over
     await recalcElo(db, postGameUpdate.completedAt);
+
+    // Then add this room to the user's list of rooms
+    await addRoomToUsers(postGameUpdate);
   }
+}
+
+async function addRoomToUsers(game: Game) {
+  const {roomId, blueTeam, redTeam} = game;
+
+  // fetch the existing rooms for each user and put this roomId first in the
+  // list, then add all the others behind
+  await Promise.all(
+      blueTeam.userIds.concat(redTeam.userIds).map(async userId => {
+        const userRef = db.collection('users').doc(userId);
+        const userSnapshot = await userRef.get();
+        const {rooms = []} = userSnapshot.data() as User;
+        return userRef.update({rooms: [roomId].concat(without(rooms, roomId))});
+      }));
 }
 
 async function sanitizeBoard(

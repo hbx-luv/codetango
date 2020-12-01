@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
 import {Router} from '@angular/router';
 import {firestore} from 'firebase';
-import {without} from 'lodash';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Room, RoomStatus} from 'types';
@@ -91,14 +90,6 @@ export class RoomService {
       await this.afs.collection('rooms').doc(roomId).update({
         userIds: firestore.FieldValue.arrayUnion(currentUserId),
       });
-
-      // fetch the existing rooms for the authenticaterd user
-      const userRef = this.db.collection('users').doc(currentUserId);
-      const userSnapshot = await userRef.get();
-      const {rooms = []} = userSnapshot.data();
-
-      // put the room id first, then add all the others behind
-      await userRef.update({rooms: [roomId].concat(without(rooms, roomId))});
     }
   }
 
