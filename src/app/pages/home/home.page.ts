@@ -1,47 +1,52 @@
-import {Component} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Component, OnDestroy} from '@angular/core';
+import {Observable, ReplaySubject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
 import {environment} from 'src/environments/environment';
-import {WordList} from 'types';
+import {User, WordList} from 'types';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnDestroy {
+  private destroyed$ = new ReplaySubject<void>();
+
   version = environment.version;
   roomName: string;
   lists: Observable<WordList[]>;
   selectedWordList: WordList;
   userHasTyped = false;
+  roomIds: string[] = [];
 
   constructor(
       public readonly authService: AuthService,
       public readonly roomService: RoomService,
       private readonly userService: UserService,
-  ) {}
+  ) {
+    this.userService.userChanged$.pipe(takeUntil(this.destroyed$))
+        .subscribe(user => {
+          if (user) {
+            this.setRoomIds(user);
+          }
+        });
+  }
 
   get disabled(): boolean {
     return this.roomService.getRoomId(this.roomName).length === 0;
   }
 
-  get roomIds(): string[] {
-    if (this.userService.currentUser) {
-      const {rooms} = this.userService.currentUser;
-      if (!this.userHasTyped) {
-        // An ExpressionChangedAfterItHasBeenCheckedError expection is thrown if
-        // there is no timeout here
-        // https://blog.angular-university.io/angular-debugging/
-        setTimeout(() => {
-          this.roomName = rooms[0];
-        });
-      }
-      return rooms.slice(0, 5);
-    } else {
-      return [];
+  setRoomIds(user: User) {
+    const {rooms} = user;
+    this.roomIds = rooms.slice(0, 5);
+
+    // if the user hasn't already started typing in the input, replace it with
+    // the last room they were in for quick access
+    if (!this.userHasTyped) {
+      this.roomName = rooms[0];
     }
   }
 
@@ -56,5 +61,9 @@ export class HomePage {
         this.roomService.navToRoom(this.roomName);
       }
     })
+  }
+
+  ngOnDestroy() {
+    this.destroyed$.next();
   }
 }

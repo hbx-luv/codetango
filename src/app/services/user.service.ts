@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {AngularFirestore} from '@angular/fire/firestore';
 import {Observable, Subscription} from 'rxjs';
@@ -12,6 +12,7 @@ export class UserService {
 
   currentUser$?: Subscription;
   currentUser?: User;
+  userChanged$: EventEmitter<User>;
 
   constructor(
       private readonly afAuth: AngularFireAuth,
@@ -28,6 +29,8 @@ export class UserService {
         delete this.currentUser;
       }
     });
+
+    this.userChanged$ = new EventEmitter<User>();
   }
 
   subscribeToUser(uid: string) {
@@ -39,6 +42,7 @@ export class UserService {
     // subscribe to user changes
     this.currentUser$ = this.getUser(uid).subscribe(user => {
       this.currentUser = user;
+      this.userChanged$.emit(user);
     });
   }
 
