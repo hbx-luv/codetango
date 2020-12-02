@@ -26,36 +26,40 @@
 </div>
 
 <ng-template #giveClue>
-  <input
-    class="clue"
-    type="text"
-    placeholder="Type your clue..."
-    [(ngModel)]="clue"
-    (keyup.enter)="submitClue()"
-  >
-  <input
-    class="count"
-    type="number"
-    placeholder="#"
-    max="999"
-    [(ngModel)]="clueCount"
-    (keyup.enter)="submitClue()"
-  >
-  <ion-button
-    (click)="submitClue()"
-    (keyup.enter)="submitClue()"
-    color="light"
-    [disabled]="disableSubmitButton"
-  >
-    Give Clue
-  </ion-button>
-  <ion-button
-    (click)="submitClue(true)"
-    color="dark"
-    [disabled]="disableSubmitButton"
-    fill="clear"
-    tooltip="Ask other spymaster if this clue is allowed"
-  >
-    Ask First
-  </ion-button>
+  <div>
+    <input
+      class="clue"
+      type="text"
+      placeholder="Type your clue..."
+      [(ngModel)]="clue"
+      (keyup.enter)="submitClue()"
+    >
+    <input
+      class="count"
+      type="number"
+      placeholder="#"
+      max="999"
+      [(ngModel)]="clueCount"
+      (keyup.enter)="submitClue()"
+    >
+  </div>
+  <div>
+    <ion-button
+      (click)="submitClue()"
+      (keyup.enter)="submitClue()"
+      color="light"
+      [disabled]="disableSubmitButton"
+    >
+      Give Clue
+    </ion-button>
+    <ion-button
+      (click)="submitClue(true)"
+      color="dark"
+      [disabled]="disableSubmitButton"
+      fill="clear"
+      tooltip="Ask other spymaster if this clue is allowed"
+    >
+      Ask First
+    </ion-button>
+  </div>
 </ng-template>

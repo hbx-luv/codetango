@@ -30,8 +30,19 @@ ion-footer {
 }
 
 @media (max-width: 1040px) {
+  .room-container .bottom-buttons:not(.board-tab) {
+    display: none;
+  }
+
   ion-footer {
     display: initial;
+
+    ion-badge {
+      position: absolute;
+      left: calc(50% + 15px);
+      transform: translateX(-50%);
+      top: 5px;
+    }
   }
 }
 

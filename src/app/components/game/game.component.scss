@@ -74,6 +74,17 @@ app-chat-box {
         display: none;
       }
     }
+    &.chat-tab {
+      .team-lists,
+      .game-board,
+      .word-history {
+        display: none;
+      }
+    }
+  }
+
+  app-chat-box:not(.chat-tab) {
+    display: none;
   }
 }
 

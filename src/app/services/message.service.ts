@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
 import {firestore} from 'firebase';
 import {Observable} from 'rxjs';
@@ -6,6 +6,10 @@ import {Message} from 'types';
 
 @Injectable({providedIn: 'root'})
 export class MessageService {
+  chatShown = false;
+  unreadMessages?: number;
+  chatShown$ = new EventEmitter();
+
   constructor(
       private readonly afs: AngularFirestore,
   ) {}
@@ -32,5 +36,11 @@ export class MessageService {
         .doc(gameId)
         .collection<Message>('spymaster-chat', ref => ref.orderBy('timestamp'))
         .valueChanges();
+  }
+
+  toggleChatShown(setTo?: boolean) {
+    this.chatShown = setTo !== undefined ? setTo : !this.chatShown;
+    this.unreadMessages = 0;
+    this.chatShown$.emit();
   }
 }

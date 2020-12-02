@@ -8,6 +8,7 @@ import {confetti} from 'src/app/confetti.js';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
+import {MessageService} from 'src/app/services/message.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -36,6 +37,7 @@ export class RoomPage implements OnDestroy {
 
   constructor(
       public readonly authService: AuthService,
+      public readonly messageService: MessageService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly route: ActivatedRoute,
@@ -161,6 +163,12 @@ export class RoomPage implements OnDestroy {
     return this.room && this.authService.authenticated;
   }
 
+  get spymaster(): boolean {
+    const {currentUserId} = this.authService;
+    return get(this.game, 'redTeam.spymaster') === currentUserId ||
+        get(this.game, 'blueTeam.spymaster') === currentUserId;
+  }
+
   setActions() {
     const actions = [];
 
@@ -230,8 +238,9 @@ export class RoomPage implements OnDestroy {
     return get(this.room, 'userIds', []).includes(userId);
   }
 
-  selectTab($event: string) {
-    this.selectedTab = $event;
+  selectTab(tab: string) {
+    this.selectedTab = tab;
+    this.messageService.toggleChatShown(tab === 'chat-tab');
   }
 
   toggleSound() {
