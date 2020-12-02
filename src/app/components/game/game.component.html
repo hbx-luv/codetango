@@ -50,4 +50,4 @@
 </ion-row>
 
 <!-- spymaster chat -->
-<app-chat-box [game]="game" *ngIf="spymaster || game.completedAt"></app-chat-box>
+<app-chat-box [class]="selectedTab" [game]="game" *ngIf="spymaster || game.completedAt"></app-chat-box>

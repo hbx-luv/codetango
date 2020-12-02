@@ -1,13 +1,13 @@
 <div class="in-game-chat">
 
-  <ion-badge mode="ios" color="danger" *ngIf="unreadMessages" (click)="setChatOpen()">
-    {{ unreadMessages }}
+  <ion-badge mode="ios" color="danger" *ngIf="messageService.unreadMessages as unread" (click)="messageService.toggleChatShown(true)">
+    {{ unread }}
   </ion-badge>
 
   <div>
     <div #scrollMe
       class="chat-messages-container"
-      [class.shown]="chatShown"
+      [class.shown]="messageService.chatShown"
       (click)="toggleChat()"
       *ngIf="messages$ | async as messages"
     >
@@ -29,18 +29,18 @@
           [userId]="message.userId"
           [color]="message.team"
           [showUserName]="false"
-          [navToScorecard]="chatShown">
+          [navToScorecard]="messageService.chatShown">
         </app-user>
         {{ message.text}}
       </p>
     </div>
     <input
       class="chatroom-input"
-      [class.shown]="chatShown"
+      [class.shown]="messageService.chatShown"
       [placeholder]="placeholder"
       [(ngModel)]="newMessage"
       (keyup.enter)="sendMessage()"
-      (click)="setChatOpen()"
+      (click)="messageService.toggleChatShown(true)"
     >
   </div>
 </div>

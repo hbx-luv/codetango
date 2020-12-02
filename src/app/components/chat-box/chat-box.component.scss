@@ -63,5 +63,15 @@
 @media (max-width: 1040px) {
   .in-game-chat {
     bottom: 48px;
+    width: 100%;
+
+    ion-badge {
+      display: none;
+    }
+
+    .chat-messages-container {
+      max-height: calc(100vh - 210px) !important;
+      opacity: 1;
+    }
   }
 }

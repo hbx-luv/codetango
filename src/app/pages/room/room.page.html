@@ -57,7 +57,7 @@
         </app-game>
 
         <!-- end game buttons -->
-        <ion-row class="bottom-buttons" *ngIf="game.completedAt">
+        <ion-row class="bottom-buttons {{selectedTab}}" *ngIf="game.completedAt">
           <ion-button color="medium" fill="outline" (click)="backToLobby()">
             New Teams
           </ion-button>
@@ -74,10 +74,16 @@
 <ion-footer *ngIf="gameInProgress">
   <ion-segment [value]="selectedTab" (click)="selectTab($event.target.value)">
     <ion-segment-button value="board-tab">
-      <ion-label>Board</ion-label>
+      <ion-icon name="grid"></ion-icon>
     </ion-segment-button>
     <ion-segment-button value="teams-tab">
-      <ion-label>Teams</ion-label>
+      <ion-icon name="people"></ion-icon>
+    </ion-segment-button>
+    <ion-segment-button value="chat-tab" *ngIf="spymaster || game.completedAt">
+      <ion-icon name="chatbox"></ion-icon>
+      <ion-badge mode="ios" color="danger" *ngIf="messageService.unreadMessages as unread">
+        {{ unread }}
+      </ion-badge>
     </ion-segment-button>
   </ion-segment>
 </ion-footer>
