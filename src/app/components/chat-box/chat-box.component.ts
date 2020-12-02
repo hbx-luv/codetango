@@ -14,7 +14,6 @@ import {Game, Message, TeamTypes} from 'types';
 })
 export class ChatBoxComponent implements OnInit, OnChanges {
   @ViewChild('scrollMe') private myScrollContainer: ElementRef;
-
   @Input() game: Game;
 
   newMessage: string;
@@ -26,7 +25,8 @@ export class ChatBoxComponent implements OnInit, OnChanges {
       private readonly utilService: UtilService,
       private readonly soundService: SoundService,
   ) {
-    this.messageService.chatShown$.subscribe(() => this.scrollToBottom(200));
+    // scroll the chat box to the bottom when the shown state is toggled
+    this.messageService.chatShown$.subscribe(() => this.scrollToBottom(300));
   }
 
   ngOnInit() {
