@@ -71,7 +71,7 @@
   </div>
 </ion-content>
 
-<ion-footer *ngIf="gameInProgress">
+<ion-footer *ngIf="gameInProgress && game">
   <ion-segment [value]="selectedTab" (click)="selectTab($event.target.value)">
     <ion-segment-button value="board-tab">
       <ion-icon name="grid"></ion-icon>

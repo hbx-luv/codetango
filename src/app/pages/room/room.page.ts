@@ -68,6 +68,11 @@ export class RoomPage implements OnDestroy {
               this.lastGame = currentGame.id;
               this.currentClue$ =
                   this.clueService.getCurrentClue(currentGame.id);
+
+              // reset the tab back to the board when a new game starts
+              if (this.selectedTab !== 'board-tab') {
+                this.selectTab('board-tab');
+              }
             }
             // detect game over
             const {status} = currentGame;
