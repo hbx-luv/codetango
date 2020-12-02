@@ -25,7 +25,6 @@ export class RoomPage implements OnDestroy {
 
   selectedTab = 'board-tab';
   roomId: string;
-  roomName?: string;
   room: Room;
   game: Game;
   currentClue$: Observable<Clue>;
@@ -47,7 +46,6 @@ export class RoomPage implements OnDestroy {
       private readonly userService: UserService,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
-    this.roomName = this.route.snapshot.paramMap.get('name');
   }
 
   ionViewDidEnter() {
