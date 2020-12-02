@@ -37,7 +37,7 @@
     "chart.js": "^2.9.3",
     "clang-format": "^1.4.0",
     "firebase": "^7.15.5",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "luxon": "^1.25.0",
     "moment": "^2.27.0",
     "ng2-tooltip-directive": "^2.9.20",
