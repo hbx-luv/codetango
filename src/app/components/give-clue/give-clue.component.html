@@ -33,6 +33,7 @@
       placeholder="Type your clue..."
       [(ngModel)]="clue"
       (keyup.enter)="submitClue()"
+      (keyup.shift.enter)="submitClue()"
     >
     <input
       class="count"
@@ -41,6 +42,7 @@
       max="999"
       [(ngModel)]="clueCount"
       (keyup.enter)="submitClue()"
+      (keyup.shift.enter)="submitClue()"
     >
   </div>
   <div>

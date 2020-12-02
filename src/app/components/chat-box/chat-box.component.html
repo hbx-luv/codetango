@@ -40,6 +40,7 @@
       [placeholder]="placeholder"
       [(ngModel)]="newMessage"
       (keyup.enter)="sendMessage()"
+      (keyup.shift.enter)="sendMessage()"
       (click)="messageService.toggleChatShown(true)"
     >
   </div>
