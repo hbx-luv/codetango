@@ -2,6 +2,7 @@
   <div class="home-container">
     <div class="new-game-container">
       <h1 class="title">CODETANGO</h1>
+      <ion-button *ngIf="tesla" (click)="fullscreen()">Go fullscreen</ion-button>
       <p class="description">
         Play Codenames online across multiple devices on a shared board. To create a new room or join an existing room, enter a room identifier and click 'GO'.
       </p>

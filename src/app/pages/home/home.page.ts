@@ -41,6 +41,10 @@ export class HomePage implements OnDestroy {
         });
   }
 
+  get tesla(): boolean {
+    return true || navigator?.userAgent?.includes('Tesla');
+  }
+
   get disabled(): boolean {
     return this.roomService.getRoomId(this.roomName).length === 0;
   }
@@ -67,6 +71,10 @@ export class HomePage implements OnDestroy {
         this.roomService.navToRoom(this.roomName);
       }
     })
+  }
+
+  fullscreen() {
+    location.href = 'https://youtube.com/redirect?q=https://play.hbx.vision';
   }
 
   ngOnDestroy() {
