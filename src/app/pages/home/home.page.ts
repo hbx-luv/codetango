@@ -42,7 +42,7 @@ export class HomePage implements OnDestroy {
   }
 
   get tesla(): boolean {
-    return true || navigator?.userAgent?.includes('Tesla');
+    return navigator?.userAgent?.includes('Tesla');
   }
 
   get disabled(): boolean {
