@@ -1,7 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import * as moment from 'moment';
-import {GameService} from 'src/app/services/game.service';
 import {Game, GameStatus} from 'types';
 
 @Component({

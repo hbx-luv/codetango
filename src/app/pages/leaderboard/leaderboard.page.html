@@ -4,11 +4,16 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>Leaderboard</ion-title>
+    <ion-buttons slot="end" *ngIf="hasRecentPlayers">
+      <ion-button (click)="toggleRecent()" tooltip="Toggle only showing recent players">
+        <ion-icon [name]="recentIcon" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <div class="leaderboard-container" *ngIf="users$ | async as users; else loading">
+  <div class="leaderboard-container" *ngIf="users; else loading">
     <ion-list *ngIf="users.length > 0; else empty">
       <ion-item *ngFor="let user of users; let index = index" [routerLink]="['/scorecard', user.id]">
         <ion-text class="rank" slot="start">
