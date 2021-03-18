@@ -42,6 +42,21 @@ export class PregameComponent {
       private readonly userService: UserService,
   ) {}
 
+  ngOnChanges() {
+    const {redReady = false, blueReady = false} = this.room || {};
+
+    // if both red and blue are ready, have red start the game and set those
+    // statuses back to false
+    if (redReady && blueReady && this.redSpymaster) {
+      this.startGame().then(() => {
+        this.roomService.updateRoom(this.room.id, {
+          redReady: false,
+          blueReady: false,
+        });
+      });
+    }
+  }
+
   get userInRoom(): boolean {
     return this.room && this.authService.authenticated &&
         this.room.userIds.includes(this.authService.currentUserId);
@@ -51,6 +66,16 @@ export class PregameComponent {
     return this.game &&
         this.game.redTeam.userIds.includes(this.game.redTeam.spymaster) &&
         this.game.blueTeam.userIds.includes(this.game.blueTeam.spymaster);
+  }
+
+  get redSpymaster(): boolean {
+    return this.userInRoom &&
+        this.game?.redTeam.spymaster === this.authService.currentUserId;
+  }
+
+  get blueSpymaster(): boolean {
+    return this.userInRoom &&
+        this.game?.blueTeam.spymaster === this.authService.currentUserId;
   }
 
   selectWordList(wordList: string) {
@@ -161,5 +186,21 @@ export class PregameComponent {
           }
         })
         .map(user => user.id!);
+  }
+
+  toggleRedReady() {
+    if (this.room?.id) {
+      this.roomService.updateRoom(this.room.id, {
+        redReady: !this.room.redReady,
+      });
+    }
+  }
+
+  toggleBlueReady() {
+    if (this.room?.id) {
+      this.roomService.updateRoom(this.room.id, {
+        blueReady: !this.room.blueReady,
+      });
+    }
   }
 }

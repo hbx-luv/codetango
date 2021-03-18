@@ -78,6 +78,9 @@ export interface Room {
   status: RoomStatus;
   userIds: string[];  // users currently in the room
 
+  redReady: boolean;
+  blueReady: boolean;
+
   // optional fields:
 
   // seconds to count down from at the start of each turn
