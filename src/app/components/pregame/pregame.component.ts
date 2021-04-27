@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {shuffle} from 'lodash';
+import {clone, shuffle} from 'lodash';
 import {Observable} from 'rxjs';
 import {first} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
@@ -18,10 +18,13 @@ import {RoomService} from '../../services/room.service';
 export class PregameComponent {
   @Input() room: Room;
   @Input() game: Game;
+
   currentGame$: Observable<Game>;
   teams: Team[];
   constructedGame: Partial<Game>;
   debounce = 500;
+  
+  lastSettings: Partial<Room>;
 
   wordLists = [
     {url: './assets/original.png', id: 'default'},
@@ -83,12 +86,25 @@ export class PregameComponent {
   }
 
   saveTimerSettings() {
-    this.roomService.updateRoom(this.room.id, {
-      timer: this.room.timer,
-      firstTurnTimer: this.room.firstTurnTimer,
-      enforceTimer: this.room.enforceTimer,
-      guessIncrement: this.room.guessIncrement
-    });
+    const updates: Partial<Room> = {};
+    const {timer, firstTurnTimer, enforceTimer, guessIncrement} = this.lastSettings;
+    
+    // only update what's changed
+    if (this.room.timer !== timer) {
+      updates.timer = this.room.timer;
+    }
+    if (this.room.firstTurnTimer !== firstTurnTimer) {
+      updates.firstTurnTimer = this.room.firstTurnTimer;
+    }
+    if (this.room.enforceTimer !== enforceTimer) {
+      updates.enforceTimer = this.room.enforceTimer;
+    }
+    if (this.room.guessIncrement !== guessIncrement) {
+      updates.guessIncrement = this.room.guessIncrement;
+    }
+    
+    this.roomService.updateRoom(this.room.id, updates);
+    this.lastSettings = clone(this.room);
   }
 
   removeUser(userId: string) {
