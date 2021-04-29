@@ -106,11 +106,11 @@
       <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
       Go Back
     </ion-button>
-    <ion-button [disabled]="!canStartGame" color="danger" (click)="toggleRedReady()" [disabled]="!redSpymaster">
+    <ion-button color="danger" (click)="toggleRedReady()" [disabled]="!redSpymaster">
       Red Ready
       <ion-icon class="margin-left" [name]="room.redReady ? 'checkmark' : 'close'"></ion-icon>
     </ion-button>
-    <ion-button [disabled]="!canStartGame" (click)="toggleBlueReady()" [disabled]="!blueSpymaster">
+    <ion-button color="primary" (click)="toggleBlueReady()" [disabled]="!blueSpymaster">
       Blue Ready
       <ion-icon class="margin-left" [name]="room.blueReady ? 'checkmark' : 'close'"></ion-icon>
     </ion-button>
