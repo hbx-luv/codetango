@@ -87,7 +87,7 @@ export class PregameComponent {
 
   saveTimerSettings() {
     const updates: Partial<Room> = {};
-    const {timer, firstTurnTimer, enforceTimer, guessIncrement} = this.lastSettings;
+    const {timer, firstTurnTimer, enforceTimer, guessIncrement} = this.lastSettings ?? this.room ?? {};
     
     // only update what's changed
     if (this.room.timer !== timer) {
