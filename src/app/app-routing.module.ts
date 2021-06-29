@@ -37,6 +37,11 @@ const routes: Routes = [
     loadChildren: () => import('./pages/game-history/game-history.module')
                             .then(m => m.GameHistoryPageModule)
   },
+  {
+    path: 'totally/doing/homework',
+    loadChildren: () => import('./pages/generals/generals.module')
+                            .then(m => m.GeneralsPageModule)
+  },
 ];
 
 @NgModule({
