@@ -1,20 +1,24 @@
 <!-- score and end turn -->
 <div class="score-bar">
   <app-timer [game]="game" [room]="room"></app-timer>
-  <h4>
-    <ion-text color="primary" class="ion-padding-end">{{game.blueAgents}}</ion-text>
-    <ion-text color="dark" class="ion-padding-end">-</ion-text>
-    <ion-text color="danger">{{game.redAgents}}</ion-text>
-  </h4>
-  <ion-button
-    [class.completed]="!!game.completedAt"
-    fill="outline"
-    color="medium"
-    (click)="endCurrentTeamsTurn()"
-    [disabled]="disableEndTurn"
-  >
-    End Turn
-  </ion-button>
+  <div>
+    <ion-button
+      fill="outline"
+      [color]="throwingDart ? 'danger' : 'medium'"
+      (click)="toggleThrowingDart()"
+      [disabled]="disableEndTurn"
+    >
+      {{ throwingDart ? "Cancel" : "Dart 🎯" }}
+    </ion-button>
+    <ion-button
+      [class.completed]="!!game.completedAt"
+      color="medium"
+      (click)="endCurrentTeamsTurn()"
+      [disabled]="disableEndTurn"
+    >
+      End Turn
+    </ion-button>
+  </div>
 </div>
 
 <ion-row class="game-row {{selectedTab}}">
@@ -31,7 +35,9 @@
       [game]="game"
       [currentClue]="currentClue"
       [readonly]="disableGameBoard"
-      [spymaster]="spymaster">
+      [spymaster]="spymaster"
+      [throwingDart]="throwingDart"
+      (clicked)="toggleThrowingDart(false)">
     </app-game-board>
 
     <!-- spymaster clue interface -->

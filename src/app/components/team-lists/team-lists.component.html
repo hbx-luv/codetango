@@ -1,5 +1,8 @@
 <div class="ion-padding-start" *ngIf="game">
   <h3 class="team-title">
+    <div class="team-score blue" *ngIf="showScore" tooltip="Remaining agents to find">
+      {{ game.blueAgents }}
+    </div>
     Blue Team
     <ion-button
       color="primary"
@@ -25,6 +28,9 @@
     </app-user>
   </div>
   <h3 class="team-title">
+    <div class="team-score red" *ngIf="showScore" tooltip="Remaining agents to find">
+      {{ game.redAgents }}
+    </div>
     Red Team
     <ion-button
       color="danger"

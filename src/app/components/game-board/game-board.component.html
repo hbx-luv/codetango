@@ -1,29 +1,32 @@
 <div>
   <ion-grid class="grid-container">
-    <ion-button
-      *ngFor="let tile of tiles"
-      [class.spymaster]="spymaster"
-      [class.selected]="tile.selected"
-      [class.readonly]="readonly"
-      [class.pictures]="game.hasPictures"
-      [class.emojis]="game.hasEmojis"
-      [color]="getColor(tile)"
-      class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
-      (click)="selectTile(tile)"
-    >
-      <ng-container [ngSwitch]="type">
-        <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
-        <span *ngSwitchCase="GameType.PICTURES">
-          <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
-        </span>
-        <span *ngSwitchCase="GameType.EMOJIS">
-          <ion-img src="https://twitter.github.io/twemoji/2/72x72/{{tile.word}}.png"></ion-img>
-        </span>
-        <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
-          {{ tile.word }}
-        </span>
-      </ng-container>
-    </ion-button>
+    <div class="tile-container" *ngFor="let tile of tiles">
+      <ion-button
+        [class.spymaster]="spymaster"
+        [class.selected]="tile.selected"
+        [class.readonly]="readonly"
+        [class.pictures]="game.hasPictures"
+        [class.emojis]="game.hasEmojis"
+        [color]="getColor(tile)"
+        class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
+        (click)="selectTile(tile)"
+      >
+        <ng-container [ngSwitch]="type">
+          <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
+          <span *ngSwitchCase="GameType.PICTURES">
+            <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
+          </span>
+          <span *ngSwitchCase="GameType.EMOJIS">
+            <ion-img src="https://twitter.github.io/twemoji/2/72x72/{{tile.word}}.png"></ion-img>
+          </span>
+          <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
+            {{ tile.word }}
+          </span>
+        </ng-container>
+      </ion-button>
+
+      <img class="dart" src="../../../assets/{{ tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="tile.dartedBy">
+    </div>
   </ion-grid>
   <ion-row class="advice-row">
     <h4>{{advice}}</h4>

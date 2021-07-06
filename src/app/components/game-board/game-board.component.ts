@@ -1,10 +1,10 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 
-import {Clue, Game, GameStatus, Room, TeamTypes, Tile, TileRole} from '../../../../types';
+import {Clue, Game, GameStatus, Room, TeamType, Tile, TileRole} from '../../../../types';
 
 enum GameType {
   WORDS = 'WORDS',
@@ -28,6 +28,9 @@ export class GameBoardComponent implements OnChanges {
   @Input() readonly: boolean;
   @Input() spymaster: boolean;
   @Input() currentClue?: Clue;
+  @Input() throwingDart: boolean;
+
+  @Output() clicked = new EventEmitter<void>();
 
   GameType = GameType;
 
@@ -81,21 +84,21 @@ export class GameBoardComponent implements OnChanges {
 
   get isMyTurn(): boolean {
     // Probably a better way for this, feel free to refactor
-    if (this.myTeam === TeamTypes.RED) {
+    if (this.myTeam === TeamType.RED) {
       return this.game.status === GameStatus.REDS_TURN;
     }
     return this.game.status === GameStatus.BLUES_TURN;
   }
 
-  get myTeam(): TeamTypes {
+  get myTeam(): TeamType {
     const {currentUserId} = this.authService;
     if (get(this.game, 'redTeam.userIds').includes(currentUserId)) {
-      return TeamTypes.RED;
+      return TeamType.RED;
     }
     if (get(this.game, 'blueTeam.userIds').includes(currentUserId)) {
-      return TeamTypes.BLUE;
+      return TeamType.BLUE;
     }
-    return TeamTypes.OBSERVER;
+    return TeamType.OBSERVER;
   }
 
   getColor(tile: Tile): string {
@@ -118,6 +121,10 @@ export class GameBoardComponent implements OnChanges {
   selectTile(tile: Tile) {
     tile.selected = true;
     tile.selectedBy = this.authService.currentUserId;
+
+    if (this.throwingDart) {
+      tile.dartedBy = this.myTeam;
+    }
 
     const updates: Partial<Game> = {tiles: this.tiles};
 
@@ -151,6 +158,7 @@ export class GameBoardComponent implements OnChanges {
     // add this guess to the clue and save
     this.clueService.addGuessToClue(this.game.id, this.currentClue.id, tile);
     this.gameService.updateGame(this.game.id, updates);
+    this.clicked.emit();
   }
 
   getAdvice(): string {

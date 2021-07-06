@@ -3,7 +3,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, Room, RoomStatus} from '../../../../types';
+import {Game, GameStatus, Room, RoomStatus} from '../../../../types';
 import {RoomService} from '../../services/room.service';
 
 @Component({
@@ -39,6 +39,11 @@ export class TeamListsComponent {
     return this.game &&
         !this.game.redTeam.userIds.includes(this.authService.currentUserId) &&
         !this.game.blueTeam.userIds.includes(this.authService.currentUserId);
+  }
+
+  get showScore(): boolean {
+    return this.room?.status === RoomStatus.GAME_IN_PROGRESS ||
+        this.room?.status === RoomStatus.GAME_ENDED;
   }
 
   showJoinButton(team: 'redTeam'|'blueTeam') {

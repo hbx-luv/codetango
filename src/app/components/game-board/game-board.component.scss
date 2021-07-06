@@ -6,60 +6,74 @@
   margin-right: auto;
   max-width: 800px;
 
-  ion-button.word {
-    max-height: 90px;
-    height: 18vw;
-    border-radius: 4px;
+  .tile-container {
+    position: relative;
+    margin: 0 2px;
 
-    // better warning color
-    --ion-color-warning: #bbb29f;
+    ion-button.word {
+      max-height: 90px;
+      height: 18vw;
+      border-radius: 4px;
+      width: 100%;
 
-    // make dark mode assassin clearer
-    --ion-color-dark: #000;
-    --ion-color-dark-contrast: #fff;
+      // better warning color
+      --ion-color-warning: #bbb29f;
 
-    // less padding
-    --padding-start: 5px;
-    --padding-end: 5px;
+      // make dark mode assassin clearer
+      --ion-color-dark: #000;
+      --ion-color-dark-contrast: #fff;
 
-    &.selected,
-    &.spymaster,
-    &.readonly {
-      pointer-events: none;
-    }
+      // less padding
+      --padding-start: 5px;
+      --padding-end: 5px;
 
-    // the role of the tile will be revealed to the spymaster
-    // or to all players at the end of the game
-    &:not(.selected) {
-      &.RED {
-        --ion-color-contrast: var(--ion-color-danger) !important;
-        &.pictures,
-        &.emojis {
-          border: 4px solid var(--ion-color-danger);
+      &.selected,
+      &.spymaster,
+      &.readonly {
+        pointer-events: none;
+      }
+
+      // the role of the tile will be revealed to the spymaster
+      // or to all players at the end of the game
+      &:not(.selected) {
+        &.RED {
+          --ion-color-contrast: var(--ion-color-danger) !important;
+          &.pictures,
+          &.emojis {
+            border: 4px solid var(--ion-color-danger);
+          }
+        }
+        &.BLUE {
+          --ion-color-contrast: var(--ion-color-primary) !important;
+          &.pictures,
+          &.emojis {
+            border: 4px solid var(--ion-color-primary);
+          }
+        }
+        &.ASSASSIN {
+          --ion-color-base: #888 !important;
         }
       }
-      &.BLUE {
-        --ion-color-contrast: var(--ion-color-primary) !important;
-        &.pictures,
-        &.emojis {
-          border: 4px solid var(--ion-color-primary);
-        }
+
+      &.pictures {
+        max-height: 130px;
+        height: 16vw;
       }
-      &.ASSASSIN {
-        --ion-color-base: #888 !important;
+
+      // First gen of the emojis word list was the unicode characters, but
+      // emojis look differently across platforms so we moved to images
+      // This line makes the old games still render nicely
+      .legacy-emojis {
+        font-size: 60px;
       }
     }
 
-    &.pictures {
-      max-height: 130px;
-      height: 16vw;
-    }
-
-    // First gen of the emojis word list was the unicode characters, but
-    // emojis look differently across platforms so we moved to images
-    // This line makes the old games still render nicely
-    .legacy-emojis {
-      font-size: 60px;
+    .dart {
+      position: absolute;
+      z-index: 999;
+      left: 50%;
+      bottom: calc(50% + 12px);
+      width: 100px;
     }
   }
 }

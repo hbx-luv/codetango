@@ -3,7 +3,7 @@ import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
-import {Clue, Game, GameStatus, Room, TeamTypes} from 'types';
+import {Clue, Game, GameStatus, Room, TeamType} from 'types';
 
 @Component({
   selector: 'app-game',
@@ -15,6 +15,8 @@ export class GameComponent {
   @Input() room?: Room;
   @Input() selectedTab = 'board-tab';
   @Input() currentClue?: Clue;
+
+  throwingDart = false;
 
   constructor(
       private readonly authService: AuthService,
@@ -39,15 +41,15 @@ export class GameComponent {
     return false;
   }
 
-  get myTeam(): TeamTypes {
+  get myTeam(): TeamType {
     const {currentUserId} = this.authService;
     if (get(this.game, 'redTeam.userIds').includes(currentUserId)) {
-      return TeamTypes.RED;
+      return TeamType.RED;
     }
     if (get(this.game, 'blueTeam.userIds').includes(currentUserId)) {
-      return TeamTypes.BLUE;
+      return TeamType.BLUE;
     }
-    return TeamTypes.OBSERVER;
+    return TeamType.OBSERVER;
   }
 
   get disableEndTurn(): boolean {
@@ -98,5 +100,9 @@ export class GameComponent {
     }
 
     this.gameService.updateGame(this.game.id, updates);
+  }
+
+  toggleThrowingDart(setValue?: boolean) {
+    this.throwingDart = setValue ?? !this.throwingDart;
   }
 }

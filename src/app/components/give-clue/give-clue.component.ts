@@ -4,7 +4,7 @@ import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, GameStatus, ProposedClue, TeamTypes, Tile} from '../../../../types';
+import {Game, GameStatus, ProposedClue, TeamType, Tile} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
 
 const TOAST_DURATION = 10000;
@@ -107,8 +107,8 @@ export class GiveClueComponent implements OnInit, OnDestroy {
         maxGuesses: this.clueCount === 0 ? 999 : this.clueCount + 1,
         guessesMade: [],
         createdAt: Date.now(),
-        team: GameStatus.BLUES_TURN === this.game.status ? TeamTypes.BLUE :
-                                                           TeamTypes.RED,
+        team: GameStatus.BLUES_TURN === this.game.status ? TeamType.BLUE :
+                                                           TeamType.RED,
       };
 
       if (askFirst) {

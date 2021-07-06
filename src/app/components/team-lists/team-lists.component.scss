@@ -3,6 +3,20 @@
   align-items: center;
   height: 36px;
 
+  .team-score {
+    padding: 4px 8px;
+    border-radius: 8px;
+    color: #fff;
+    margin-right: 8px;
+
+    &.blue {
+      background: var(--ion-color-primary);
+    }
+    &.red {
+      background: var(--ion-color-danger);
+    }
+  }
+
   ion-button {
     margin-left: 25px;
   }

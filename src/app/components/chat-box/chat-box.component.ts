@@ -5,7 +5,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {MessageService} from 'src/app/services/message.service';
 import {Sound, SoundService} from 'src/app/services/sound.service';
 import {UtilService} from 'src/app/services/util.service';
-import {Game, Message, TeamTypes} from 'types';
+import {Game, Message, TeamType} from 'types';
 
 @Component({
   selector: 'app-chat-box',
@@ -84,9 +84,8 @@ export class ChatBoxComponent implements OnInit, OnChanges {
     // when the game is ongoing, messages will be sent in the chat
     else {
       const {currentUserId: userId} = this.authService;
-      const team = this.game.blueTeam.userIds.includes(userId) ?
-          TeamTypes.BLUE :
-          TeamTypes.RED;
+      const team = this.game.blueTeam.userIds.includes(userId) ? TeamType.BLUE :
+                                                                 TeamType.RED;
 
       this.messageService.sendSpymasterMessage(this.game.id, {
         text: this.newMessage,

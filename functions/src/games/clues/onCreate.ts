@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
-import {Clue, Game, TeamTypes} from '../../../../types';
+import {Clue, Game, TeamType} from '../../../../types';
 import {getGame, getUserName} from '../../util/getters';
 import {sendSpymasterMessage} from '../../util/message';
 
@@ -53,9 +53,9 @@ export async function getSpymasterName(
 }
 
 function getSpymasterId(game: Game, clue: Clue): string|undefined {
-  if (clue.team === TeamTypes.BLUE) {
+  if (clue.team === TeamType.BLUE) {
     return game.blueTeam.spymaster;
-  } else if (clue.team === TeamTypes.RED) {
+  } else if (clue.team === TeamType.RED) {
     return game.redTeam.spymaster;
   }
 

@@ -4,7 +4,7 @@ import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Clue, Game, TeamTypes} from '../../../../types';
+import {Clue, Game, TeamType} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
@@ -68,9 +68,9 @@ export class WordHistoryComponent implements OnInit {
       return null;
     }
     switch (clue.team) {
-      case TeamTypes.BLUE:
+      case TeamType.BLUE:
         return 'primary';
-      case TeamTypes.RED:
+      case TeamType.RED:
         return 'danger';
       default:
         return '';

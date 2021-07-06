@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {Clue, TeamTypes} from 'types';
+import {Clue, TeamType} from 'types';
 
 @Component({
   selector: 'app-clue',
@@ -21,9 +21,9 @@ export class ClueComponent {
       return null;
     }
     switch (this.clue.team) {
-      case TeamTypes.BLUE:
+      case TeamType.BLUE:
         return 'primary';
-      case TeamTypes.RED:
+      case TeamType.RED:
         return 'danger';
       default:
         return '';

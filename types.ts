@@ -1,7 +1,7 @@
 import {firestore} from 'firebase';
 
 // the team the user/player is on
-export enum TeamTypes {
+export enum TeamType {
   RED = 'RED',
   BLUE = 'BLUE',
   OBSERVER = 'OBSERVER',
@@ -45,13 +45,14 @@ export interface Tile {
   word?: string;
   image?: string;
   role: TileRole;
+  dartedBy?: TeamType;
   selected: boolean;
   selectedBy?: string;  // user who clicked
 }
 
 // The players that make up a team
 export interface Team {
-  color: TeamTypes;
+  color: TeamType;
   userIds: string[];
   spymaster?: string;
 }
@@ -63,7 +64,7 @@ export interface Clue {
   maxGuesses: number;
   guessesMade: Tile[];
   createdAt: number;
-  team: TeamTypes;
+  team: TeamType;
 
   // assigned by client
   id?: string;
@@ -205,7 +206,7 @@ export interface Message {
 
   // for messages created by users
   userId?: string;
-  team?: TeamTypes;
+  team?: TeamType;
 }
 
 export interface UserToUserStats {

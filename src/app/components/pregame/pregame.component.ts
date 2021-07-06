@@ -6,7 +6,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, Room, RoomStatus, Team, TeamTypes, User} from '../../../../types';
+import {Game, Room, RoomStatus, Team, TeamType, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
 
@@ -23,7 +23,7 @@ export class PregameComponent {
   teams: Team[];
   constructedGame: Partial<Game>;
   debounce = 500;
-  
+
   lastSettings: Partial<Room>;
 
   wordLists = [
@@ -87,8 +87,9 @@ export class PregameComponent {
 
   saveTimerSettings() {
     const updates: Partial<Room> = {};
-    const {timer, firstTurnTimer, enforceTimer, guessIncrement} = this.lastSettings ?? this.room ?? {};
-    
+    const {timer, firstTurnTimer, enforceTimer, guessIncrement} =
+        this.lastSettings ?? this.room ?? {};
+
     // only update what's changed
     if (this.room.timer !== timer) {
       updates.timer = this.room.timer;
@@ -102,7 +103,7 @@ export class PregameComponent {
     if (this.room.guessIncrement !== guessIncrement) {
       updates.guessIncrement = this.room.guessIncrement;
     }
-    
+
     this.roomService.updateRoom(this.room.id, updates);
     this.lastSettings = clone(this.room);
   }
@@ -137,12 +138,12 @@ export class PregameComponent {
     await this.gameService.createGame({
       createdAt: Date.now(),
       blueTeam: {
-        color: TeamTypes.BLUE,
+        color: TeamType.BLUE,
         userIds: sortedBlue,
         spymaster: sortedBlue[0],
       },
       redTeam: {
-        color: TeamTypes.RED,
+        color: TeamType.RED,
         userIds: sortedRed,
         spymaster: sortedRed[0],
       },
