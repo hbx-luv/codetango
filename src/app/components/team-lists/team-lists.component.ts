@@ -15,6 +15,7 @@ export class TeamListsComponent {
   @Input() room: Room;
   @Input() game: Game;
   @Input() setSpymaster: boolean;
+  @Input() showScore = false;
 
   constructor(
       private readonly authService: AuthService,
@@ -39,11 +40,6 @@ export class TeamListsComponent {
     return this.game &&
         !this.game.redTeam.userIds.includes(this.authService.currentUserId) &&
         !this.game.blueTeam.userIds.includes(this.authService.currentUserId);
-  }
-
-  get showScore(): boolean {
-    return this.room?.status === RoomStatus.GAME_IN_PROGRESS ||
-        this.room?.status === RoomStatus.GAME_ENDED;
   }
 
   showJoinButton(team: 'redTeam'|'blueTeam') {
