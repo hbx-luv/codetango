@@ -7,6 +7,7 @@
       [color]="throwingDart ? 'danger' : 'medium'"
       (click)="toggleThrowingDart()"
       [disabled]="disableEndTurn"
+      *ngIf="!spymaster"
     >
       {{ throwingDart ? "Cancel" : "Dart 🎯" }}
     </ion-button>
