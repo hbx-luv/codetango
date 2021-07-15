@@ -45,7 +45,7 @@ export interface Tile {
   word?: string;
   image?: string;
   role: TileRole;
-  dartedBy?: TeamType;
+  dartedBy?: TileRole;
   selected: boolean;
   selectedBy?: string;  // user who clicked
 }

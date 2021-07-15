@@ -123,7 +123,7 @@ export class GameBoardComponent implements OnChanges {
     tile.selectedBy = this.authService.currentUserId;
 
     if (this.throwingDart) {
-      tile.dartedBy = this.myTeam;
+      tile.dartedBy = `${this.myTeam}` as TileRole;
     }
 
     const updates: Partial<Game> = {tiles: this.tiles};

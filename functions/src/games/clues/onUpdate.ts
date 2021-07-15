@@ -94,8 +94,9 @@ async function sendGuessMessage(
   if (newGuess) {
     const name = await getUserName(db, newGuess.selectedBy);
     if (name) {
+      const dartOrNot = newGuess.dartedBy ? 'darted' : 'clicked on';
       await sendSpymasterMessage(
-          db, gameId, `${name} clicked on ${newGuess.word}`);
+          db, gameId, `${name} ${dartOrNot} ${newGuess.word}`);
     } else {
       console.log('no record of who clicked this tile?!');
     }
