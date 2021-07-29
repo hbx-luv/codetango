@@ -1,7 +1,7 @@
 import {firestore} from 'firebase-admin';
 import {toPairs} from 'lodash';
 
-import {Game, GameStatus, Stats, Team, UserToUserStats} from '../../../types';
+import {Game, GameStatus, Stats, Team, TileRole, UserToUserStats} from '../../../types';
 
 import {BigBatch} from './big-batch';
 import {getChange} from './elo-math';
@@ -125,6 +125,11 @@ export async function recalcElo(
       'stats.spymasterStreak': data.spymasterStreak,
       'stats.spymasterBestStreak': data.spymasterBestStreak,
       'stats.assassinsAsSpymaster': data.assassinsAsSpymaster,
+      'stats.dartsThrown': data.dartsThrown,
+      'stats.dartsAssassin': data.dartsAssassin,
+      'stats.dartsCivilian': data.dartsCivilian,
+      'stats.dartsMyTeam': data.dartsMyTeam,
+      'stats.dartsOtherTeam': data.dartsOtherTeam,
       'stats.currentStreak': data.currentStreak,
       'stats.bestStreak': data.bestStreak,
       'stats.provisional': data.provisional,
@@ -208,6 +213,11 @@ export async function getEloHistoryForUser(
     spymasterStreak: 0,
     spymasterBestStreak: 0,
     assassinsAsSpymaster: 0,
+    dartsThrown: 0,
+    dartsAssassin: 0,
+    dartsCivilian: 0,
+    dartsMyTeam: 0,
+    dartsOtherTeam: 0,
     currentStreak: 0,
     bestStreak: 0,
     provisional: true,
@@ -289,6 +299,25 @@ function setStats(game: Game, userMap: UserMap, userToUserMap: UserToUserMap) {
   const winnersRating = getTeamElo(winningTeam, userMap);
   const losersRating = getTeamElo(losingTeam, userMap);
   const delta = getChange(winnersRating, losersRating);
+
+  // update darts stats
+  const darts = game.tiles?.filter(tile => !!tile.dartedBy) ?? [];
+  for (const dart of darts) {
+    const {dartedBy, role, selectedBy} = dart;
+    if (selectedBy !== undefined) {
+      const user = userMap[selectedBy];
+      user.dartsThrown++;
+      if (role === TileRole.ASSASSIN) {
+        user.dartsAssassin++;
+      } else if (role === TileRole.CIVILIAN) {
+        user.dartsCivilian++;
+      } else if (role === dartedBy) {
+        user.dartsMyTeam++;
+      } else {
+        user.dartsOtherTeam++;
+      }
+    }
+  }
 
   // set stats for users on the winning team
   for (const winner of winningTeam.userIds) {

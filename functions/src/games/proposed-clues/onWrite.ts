@@ -9,7 +9,7 @@ import {getSpymasterName} from '../clues';
 try {
   admin.initializeApp();
 } catch (e) {
-  console.log(e);
+  // do nothing, this is ok
 }
 
 const db = admin.firestore();

@@ -175,6 +175,11 @@ export interface UserStats {
   assassinsAsSpymaster: number;
   currentStreak: number;
   bestStreak: number;
+  dartsThrown: number;
+  dartsAssassin: number;
+  dartsCivilian: number;
+  dartsMyTeam: number;
+  dartsOtherTeam: number;
   provisional: boolean;
   ally?: string;
   nemesis?: string;

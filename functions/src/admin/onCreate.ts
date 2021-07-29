@@ -6,7 +6,7 @@ import {BigBatch} from '../util/big-batch';
 try {
   admin.initializeApp();
 } catch (e) {
-  console.log(e);
+  // do nothing, this is ok
 }
 const db = admin.firestore() as any;
 

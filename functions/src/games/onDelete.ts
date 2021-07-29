@@ -2,9 +2,9 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
 try {
-  admin.initializeApp()
+  admin.initializeApp();
 } catch (e) {
-  console.log(e)
+  // do nothing, this is ok
 }
 const db = admin.firestore();
 

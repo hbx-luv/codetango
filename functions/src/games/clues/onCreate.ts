@@ -8,7 +8,7 @@ import {sendSpymasterMessage} from '../../util/message';
 try {
   admin.initializeApp();
 } catch (e) {
-  console.log(e);
+  // do nothing, this is ok
 }
 
 const db = admin.firestore();
