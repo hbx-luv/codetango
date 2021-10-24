@@ -2,6 +2,7 @@ import {NgModule} from '@angular/core';
 import {AngularFireModule} from '@angular/fire';
 import {AngularFireAuthModule} from '@angular/fire/auth';
 import {AngularFirestoreModule} from '@angular/fire/firestore';
+import {AngularFireAnalyticsModule, ScreenTrackingService, UserTrackingService} from '@angular/fire/analytics';
 import {BrowserModule} from '@angular/platform-browser';
 import {RouteReuseStrategy} from '@angular/router';
 import {SplashScreen} from '@ionic-native/splash-screen/ngx';
@@ -25,9 +26,12 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireAuthModule,
+    AngularFireAnalyticsModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],
   providers: [
+    ScreenTrackingService,
+    UserTrackingService,
     StatusBar,
     SplashScreen,
     {provide: RouteReuseStrategy, useClass: IonicRouteStrategy},
