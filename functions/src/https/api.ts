@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { Game } from '../../../types';
+import { Game, User } from '../../../types';
 
 
 try {
@@ -28,7 +28,6 @@ app.get('/', async (request, response) => {
 
 app.get('/games', async (request, response) => {
   const {roomId} = request.query;
-  console.log(`roomId: ${roomId}`);
 
   try {
     // incorporate the roomId if provided
@@ -49,3 +48,23 @@ app.get('/games', async (request, response) => {
     });
   }
 });
+
+app.get('/users/:userId', async (request, response) => {
+    const {userId} = request.params;
+  
+    try {
+      const snapshot = await db.collection('users').doc(userId).get();
+      const user = snapshot.data() as User;
+      user.id = snapshot.id;
+
+      // delete some user data
+      user.email = '[redacted]';
+      user.photoURL = '[redacted]';
+
+      response.json(user);
+    } catch (error) {
+      response.status(500).send({
+        error: `could not retrieve games`,
+      });
+    }
+  });
