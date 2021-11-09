@@ -1,7 +1,7 @@
 {
   "name": "codetango",
   "version": "1.0.0",
-  "author": "Matt, Alex, Ryan, Armin, Justin, Bob, Tyler, Brik",
+  "author": "Matt, Alex, Ryan, Armin, Justin, Bob, Tyler, Brik, JJ",
   "homepage": "https://play.hbx.vision/",
   "scripts": {
     "serve": "ionic serve",
@@ -74,5 +74,5 @@
     "inquirer-autocomplete-prompt": "^1.0.1",
     "open": "^7.0.3"
   },
-  "description": "An Ionic project"
+  "description": "The best way to play codenames"
 }
