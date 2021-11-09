@@ -35,6 +35,8 @@ export class PregameComponent {
       warning: 'Note: This version is NSFW. We advise playing with adults only.'
     },
     {url: './assets/pictures.png', id: 'pictures'},
+    {url: './assets/tv-words.png', id: 'tvWords'},
+    {url: './assets/pop-culture-words.png', id: 'popCultureWords'},
   ];
 
   constructor(
