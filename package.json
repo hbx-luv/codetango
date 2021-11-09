@@ -36,7 +36,7 @@
     "@ionic/angular": "^5.0.0",
     "chart.js": "^2.9.3",
     "clang-format": "^1.4.0",
-    "firebase": "^9.3.0",
+    "firebase": "^7.15.5",
     "lodash": "^4.17.20",
     "luxon": "^1.25.0",
     "moment": "^2.27.0",
