@@ -40,7 +40,7 @@ export enum ClueStatus {
 }
 
 export enum UserRole {
-  ADMIN = 'Admin'
+  ADMIN = 'Admin',
 }
 
 // the word/image to display on the board as well as information about
