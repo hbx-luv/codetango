@@ -38,9 +38,8 @@ const routes: Routes = [
                             .then(m => m.GameHistoryPageModule)
   },
   {
-    path: 'totally/doing/homework',
-    loadChildren: () => import('./pages/generals/generals.module')
-                            .then(m => m.GeneralsPageModule)
+    path: 'manage/admin',
+    loadChildren: () => import('./pages/admin/admin.module').then( m => m.AdminPageModule)
   },
 ];
 

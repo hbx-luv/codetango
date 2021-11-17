@@ -39,6 +39,10 @@ export enum ClueStatus {
   DENIED = 'DENIED',
 }
 
+export enum UserRole {
+  ADMIN = 'Admin'
+}
+
 // the word/image to display on the board as well as information about
 // the team/role it's tied to and whether or not it has been selected
 export interface Tile {
@@ -145,6 +149,7 @@ export interface User {
   name: string;
   email: string;
   rooms: string[];  // room ids
+  role?: UserRole;
 
   nickname?: string;
 

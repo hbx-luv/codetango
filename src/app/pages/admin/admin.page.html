@@ -1,0 +1,31 @@
+<ng-container *ngIf="showAdmin; else loading">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Admin</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <div class="padding">
+      <h1>Set up word database</h1>
+      <ion-button (click)="wordListsService.setupDatabase()">Set up</ion-button>
+
+      <h1>Migrate user</h1>
+      <ion-item>
+        <ion-label position="floating">Old User Id</ion-label>
+        <ion-input [(ngModel)]="migrateOldUserId"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">New User Id</ion-label>
+        <ion-input [(ngModel)]="migrateNewUserId"></ion-input>
+      </ion-item>
+      <ion-button (click)="wordListsService.setupDatabase()" [disabled]="migrateDisabled" (click)="migrate()">Migrate</ion-button>
+    </div>
+  </ion-content>
+</ng-container>
+
+<ng-template #loading>
+  <div class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>

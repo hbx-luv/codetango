@@ -1,12 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
 
     // This rule allows anyone on the internet to view, edit, and delete
     // all data in your Firestore database. It is useful for getting
     // started, but it leaves your app open to attackers.
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
     }
 
     match /deletedGames/{document=**} {
@@ -36,6 +43,13 @@ service cloud.firestore {
     }
 
     match /users/{document=**} {
+      function onlyWhitelistedKeys() {
+      	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'rooms', 'nickname', 'photoURL']);
+      }
+      function isOwner() {
+      	return request.auth.uid == resource.id;
+      }
+
       // Allow reading/writing to your own user doc
       allow read: if true;
       allow write: if request.auth.uid == request.resource.id;
