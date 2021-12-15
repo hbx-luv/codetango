@@ -119,6 +119,9 @@ export class GameBoardComponent implements OnChanges {
   }
 
   selectTile(tile: Tile) {
+    if (this.readonly) {
+      return;  // Prevents any type of click trigger (ie, tab and enter)
+    }
     tile.selected = true;
     tile.selectedBy = this.authService.currentUserId;
 
