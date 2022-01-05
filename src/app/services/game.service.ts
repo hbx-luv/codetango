@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
-import {firestore} from 'firebase';
+import {default as firebase} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Game} from 'types';
@@ -22,8 +22,8 @@ export class GameService {
 
   removePlayerFromGame(gameId: string, userIdToRemove: string) {
     return this.afs.collection('games').doc(gameId).update({
-      'redTeam.userIds': firestore.FieldValue.arrayRemove(userIdToRemove),
-      'blueTeam.userIds': firestore.FieldValue.arrayRemove(userIdToRemove),
+      'redTeam.userIds': firebase.firestore.FieldValue.arrayRemove(userIdToRemove),
+      'blueTeam.userIds': firebase.firestore.FieldValue.arrayRemove(userIdToRemove),
     });
   }
 
@@ -31,8 +31,8 @@ export class GameService {
       gameId: string, playerId: string, team: 'redTeam'|'blueTeam') {
     const oppositeTeam = team === 'redTeam' ? 'blueTeam' : 'redTeam';
     return this.afs.collection('games').doc(gameId).update({
-      [`${team}.userIds`]: firestore.FieldValue.arrayUnion(playerId),
-      [`${oppositeTeam}.userIds`]: firestore.FieldValue.arrayRemove(playerId),
+      [`${team}.userIds`]: firebase.firestore.FieldValue.arrayUnion(playerId),
+      [`${oppositeTeam}.userIds`]: firebase.firestore.FieldValue.arrayRemove(playerId),
     });
   }
 

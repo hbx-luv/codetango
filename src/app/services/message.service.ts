@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
-import {firestore} from 'firebase';
+import {default as firebase} from 'firebase';
 import {Observable} from 'rxjs';
 import {Message} from 'types';
 
@@ -20,7 +20,7 @@ export class MessageService {
         .doc(gameId)
         .collection<Message>('spymaster-chat')
         .add({
-          timestamp: firestore.FieldValue.serverTimestamp(),
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           text: message.text,
           ...message,
         });

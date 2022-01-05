@@ -1,11 +1,11 @@
-import {firestore} from 'firebase';
+import {default as firebase} from 'firebase';
 
 // The limit of actions you can do on a single WriteBatch
 export const MAX_BATCH_SIZE = 500;
 
 export class BigBatch {
   private _size = 0;
-  private batches: firestore.WriteBatch[] = [];
+  private batches: firebase.firestore.WriteBatch[] = [];
   private db: any;
 
   constructor(db: any) {
@@ -31,8 +31,8 @@ export class BigBatch {
    * @return This `WriteBatch` instance. Used for chaining method calls.
    */
   set<T>(
-      documentRef: firestore.DocumentReference<T>, data: T,
-      options?: firestore.SetOptions): BigBatch {
+      documentRef: firebase.firestore.DocumentReference<T>, data: T,
+      options: firebase.firestore.SetOptions = {}): BigBatch {
     this.growIfNecessary();
     this._size++;
     this.batch.set(documentRef, data, options);
@@ -50,7 +50,7 @@ export class BigBatch {
    * within the document.
    * @return This `WriteBatch` instance. Used for chaining method calls.
    */
-  update(documentRef: firestore.DocumentReference, data: firestore.UpdateData):
+  update(documentRef: firebase.firestore.DocumentReference, data: firebase.firestore.UpdateData):
       BigBatch {
     this.growIfNecessary();
     this._size++;
@@ -64,7 +64,7 @@ export class BigBatch {
    * @param documentRef A reference to the document to be deleted.
    * @return This `WriteBatch` instance. Used for chaining method calls.
    */
-  delete(documentRef: firestore.DocumentReference): BigBatch {
+  delete(documentRef: firebase.firestore.DocumentReference): BigBatch {
     this.growIfNecessary();
     this._size++;
     this.batch.delete(documentRef);
@@ -90,7 +90,7 @@ export class BigBatch {
    * adding new batches to the list as necessary so we can always safely perform
    * actions on the last batch.
    */
-  private get batch(): firestore.WriteBatch {
+  private get batch(): firebase.firestore.WriteBatch {
     // be super duper safe
     if (this.batches.length === 0) {
       this.growIfNecessary();

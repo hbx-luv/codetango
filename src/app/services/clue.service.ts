@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
-import {firestore} from 'firebase';
+import {default as firebase} from 'firebase';
 import {omit} from 'lodash';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -54,7 +54,7 @@ export class ClueService {
         .doc(gameId)
         .collection(CLUES_COLLECTION)
         .doc(clueId)
-        .update({guessesMade: firestore.FieldValue.arrayUnion(tile)});
+        .update({guessesMade: firebase.firestore.FieldValue.arrayUnion(tile)});
   }
 
   proposeClue(gameId: string, clue: Partial<ProposedClue>):

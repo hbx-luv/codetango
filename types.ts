@@ -1,4 +1,4 @@
-import {firestore} from 'firebase';
+import {default as firebase} from 'firebase';
 
 // the team the user/player is on
 export enum TeamType {
@@ -204,7 +204,7 @@ export enum MessageType {
 
 export interface Message {
   text: string;
-  timestamp: firestore.FieldValue;
+  timestamp: firebase.firestore.FieldValue;
 
   // server messages are styled differently
   fromServer?: boolean;

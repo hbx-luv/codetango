@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
 import {Router} from '@angular/router';
-import {firestore} from 'firebase';
+import {default as firebase} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Room, RoomStatus} from 'types';
@@ -20,7 +20,7 @@ const defaultRoom = {
 
 @Injectable({providedIn: 'root'})
 export class RoomService {
-  private db: firestore.Firestore;
+  private db: firebase.firestore.Firestore;
 
   // the purpose of this map is to allow room generation with a fun name that
   // isn't just the id. when a user navs to a room via the input on the home
@@ -35,7 +35,7 @@ export class RoomService {
       private readonly afs: AngularFirestore,
       private readonly router: Router,
   ) {
-    this.db = firestore();
+    this.db = firebase.firestore();
   }
 
   async createRoom(partial: Partial<Room>): Promise<string> {
