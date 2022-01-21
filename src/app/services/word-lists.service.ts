@@ -737,7 +737,35 @@ export class WordListsService {
         'Wreath',
         'Yule',
         'Yuletide',
-];
+    ];
+
+    private mlk = [
+      'Abolition',
+      'Armstrong',
+      'Africa',
+      'Ali',
+      'Soul',
+      'Blues',
+      'Boycott',
+      'Bus',
+      'Carver',
+      'Civil',
+      'Rights',
+      'War',
+      'Voting',
+      'Emancipation',
+      'Equality',
+      'Freedom',
+      'Truth',
+      'Integration',
+      'Jazz',
+      'Jim',
+      'Crow',
+      'March',
+      'King',
+      'Racism',
+      'Slavery',
+    ];
 
     getWordLists(): Observable<WordList[]> {
         return this.afs.collection<WordList>('wordlists').valueChanges();
@@ -768,6 +796,7 @@ export class WordListsService {
         this.setWordList('popCultureWords', this.popCultureWords);
         this.setWordList('thanksgiving', this.thanksgiving);
         this.setWordList('christmas', this.christmas);
+        this.setWordList('mlk', this.mlk);
     }
 
     private getPicturesWordList(): string[] {
