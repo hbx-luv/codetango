@@ -6,7 +6,9 @@
     white-space: nowrap;
 
     ion-label {
-      overflow: initial;
+      overflow: hidden;
+      max-width: 180px;
+      text-overflow: ellipsis;
     }
 
     &.avatar-only {

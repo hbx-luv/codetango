@@ -6,10 +6,10 @@
     [outline]="shouldOutline"
     (click)="goToUser($event)"
   >
-    <ng-container *ngIf="user$ | async as user; else loading">
+    <ng-container *ngIf="user; else loading">
 
       <!-- hovering on the avatar shows their full name in a tooltip -->
-      <ion-avatar [tooltip]="user.nickname || user.name" content-type="template" *ngIf="!showUserName && navToScorecard; else noTooltip">
+      <ion-avatar [tooltip]="name" content-type="template" *ngIf="!showUserName && navToScorecard; else noTooltip">
         <ion-img [src]="user.photoURL"></ion-img>
       </ion-avatar>
 
@@ -18,7 +18,7 @@
         <ion-avatar><ion-img [src]="user.photoURL"></ion-img></ion-avatar>
       </ng-template>
 
-      <ion-label *ngIf="showUserName">{{user.nickname || user.name}}</ion-label>
+      <ion-label *ngIf="showUserName">{{ name }}</ion-label>
 
     </ng-container>
   </ion-chip>

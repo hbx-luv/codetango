@@ -54,7 +54,7 @@ export class TimerComponent implements OnChanges, OnDestroy {
 
       // TODO: re-implement enforceTimer in a way that ensures the turn is only
       // ended once
-      if (this.seconds <= 0 && this.room.enforceTimer && !completedAt) {
+      if (this.seconds <= 0 && this.room?.enforceTimer && !completedAt) {
         this.gameService.updateGame(this.game.id, {
           status: this.game.status === GameStatus.BLUES_TURN ?
               GameStatus.REDS_TURN :

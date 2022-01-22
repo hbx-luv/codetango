@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {Router} from '@angular/router';
-import {Observable} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 
 import {User} from '../../../../types';
@@ -13,6 +14,8 @@ import {PopoverAction} from '../actions-popover/actions-popover.component';
   styleUrls: ['./user.component.scss'],
 })
 export class UsersComponent implements OnChanges {
+  private destroyed$ = new Subject<void>();
+
   BASE_WIDTH = 75;
 
   @Input() userId: string;
@@ -24,7 +27,7 @@ export class UsersComponent implements OnChanges {
   @Output() remove = new EventEmitter<void>();
   @Output() setSpymaster = new EventEmitter<void>();
 
-  user$: Observable<User>;
+  user: User;
   style: {width: string};
 
   actions: PopoverAction[] = [
@@ -52,7 +55,11 @@ export class UsersComponent implements OnChanges {
 
   ngOnChanges() {
     if (this.userId) {
-      this.user$ = this.userService.getUser(this.userId);
+      this.userService.getUser(this.userId)
+        .pipe(takeUntil(this.destroyed$))
+        .subscribe(user => {
+          this.user = user;
+        });
     }
   }
 
@@ -86,5 +93,13 @@ export class UsersComponent implements OnChanges {
 
   get you(): boolean {
     return this.authService.currentUserId === this.userId;
+  }
+
+  get name(): string {
+    return this.user?.nickname ?? this.user?.name ?? '';
+  }
+
+  ngOnDestroy() {
+    this.destroyed$.next();
   }
 }
