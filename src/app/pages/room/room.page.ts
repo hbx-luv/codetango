@@ -59,6 +59,7 @@ export class RoomPage implements OnDestroy {
         .pipe(takeUntil(this.destroyed))
         .subscribe(currentGame => {
           this.game = currentGame;
+          this.determineResetRoom();
           this.setActions();
 
           if (currentGame) {
@@ -172,6 +173,16 @@ export class RoomPage implements OnDestroy {
         get(this.game, 'blueTeam.spymaster') === currentUserId;
   }
 
+  determineResetRoom() {
+    const inGameStatuses = [RoomStatus.GAME_IN_PROGRESS, RoomStatus.GAME_ENDED];
+    const inGame = inGameStatuses.includes(this.room?.status);
+
+    // if there is no current game, reset to pregame
+    if (inGame && this.game === null) {
+      this.roomService.updateRoom(this.roomId, {status: RoomStatus.PREGAME});
+    }
+  }
+
   setActions() {
     const actions = [];
 
@@ -212,6 +223,7 @@ export class RoomPage implements OnDestroy {
         .pipe(takeUntil(this.destroyed))
         .subscribe(async room => {
           this.room = room;
+          this.determineResetRoom();
           this.setActions();
 
           // if this room doesn't exist, create a new room with the id
@@ -253,6 +265,7 @@ export class RoomPage implements OnDestroy {
 
   async backToLobby() {
     let doIt = true;
+    const thisGameId = this.game.id;
 
     // if game is in progress, double check before proceeding
     if (!this.game.completedAt) {
@@ -262,11 +275,6 @@ export class RoomPage implements OnDestroy {
           'New Teams',
           'Nevermind',
       );
-
-      // delete this incomplete game before proceeding
-      if (doIt) {
-        await this.gameService.deleteGame(this.game.id);
-      }
     }
 
     if (doIt) {
@@ -275,11 +283,15 @@ export class RoomPage implements OnDestroy {
         status: RoomStatus.PREGAME,
       });
       await loader.dismiss();
+
+      // finally delete this incomplete game
+      await this.gameService.deleteGame(thisGameId);
     }
   }
 
   async nextGame() {
     let doIt = true;
+    const thisGameId = this.game.id;
 
     // if game is in progress, double check before proceeding
     if (!this.game.completedAt) {
@@ -289,11 +301,6 @@ export class RoomPage implements OnDestroy {
           'New Game',
           'Nevermind',
       );
-
-      // delete this incomplete game before proceeding
-      if (doIt) {
-        await this.gameService.deleteGame(this.game.id);
-      }
     }
 
     if (doIt) {
@@ -308,7 +315,7 @@ export class RoomPage implements OnDestroy {
       // if any team is now too small, redirect back to the pregame lobby
       if (redTeam.userIds.length < 2 || blueTeam.userIds.length < 2) {
         loader.dismiss();
-        this.roomService.updateRoom(this.room.id, {status: RoomStatus.PREGAME});
+        await this.roomService.updateRoom(this.room.id, {status: RoomStatus.PREGAME});
         this.utilService.showToast(
             'Too many users left the room to start a new game with the same teams',
             10000);
@@ -325,6 +332,9 @@ export class RoomPage implements OnDestroy {
       await this.roomService.updateRoom(
           roomId, {status: RoomStatus.ASSIGNING_ROLES});
       await loader.dismiss();
+
+      // finally delete this incomplete game
+      await this.gameService.deleteGame(thisGameId);
     }
   }
 
