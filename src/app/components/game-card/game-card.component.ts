@@ -63,9 +63,27 @@ export class GameCardComponent implements OnInit {
     let date = '';
     let time = '';
 
+    const days = moment().diff(this.completedMoment, 'days');
+
     if (this.completedMoment) {
-      date = this.completedMoment.format('dddd, MMM D');
       time = this.completedMoment.format('h:mma');
+
+      // relative times
+      if (days === 0) {
+        date = 'Today';
+        time = this.completedMoment.fromNow();
+      } else if (days === 1) {
+        date = 'Yesterday';
+      } else if (days > 1 && days < 7) {
+        date = this.completedMoment.format('dddd');
+      } else {
+        date = this.completedMoment.format('dddd, MMM D');
+      }
+
+      // dates a year in the past should include year to be more clear
+      if (days >= 365) {
+        date += ` ${this.completedMoment.format('YYYY')}`;
+      }
     }
 
     return {date, time};

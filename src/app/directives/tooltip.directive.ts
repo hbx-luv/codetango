@@ -4,9 +4,9 @@ import { Directive, Input, ElementRef, HostListener, Renderer2 } from '@angular/
   selector: '[tooltip]'
 })
 export class TooltipDirective {
-  @Input('tooltip') tooltip: string;
+  @Input() tooltip: string;
   @Input() placement: string = 'bottom';
-  @Input() delay: number = 10;
+  @Input() delay: number = 0;
   
   tooltipElement: HTMLElement;
   offset = 10;
