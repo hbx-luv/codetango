@@ -1,5 +1,6 @@
 import {firestore} from 'firebase-admin';
 import {toPairs} from 'lodash';
+import {default as firebase} from 'firebase';
 
 import {Game, GameStatus, Stats, Team, UserToUserStats} from '../../../types';
 
