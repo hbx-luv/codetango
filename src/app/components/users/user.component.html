@@ -9,7 +9,7 @@
     <ng-container *ngIf="user$ | async as user; else loading">
 
       <!-- hovering on the avatar shows their full name in a tooltip -->
-      <ion-avatar [tooltip]="userTemplate" content-type="template" *ngIf="!showUserName && navToScorecard; else noTooltip">
+      <ion-avatar [tooltip]="user.nickname || user.name" content-type="template" *ngIf="!showUserName && navToScorecard; else noTooltip">
         <ion-img [src]="user.photoURL"></ion-img>
       </ion-avatar>
 
@@ -37,8 +37,4 @@
     color="medium"
     name="lines-small">
   </ion-spinner>
-</ng-template>
-
-<ng-template #userTemplate>
-  <app-user [userId]="userId" [color]="color"></app-user>
 </ng-template>
