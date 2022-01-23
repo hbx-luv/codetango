@@ -1,11 +1,13 @@
 import {Component, OnDestroy} from '@angular/core';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {AuthService} from 'src/app/services/auth.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
 import {environment} from 'src/environments/environment';
 import {User, WordList} from 'types';
+
+const LOCALSTORAGE_ROOMS = 'CODETANGO_LOCALSTORAGE_ROOMS';
+const LOCALSTORAGE_USER_ID = 'CODETANGO_LOCALSTORAGE_USER_ID';
 
 @Component({
   selector: 'app-home',
@@ -20,10 +22,12 @@ export class HomePage implements OnDestroy {
   lists: Observable<WordList[]>;
   selectedWordList: WordList;
   userHasTyped = false;
-  roomIds: string[] = [];
+  
+  // load these from cache initially
+  roomIds: string[] = this.getLocalStorage(LOCALSTORAGE_ROOMS, []);
+  userId: string = this.getLocalStorage(LOCALSTORAGE_USER_ID, undefined);
 
   constructor(
-      public readonly authService: AuthService,
       public readonly roomService: RoomService,
       private readonly userService: UserService,
   ) {}
@@ -36,7 +40,13 @@ export class HomePage implements OnDestroy {
     this.userService.userChanged$.pipe(takeUntil(this.destroyed$))
         .subscribe(user => {
           if (user) {
+            this.userId = user.id;
+            this.setLocalStorage(LOCALSTORAGE_USER_ID, this.userId);
+
             this.setRoomIds(user);
+          } else {
+            delete this.userId;
+            delete this.roomIds;
           }
         });
   }
@@ -58,6 +68,9 @@ export class HomePage implements OnDestroy {
     if (!this.userHasTyped) {
       this.roomName = rooms[0];
     }
+
+    // cache
+    this.setLocalStorage(LOCALSTORAGE_ROOMS, this.roomIds);
   }
 
   selectWordList(list: WordList) {
@@ -75,6 +88,15 @@ export class HomePage implements OnDestroy {
 
   fullscreen() {
     location.href = 'https://youtube.com/redirect?q=https://play.hbx.vision';
+  }
+
+  getLocalStorage(key: string, defaultValue: any) {
+    const value = JSON.parse(localStorage.getItem(key));
+    return value ?? defaultValue;
+  }
+
+  setLocalStorage(key: string, value: any) {
+    localStorage.setItem(key, JSON.stringify(value));
   }
 
   ngOnDestroy() {

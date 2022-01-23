@@ -25,8 +25,8 @@
     </div>
   </div>
 
-  <ion-fab vertical="top" horizontal="end" slot="fixed" *ngIf="authService.authenticated">
-    <ion-fab-button color="medium" [routerLink]="['/', 'scorecard', authService.currentUserId]">
+  <ion-fab vertical="top" horizontal="end" slot="fixed" *ngIf="userId">
+    <ion-fab-button color="medium" [routerLink]="['/', 'scorecard', userId]">
       <ion-icon name="person"></ion-icon>
     </ion-fab-button>
   </ion-fab>
