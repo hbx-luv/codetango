@@ -134,6 +134,7 @@ export interface Game {
 
   // client fields
   id?: string;
+  exists?: boolean;
 }
 
 // /games/{id}/turns

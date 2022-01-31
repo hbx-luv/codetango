@@ -14,11 +14,7 @@
     "deploy:prod": "npm run update && npm run build:prod && firebase deploy -P prod",
     "deploy-functions:prod": "npm run update && firebase deploy --only functions -P prod",
     "deploy-hosting:prod": "npm run update && npm run build:prod && firebase deploy --only hosting -P prod",
-    "ng": "ng",
-    "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "indexes": "firebase firestore:indexes > firestore.indexes.json -P prod"
   },
   "private": true,
   "dependencies": {

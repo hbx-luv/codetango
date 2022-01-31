@@ -14,7 +14,7 @@ import {Game} from '../../../types';
 
 export const onDeleteGame =
     functions.firestore.document('games/{gameId}').onDelete(gameDoc => {
-      const game = {id: gameDoc.id, ...gameDoc.data()} as Game
+      const game = {...gameDoc.data(), id: gameDoc.id} as Game
       return handleGameDeleted(game);
     });
 

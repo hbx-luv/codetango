@@ -4,6 +4,7 @@ import {first} from 'rxjs/operators';
 import {GameService} from 'src/app/services/game.service';
 import {Game} from 'types';
 
+const PATTERN = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 const LIMIT = 10;
 
 @Component({
@@ -15,6 +16,10 @@ export class GameHistoryPage {
   games: Game[];
   roomId: string;
   infiniteScrollDisabled = true;
+  
+  showDeleted = false;
+  current = 0;
+  bound;
 
   constructor(
       private readonly gameService: GameService,
@@ -22,6 +27,15 @@ export class GameHistoryPage {
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
     this.reset();
+  }
+
+  ionViewDidEnter() {
+    this.bound =  this.keyHandler.bind(this);
+    document.addEventListener('keydown', this.bound);
+  }
+  
+  ionViewDidLeave() {
+    document.removeEventListener('keydown', this.bound);
   }
 
   async reset() {
@@ -43,8 +57,9 @@ export class GameHistoryPage {
     }
 
     // fetch LIMIT more games
+    const collection = this.showDeleted ? 'deletedGames' : 'games';
     const moreGames =
-        await this.gameService.getCompletedGames(this.roomId, LIMIT, startAfter)
+        await this.gameService.getCompletedGames(this.roomId, LIMIT, startAfter, collection)
             .pipe(first())
             .toPromise();
 
@@ -73,6 +88,25 @@ export class GameHistoryPage {
     } else {
       // otherwise, re-enable infinite scroll
       this.infiniteScrollDisabled = false;
+    }
+  }
+
+  private keyHandler (event) {
+    // If the key isn't the current key in the pattern, reset
+    if (event.key !== PATTERN[this.current]) {
+      console.log(`${event.key} !== ${PATTERN[this.current]}`)
+      this.current = 0;
+      return;
+    }
+
+    // Update how much of the pattern is complete
+    this.current++;
+
+    // If complete, reset
+    if (PATTERN.length === this.current) {
+      this.current = 0;
+      this.showDeleted = !this.showDeleted;
+      this.reset();
     }
   }
 }

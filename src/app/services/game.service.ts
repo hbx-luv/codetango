@@ -48,7 +48,7 @@ export class GameService {
         .doc<Game>(gameId)
         .snapshotChanges()
         .pipe(map(game => {
-          return {id: game.payload.id, ...game.payload.data()};
+          return {id: game.payload.id, exists: game.payload.exists, ...game.payload.data()};
         }));
   }
 
@@ -72,11 +72,11 @@ export class GameService {
         }));
   }
 
-  getCompletedGames(roomId?: string, limit?: number, startAfter?: number):
+  getCompletedGames(roomId?: string, limit?: number, startAfter?: number, collection = 'games'):
       Observable<Game[]> {
     return this.afs
         .collection<Game>(
-            'games',
+            collection,
             ref => {
               let query = ref.orderBy('completedAt', 'desc');
 

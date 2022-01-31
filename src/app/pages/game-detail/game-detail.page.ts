@@ -6,6 +6,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Game} from 'types';
+import {default as firebase} from 'firebase';
 
 @Component({
   selector: 'app-game-detail',
@@ -36,7 +37,7 @@ export class GameDetailPage implements OnDestroy {
   }
 
   get canDelete(): boolean {
-    return this.game && this.authService.authenticated &&
+    return this.game?.exists && this.authService.authenticated &&
         (this.game.blueTeam.userIds.includes(this.authService.currentUserId) ||
          this.game.redTeam.userIds.includes(this.authService.currentUserId));
   }
@@ -53,6 +54,23 @@ export class GameDetailPage implements OnDestroy {
       await this.gameService.deleteGame(this.gameId);
       this.router.navigate([this.roomId, 'games']);
       await loader.dismiss();
+    }
+  }
+
+  async restoreGame() {
+    const db = firebase.firestore();
+    const snap = await db.collection('deletedGames').where('id', '==', this.game.id).get();
+    if (snap.docs.length > 0) {
+      const data = snap.docs[0].data();
+      delete data.id;
+      const ref = await db.collection('games').add(data);
+      snap.docs[0].ref.delete();
+      this.router.navigate([`../${ref.id}`], {
+        relativeTo: this.route,
+        replaceUrl: true,
+      });
+    } else {
+      this.utilService.showToast(`No deleted games with id: ${this.game.id}`);
     }
   }
 

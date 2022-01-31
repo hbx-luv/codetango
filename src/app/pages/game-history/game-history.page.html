@@ -7,7 +7,7 @@
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Game History</ion-title>
+    <ion-title>{{ showDeleted ? 'SHOWING DELETED GAMES' : 'Game History' }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="reset()">
         <ion-icon name="refresh" slot="icon-only"></ion-icon>

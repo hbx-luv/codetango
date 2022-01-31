@@ -16,6 +16,7 @@
 <ion-content>
   <ng-container *ngIf="game; else loading">
     <app-game
+      *ngIf="game.exists; else deleted"
       [game]="game">
     </app-game>
   </ng-container>
@@ -24,5 +25,12 @@
 <ng-template #loading>
   <div class="spinner-container">
     <ion-spinner></ion-spinner>
+  </div>
+</ng-template>
+
+<ng-template #deleted>
+  <div class="spinner-container">
+    <h3>This game was deleted</h3>
+    <ion-button (click)="restoreGame()">Restore Game</ion-button>
   </div>
 </ng-template>
