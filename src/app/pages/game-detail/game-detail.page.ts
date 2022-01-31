@@ -63,12 +63,8 @@ export class GameDetailPage implements OnDestroy {
     if (snap.docs.length > 0) {
       const data = snap.docs[0].data();
       delete data.id;
-      const ref = await db.collection('games').add(data);
+      await db.collection('games').doc(this.game.id).set(data);
       snap.docs[0].ref.delete();
-      this.router.navigate([`../${ref.id}`], {
-        relativeTo: this.route,
-        replaceUrl: true,
-      });
     } else {
       this.utilService.showToast(`No deleted games with id: ${this.game.id}`);
     }
