@@ -285,7 +285,9 @@ export class RoomPage implements OnDestroy {
       await loader.dismiss();
 
       // finally delete this incomplete game
-      await this.gameService.deleteGame(thisGameId);
+      if (!this.game.completedAt) {
+        await this.gameService.deleteGame(thisGameId);
+      }
     }
   }
 
@@ -334,7 +336,9 @@ export class RoomPage implements OnDestroy {
       await loader.dismiss();
 
       // finally delete this incomplete game
-      await this.gameService.deleteGame(thisGameId);
+      if (!this.game.completedAt) {
+        await this.gameService.deleteGame(thisGameId);
+      }
     }
   }
 
