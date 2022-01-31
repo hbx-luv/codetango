@@ -293,10 +293,10 @@ export class RoomPage implements OnDestroy {
 
   async nextGame() {
     let doIt = true;
-    const thisGameId = this.game.id;
+    const {id: thisGameId, completedAt} = this.game;
 
     // if game is in progress, double check before proceeding
-    if (!this.game.completedAt) {
+    if (!completedAt) {
       doIt = await this.utilService.confirm(
           'Are you sure you want to start a new game?',
           'This game will be abandoned, but the teams will remain the same.',
@@ -336,7 +336,7 @@ export class RoomPage implements OnDestroy {
       await loader.dismiss();
 
       // finally delete this incomplete game
-      if (!this.game.completedAt) {
+      if (!completedAt) {
         await this.gameService.deleteGame(thisGameId);
       }
     }
