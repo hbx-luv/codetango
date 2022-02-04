@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import * as moment from 'moment';
 import {Game, GameStatus} from 'types';
+import {cloneDeep} from 'lodash';
 
 @Component({
   selector: 'app-game-card',
@@ -63,7 +64,8 @@ export class GameCardComponent implements OnInit {
     let date = '';
     let time = '';
 
-    const days = moment().diff(this.completedMoment, 'days');
+    const clone = cloneDeep(this.completedMoment).startOf('day')
+    const days = moment().startOf('day').diff(clone, 'days');
 
     if (this.completedMoment) {
       time = this.completedMoment.format('h:mma');
