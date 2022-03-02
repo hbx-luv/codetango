@@ -168,15 +168,15 @@ export class GiveClueComponent implements OnInit, OnDestroy {
    * words within the clue return the overlapping parts
    */
   getOverlap(tiles: Tile[], clue: string): string[] {
+    const MIN_LENGTH = 3;
     for (const tile of tiles) {
-      for (const subword of tile.word.split(' ')) {
-        for (const subclue of clue.split(' ')) {
-          // only check subparts of the clue that are 3 characters or more
-          // for example "WELCOME TO THE JUNGLE" should not match "PISTOL" just
-          // because "PISTOL" includes "TO" (that clue is still debatable)
+      // only check subparts of the clue that are 3 characters or more
+      // for example "WELCOME TO THE JUNGLE" should not match "PISTOL" just
+      // because "PISTOL" includes "TO" (that clue is still debatable)
+      for (const subword of tile.word.split(' ').filter(s => s.length >= MIN_LENGTH)) {
+        for (const subclue of clue.split(' ').filter(s => s.length >= MIN_LENGTH)) {
           // ignore the hardcoded list of small words too
-          if (subclue.length > 2 && !SMALL_WORDS.includes(subclue) &&
-              this.lowerCaseIncludes(subword, subclue)) {
+          if (!SMALL_WORDS.includes(subclue) && this.lowerCaseIncludes(subword, subclue)) {
             return [subclue, tile.word];
           }
         }
