@@ -10,10 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install @angular/cli
-        run: npm i -D -E @angular/cli
+        run: npm i -D -E @angular/cli --force
       - name: Use coturiv/setup-ionic
         uses: coturiv/setup-ionic@master
         with:
           cordova-version: 8
-      - run: npm ci
+      - run: npm ci --force
       - run: npm run build:prod
