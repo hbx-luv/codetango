@@ -96,7 +96,7 @@ export class UsersComponent implements OnChanges {
   }
 
   get name(): string {
-    return this.user?.nickname ?? this.user?.name ?? '';
+    return this.user?.nickname || this.user?.name || '';
   }
 
   ngOnDestroy() {
