@@ -9,6 +9,7 @@ import {Clue, TeamType} from 'types';
 export class ClueComponent {
   @Input() clue: Clue;
   @Input() showTooltip: boolean;
+  @Input() isEmojis: boolean;
 
   constructor() {}
 
@@ -28,5 +29,11 @@ export class ClueComponent {
       default:
         return '';
     }
+  }
+
+  // Receive the code (ie: 1f45d)
+  // And create a picture tooltip
+  emojiTooltip(emojiWord: string): string {
+    return `https://twitter.github.io/twemoji/2/72x72/${emojiWord}.png`;
   }
 }

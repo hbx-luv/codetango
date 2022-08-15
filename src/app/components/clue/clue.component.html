@@ -3,7 +3,8 @@
   <span class="guess-count">{{clue.guessCount}}</span>
   <span class="guesses" slot="end">
     <div class="guess-indicator {{tile.role}}" *ngFor="let tile of clue.guessesMade">
-      <div class="tooltip" [tooltip]="tile.word" *ngIf="showTooltip"></div>
+      <div class="tooltip" [tooltip]="tile.word" *ngIf="showTooltip && !isEmojis"></div>
+      <div class="tooltip" [tooltip]="emojiTooltip(tile.word)" *ngIf="showTooltip && isEmojis"></div>
       <img class="dart" src="../../../assets/{{ tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="tile.dartedBy">
     </div>
   </span>

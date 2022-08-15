@@ -7,7 +7,7 @@ export class TooltipDirective {
   @Input() tooltip: string;
   @Input() placement: string = 'bottom';
   @Input() delay: number = 0;
-  
+
   tooltipElement: HTMLElement;
   offset = 10;
 
@@ -38,16 +38,13 @@ export class TooltipDirective {
   }
 
   create() {
-    this.tooltipElement = this.renderer.createElement('span');
-
-    this.renderer.appendChild(
-      this.tooltipElement,
-      this.renderer.createText(this.tooltip) // textNode
-    );
-
-    this.renderer.appendChild(document.body, this.tooltipElement);
-    // this.renderer.appendChild(this.el.nativeElement, this.tooltip);
-
+    if (this.tooltip && this.tooltip.startsWith('http')) {
+      this.createImg();
+    } else {
+      this.createText();
+    }
+  }
+  createClassAndDelay() {
     this.renderer.addClass(this.tooltipElement, 'ng-tooltip');
     this.renderer.addClass(this.tooltipElement, `ng-tooltip-${this.placement}`);
 
@@ -58,12 +55,37 @@ export class TooltipDirective {
     this.renderer.setStyle(this.tooltipElement, 'transition', `opacity ${this.delay}ms`);
   }
 
+  createText() {
+    this.tooltipElement = this.renderer.createElement('span');
+
+    this.renderer.appendChild(
+      this.tooltipElement,
+      this.renderer.createText(this.tooltip) // textNode
+    );
+
+    this.renderer.appendChild(document.body, this.tooltipElement);
+    // this.renderer.appendChild(this.el.nativeElement, this.tooltip);
+
+    this.createClassAndDelay();
+  }
+
+  createImg() {
+    this.tooltipElement = this.renderer.createElement('ion-img');
+
+    this.renderer.setAttribute(this.tooltipElement, 'src', this.tooltip);
+
+    this.renderer.appendChild(document.body, this.tooltipElement);
+
+    this.createClassAndDelay();
+  }
+
   setPosition() {
     const hostPos = this.el.nativeElement.getBoundingClientRect();
     const tooltipPos = this.tooltipElement.getBoundingClientRect();
     const scrollPos = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
-    let top, left;
+    let top;
+    let left;
 
     if (this.placement === 'top') {
       top = hostPos.top - tooltipPos.height - this.offset;
@@ -155,7 +177,7 @@ export class TooltipDirective {
         opacity: 1;
       }
     `;
-    
+
     document.head.appendChild(style);
   }
 }
