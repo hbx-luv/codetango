@@ -7,6 +7,7 @@ export class TooltipDirective {
   @Input() tooltip: string;
   @Input() placement: string = 'bottom';
   @Input() delay: number = 0;
+  @Input() width?: number;
 
   tooltipElement: HTMLElement;
   offset = 10;
@@ -86,20 +87,21 @@ export class TooltipDirective {
 
     let top;
     let left;
+    const tooltipWidth = this.width || tooltipPos.width;
 
     if (this.placement === 'top') {
       top = hostPos.top - tooltipPos.height - this.offset;
-      left = hostPos.left + (hostPos.width - tooltipPos.width) / 2;
+      left = hostPos.left + (hostPos.width - tooltipWidth) / 2;
     }
 
     if (this.placement === 'bottom') {
       top = hostPos.bottom + this.offset;
-      left = hostPos.left + (hostPos.width - tooltipPos.width) / 2;
+      left = hostPos.left + (hostPos.width - tooltipWidth) / 2;
     }
 
     if (this.placement === 'left') {
       top = hostPos.top + (hostPos.height - tooltipPos.height) / 2;
-      left = hostPos.left - tooltipPos.width - this.offset;
+      left = hostPos.left - tooltipWidth - this.offset;
     }
 
     if (this.placement === 'right') {
