@@ -69,5 +69,8 @@
     "tslint": "~6.1.0",
     "typescript": "~3.8.3"
   },
-  "description": "The best way to play codenames"
+  "description": "The best way to play codenames",
+  "config": {
+    "ionic_webpack": "./webpack.config.js"
+  }
 }
