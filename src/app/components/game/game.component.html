@@ -59,3 +59,8 @@
 
 <!-- spymaster chat -->
 <app-chat-box [class]="selectedTab" [game]="game" *ngIf="spymaster || game.completedAt"></app-chat-box>
+
+<!-- custom dart cursor -->
+<div id="dart-cursor" [class.shown]="throwingDart">
+  <img src="../../../assets/{{dartColor}}-dart.png">
+</div>

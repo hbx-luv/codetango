@@ -24,6 +24,10 @@ export class GameComponent {
       private readonly utilService: UtilService,
   ) {}
 
+  ngOnInit() {
+    document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+  }
+
   // Do not allow a player to click when:
   // 1) There is no game
   // 2) The game is over
@@ -70,6 +74,10 @@ export class GameComponent {
         get(this.game, 'blueTeam.spymaster') === currentUserId;
   }
 
+  get dartColor(): string {
+    return this.game?.status === GameStatus.REDS_TURN ? 'red' : 'blue';
+  }
+
   async endCurrentTeamsTurn() {
     // If no guesses have been made, double check that they really want to end
     // the turn. Codenames rules don't allow ending a turn without making any
@@ -104,5 +112,15 @@ export class GameComponent {
 
   toggleThrowingDart(setValue?: boolean) {
     this.throwingDart = setValue ?? !this.throwingDart;
+  }
+
+  handleMouseMove(e: MouseEvent) {
+    const dart = document.getElementById('dart-cursor');
+    dart.style.top = `${e.clientY - 80}px`;
+    dart.style.left = `${e.clientX}px`;
+  }
+
+  ngOnDestroy() {
+    document.removeEventListener('mousemove', this.handleMouseMove.bind(this));
   }
 }
