@@ -129,6 +129,8 @@ export interface Game {
   hasPictures?: boolean;
   hasEmojis?: boolean;
 
+  gameType?: GameType;
+
   // set by the server for querying
   userIds?: string[];
 
@@ -225,4 +227,15 @@ export interface UserToUserStats {
   totalAgainst: number;
   wonWith: number;
   wonAgainst: number;
+}
+
+export enum GameType {
+  WORDS = 'WORDS',
+  PICTURES = 'PICTURES',
+  EMOJIS = 'EMOJIS',
+  MEMES = 'MEMES',
+  CARTOONS = 'CARTOONS',
+
+  // first version of emojis RIP
+  LEGACY_EMOJIS = 'LEGACY_EMOJIS'
 }

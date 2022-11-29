@@ -29,14 +29,21 @@ export class PregameComponent {
   wordLists = [
     {url: './assets/original.png', id: 'default'},
     {url: './assets/emojis.png', id: 'emojis'},
+    {url: './assets/memes.png', id: 'memes'},
+    {url: './assets/pictures.png', id: 'pictures'},
+    {url: './assets/tv-words.png', id: 'tvWords'},
+    {url: './assets/winter.png', id: 'winter'},
+  ];
+
+  hiddenWordLists = [
     {
       url: './assets/deep-undercover.png',
       id: 'deepUndercover',
       warning: 'Note: This version is NSFW. We advise playing with adults only.'
     },
-    {url: './assets/pictures.png', id: 'pictures'},
-    {url: './assets/tv-words.png', id: 'tvWords'},
     {url: './assets/pop-culture-words.png', id: 'popCultureWords'},
+    {url: './assets/halloween.png', id: 'halloween'},
+    {url: './assets/thanksgiving.png', id: 'thanksgiving'},
   ];
 
   constructor(

@@ -13,6 +13,9 @@
       >
         <ng-container [ngSwitch]="type">
           <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
+          <span *ngSwitchCase="GameType.MEMES">
+            <ion-img src="./assets/memes/{{tile.word}}.jpg"></ion-img>
+          </span>
           <span *ngSwitchCase="GameType.PICTURES">
             <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
           </span>

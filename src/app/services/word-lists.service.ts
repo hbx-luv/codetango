@@ -893,7 +893,32 @@ export class WordListsService {
       'treats',
       'trick or treat',
       'tricks',
-      'trunk or treat',
+    ];
+
+    private memes = [
+        'bad luck brian',
+        'bernie sanders mittens',
+        'calculating',
+        'captain picard facepalm',
+        'captain picard open hand',
+        'creepy condescending wonka',
+        'crying jordan',
+        'disaster girl',
+        'distracted boyfriend',
+        'doge',
+        'first world problems',
+        'for the better right',
+        'hide the pain harold',
+        'is this a pigeon',
+        'laughing leo',
+        'leonardo dicaprio cheers',
+        'one does not simply',
+        'real housewives crying',
+        'roll safe think about it',
+        'satisfied seal',
+        'spiderman pointing at spiderman',
+        'this is fine',
+        'woody buzz pointing',
     ];
 
     getWordLists(): Observable<WordList[]> {
@@ -920,6 +945,7 @@ export class WordListsService {
         this.setWordList('deepUndercover', this.deepUndercover);
         this.setWordList('duetWords', this.duetWords);
         this.setWordList('emojis', this.emojis);
+        this.setWordList('memes', this.memes);
         this.setWordList('pictures', this.getPicturesWordList());
         this.setWordList('tvWords', this.tvWords);
         this.setWordList('popCultureWords', this.popCultureWords);
@@ -927,6 +953,7 @@ export class WordListsService {
         this.setWordList('christmas', this.christmas);
         this.setWordList('mlk', this.mlk);
         this.setWordList('halloween', this.halloween);
+        this.setWordList('winter', this.halloween.concat(this.thanksgiving, this.christmas));
     }
 
     private getPicturesWordList(): string[] {

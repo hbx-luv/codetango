@@ -28,7 +28,7 @@ export const onCreateGame =
           if (!game.tiles) {
             const wordList = await getWordList(game.roomId);
 
-            updates.hasPictures = wordList === 'pictures';
+            updates.hasPictures = (wordList === 'pictures' || wordList === 'memes') ;
             updates.hasEmojis = wordList === 'emojis';
 
             updates.tiles = await generateNewGameTiles(wordList);
@@ -117,7 +117,7 @@ async function getWordList(roomId: string): Promise<string> {
 
 function getRoleCounts(wordList: string) {
   const random = Math.round(Math.random());
-  if (wordList === 'pictures') {
+  if (wordList === 'pictures' || wordList === 'memes') {
     return random ? {red: 7, blue: 8, assassins: 1} :
                     {red: 8, blue: 7, assassins: 1};
   } else {
