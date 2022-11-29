@@ -123,13 +123,12 @@ export interface Game {
   blueAgents: number;  // remaining blue agents
   redAgents: number;   // remaining red agents
   status: GameStatus;
-  roomId: string;
+  gameType: GameType;
 
+  roomId: string;
   // true for games that are using pictures
   hasPictures?: boolean;
   hasEmojis?: boolean;
-
-  gameType?: GameType;
 
   // set by the server for querying
   userIds?: string[];

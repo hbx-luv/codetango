@@ -6,7 +6,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, Room, RoomStatus, Team, TeamType, User} from '../../../../types';
+import {Game, GameType, Room, RoomStatus, Team, TeamType, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
 
@@ -178,6 +178,7 @@ export class PregameComponent {
         'blueTeam.userIds': this.sortSpymasterFirst(this.game.blueTeam),
         'redTeam.userIds': this.sortSpymasterFirst(this.game.redTeam),
         'turnEnds': Date.now() + (timer * 1000),
+        'gameType': GameType.MEMES,
       });
     }
     await loader.dismiss();
