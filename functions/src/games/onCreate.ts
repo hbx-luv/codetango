@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {shuffle} from 'lodash';
 
-import {Game, GameStatus, Room, Tile, TileRole, WordList} from '../../../types';
+import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../../../types';
 
 try {
   admin.initializeApp();
@@ -11,6 +11,38 @@ try {
 }
 
 const db = admin.firestore();
+
+
+// @ts-ignore
+function getGameType(game: Game, wordList: string): GameType {
+    if (game) {
+      if (game?.gameType) {
+        return game.gameType;
+      } else if (game.hasPictures) {
+        if (wordList === 'memes') {
+          return GameType.MEMES;
+        } else if (wordList === 'pictures') {
+          return GameType.PICTURES;
+        }
+      } else if (game.hasEmojis) {
+        // hardcoded legacy timestamp of the last game to play with the initial
+        // (legacy) version of codenames emojis
+        if (game.createdAt < 1604606378903) {
+          return GameType.LEGACY_EMOJIS;
+        } else {
+          return GameType.EMOJIS;
+        }
+      }
+    } // else
+  if (wordList === 'pictures') {
+    return GameType.PICTURES;
+  } else if(wordList === 'memes') {
+    return GameType.MEMES;
+  } else if(wordList === 'emojis') {
+    return GameType.EMOJIS;
+  }
+  return GameType.WORDS;
+}
 
 export const onCreateGame =
     functions.firestore.document('games/{gameId}')
@@ -30,7 +62,7 @@ export const onCreateGame =
 
             updates.hasPictures = (wordList === 'pictures' || wordList === 'memes') ;
             updates.hasEmojis = wordList === 'emojis';
-
+            updates.gameType = getGameType(game, wordList);
             updates.tiles = await generateNewGameTiles(wordList);
             const blueTeamTiles = updates.tiles.filter(
                 tile => tile.role === TileRole.BLUE && !tile.selected);
@@ -82,8 +114,9 @@ async function getWords(wordList: string): Promise<string[]> {
     const newWordsForGame = [] as string[];
     const {words} = snapshot.data() as WordList;
 
-    // in codenames pictures, you only get 20 tiles
-    const count = wordList === 'pictures' ? 20 : 25;
+    const isPictures = (wordList === 'pictures' || wordList === 'memes');
+    // in codenames pictures (and memes), you only get 20 tiles
+    const count = isPictures ? 20 : 25;
 
     while (newWordsForGame.length < count) {
       const randomIndex = Math.floor(Math.random() * words.length);
