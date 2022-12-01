@@ -41,14 +41,14 @@
           --ion-color-contrast: var(--ion-color-danger) !important;
           &.pictures,
           &.emojis {
-            border: 4px solid var(--ion-color-danger);
+            border: 6px solid var(--ion-color-danger);
           }
         }
         &.BLUE {
           --ion-color-contrast: var(--ion-color-primary) !important;
           &.pictures,
           &.emojis {
-            border: 4px solid var(--ion-color-primary);
+            border: 6px solid var(--ion-color-primary);
           }
         }
         &.ASSASSIN {
@@ -56,6 +56,7 @@
         }
       }
 
+      &.memes,
       &.pictures {
         max-height: 130px;
         height: 16vw;
@@ -67,6 +68,29 @@
       .legacy-emojis {
         font-size: 60px;
       }
+    }
+
+    // after a clue is selected, make it more obvious to both operative
+    // and spymaster by (1) grayscaling the clue and (2) reducing opacity
+    // to allow the clue to show more clearly as the card color.
+    ion-button.selected {
+       &.emojis {
+         span {
+           ion-img {
+             filter: grayscale(30%);
+             opacity: 0.6;
+           }
+         }
+       }
+      &.pictures {
+        span {
+          ion-img {
+            filter: grayscale(70%);
+            opacity: 0.4;
+          }
+        }
+      }
+
     }
 
     .dart {
@@ -96,3 +120,4 @@
     }
   }
 }
+

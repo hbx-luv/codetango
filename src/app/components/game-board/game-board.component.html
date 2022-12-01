@@ -7,6 +7,7 @@
         [class.readonly]="readonly"
         [class.pictures]="game.hasPictures"
         [class.emojis]="game.hasEmojis"
+        [class.meme-picture]="game.gameType == GameType.MEMES"
         [color]="getColor(tile)"
         class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
         (click)="selectTile(tile)"

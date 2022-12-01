@@ -50,7 +50,7 @@ export class GameBoardComponent implements OnChanges {
 
   get type(): GameType {
     if (this.game) {
-      if (this.game.gameType) {
+      if (this.game?.gameType) {
         return this.game.gameType;
       } else if (this.game.hasPictures) {
         return GameType.PICTURES;

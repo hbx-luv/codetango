@@ -9,6 +9,7 @@ import {UtilService} from 'src/app/services/util.service';
 import {Game, GameType, Room, RoomStatus, Team, TeamType, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
+import {WordListsService} from '../../services/word-lists.service';
 
 @Component({
   selector: 'app-pregame',
@@ -52,6 +53,7 @@ export class PregameComponent {
       private readonly roomService: RoomService,
       private readonly utilService: UtilService,
       private readonly userService: UserService,
+      private readonly wordListsService: WordListsService,
   ) {}
 
   ngOnChanges() {
@@ -173,12 +175,15 @@ export class PregameComponent {
     });
     const timer = this.room.firstTurnTimer || this.room.timer;
     if (timer) {
+      const gameType = this.wordListsService.getGameType(this.room.wordList);
+      const hasPictures = (gameType === GameType.PICTURES || gameType === GameType.MEMES);
       // set spymaster to the top of the list and set timer
       await this.gameService.updateGame(this.game.id, {
         'blueTeam.userIds': this.sortSpymasterFirst(this.game.blueTeam),
         'redTeam.userIds': this.sortSpymasterFirst(this.game.redTeam),
         'turnEnds': Date.now() + (timer * 1000),
-        'gameType': GameType.MEMES,
+        'gameType': gameType,
+        'hasPictures': hasPictures,
       });
     }
     await loader.dismiss();
