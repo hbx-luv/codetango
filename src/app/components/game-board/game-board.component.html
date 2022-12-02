@@ -7,12 +7,16 @@
         [class.readonly]="readonly"
         [class.pictures]="game.hasPictures"
         [class.emojis]="game.hasEmojis"
+        [class.meme-picture]="game.gameType == GameType.MEMES"
         [color]="getColor(tile)"
         class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
         (click)="selectTile(tile)"
       >
         <ng-container [ngSwitch]="type">
           <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
+          <span *ngSwitchCase="GameType.MEMES">
+            <ion-img src="./assets/memes/{{tile.word}}.jpg"></ion-img>
+          </span>
           <span *ngSwitchCase="GameType.PICTURES">
             <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
           </span>

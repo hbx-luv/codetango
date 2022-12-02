@@ -3,17 +3,7 @@ import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
-
-import {Clue, Game, GameStatus, Room, TeamType, Tile, TileRole} from '../../../../types';
-
-enum GameType {
-  WORDS = 'WORDS',
-  PICTURES = 'PICTURES',
-  EMOJIS = 'EMOJIS',
-
-  // first version of emojis RIP
-  LEGACY_EMOJIS = 'LEGACY_EMOJIS'
-}
+import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
 
 @Component({
   selector: 'app-game-board',
@@ -60,7 +50,9 @@ export class GameBoardComponent implements OnChanges {
 
   get type(): GameType {
     if (this.game) {
-      if (this.game.hasPictures) {
+      if (this.game?.gameType) {
+        return this.game.gameType;
+      } else if (this.game.hasPictures) {
         return GameType.PICTURES;
       } else if (this.game.hasEmojis) {
         // hardcoded legacy timestamp of the last game to play with the initial
