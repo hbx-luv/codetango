@@ -32,7 +32,7 @@
       <img class="dart" src="../../../assets/{{ tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="tile.dartedBy">
     </div>
   </ion-grid>
-  <ion-row class="advice-row">
+  <ion-row class="advice-row" *ngIf="!isObserver">
     <h4>{{advice}}</h4>
   </ion-row>
 </div>
