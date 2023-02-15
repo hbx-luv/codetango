@@ -93,6 +93,10 @@ export class GameBoardComponent implements OnChanges {
     return TeamType.OBSERVER;
   }
 
+  get isObserver(): boolean {
+    return this.myTeam === TeamType.OBSERVER;
+  }
+
   getColor(tile: Tile): string {
     if (!tile.selected) {
       return 'light';
