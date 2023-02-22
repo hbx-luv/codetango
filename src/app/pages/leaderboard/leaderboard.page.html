@@ -17,7 +17,7 @@
     <ion-list *ngIf="users.length > 0; else empty">
       <ion-item *ngFor="let user of users; let index = index" [routerLink]="['/scorecard', user.id]">
         <ion-text class="rank" slot="start">
-          {{ index + 1 }}
+          {{ user.rank }}
         </ion-text>
         <ion-avatar slot="start">
           <img [src]="user.photoURL">

@@ -42,11 +42,23 @@ export class LeaderboardPage implements OnDestroy {
   }
 
   get users(): User[] {
+    // only show the recent players if that option is on and there are recent players
+    let users = this.hasGames ?? [];
     if (this.onlyShowRecent && this.hasRecentPlayers) {
-      return this.playedRecently;
-    } else {
-      return this.hasGames;
+      users = this.playedRecently ?? [];
     }
+
+    // set rank, people with the same elo are the same rank
+    let rank = 0;
+    for (let i = 0; i < users.length; i++) {
+      // compare this player to the previous
+      if (users[i].stats?.elo !== users[i - 1]?.stats?.elo) {
+        rank = i + 1;
+      }
+      users[i].rank = rank;
+    }
+
+    return users;
   }
 
   get recentIcon(): string {

@@ -163,6 +163,7 @@ export interface User {
 
   // set by the client
   id?: string;
+  rank?: number;
 }
 
 // /wordlists
