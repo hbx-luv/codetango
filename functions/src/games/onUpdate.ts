@@ -102,8 +102,10 @@ async function addRoomToUsers(game: Game) {
       blueTeam.userIds.concat(redTeam.userIds).map(async userId => {
         const userRef = db.collection('users').doc(userId);
         const userSnapshot = await userRef.get();
-        const {rooms = []} = userSnapshot.data() as User;
-        return userRef.update({rooms: [roomId].concat(without(rooms, roomId))});
+        if (userSnapshot.exists) {
+          const {rooms = []} = userSnapshot.data() as User;
+          userRef.update({rooms: [roomId].concat(without(rooms, roomId))});
+        }
       }));
 }
 

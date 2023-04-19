@@ -141,7 +141,7 @@ export async function recalcElo(
       updateData['stats.nemesis'] = data.nemesis;
     }
 
-    batch.update(db.collection('users').doc(userId), updateData);
+    batch.set(db.collection('users').doc(userId), updateData, {merge: true});
   }
 
   // wait for the batches to commit in order
