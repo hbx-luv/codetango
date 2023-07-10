@@ -79,6 +79,22 @@ export class UtilService {
   }
 
   /**
+   * Show a confirmation popup, return true if they confirm
+   */
+  alert(header: string, message: string, confirmText: string):
+      Promise<boolean> {
+    return new Promise(async resolve => {
+      const alert = await this.alertCtrl.create({
+        header,
+        message,
+        buttons: [{text: confirmText}],
+      });
+
+      await alert.present();
+    });
+  }
+
+  /**
    * Present a loader with the given message, then return the loader
    * so the caller can dismiss it with loading.dismiss();
    */

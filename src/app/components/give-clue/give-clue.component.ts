@@ -1,8 +1,10 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Observable, ReplaySubject} from 'rxjs';
 import {tap} from 'rxjs/operators';
+import {ChatGptService} from 'src/app/services/chat-gpt.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
+import {originalWordList} from 'src/app/services/word-lists/original-word-list';
 
 import {Game, GameStatus, ProposedClue, TeamType, Tile} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
@@ -34,10 +36,14 @@ export class GiveClueComponent implements OnInit, OnDestroy {
   clue: string;
   clueCount: number;
 
+  canUseChatGPT = false;
+  askingChatGpt = false;
+
   constructor(
       public readonly clueService: ClueService,
       private readonly utilService: UtilService,
       private readonly soundService: SoundService,
+      private readonly chatGptService: ChatGptService,
   ) {}
 
   ngOnInit() {
@@ -59,6 +65,19 @@ export class GiveClueComponent implements OnInit, OnDestroy {
                 this.soundService.play(Sound.PROPOSED_CLUE);
               }
             }));
+
+    this.canUseChatGPT =
+        this.game.tiles.every(tile => originalWordList.includes(tile.word));
+  }
+
+  get currentTeam(): TeamType {
+    return GameStatus.BLUES_TURN === this.game.status ? TeamType.BLUE :
+                                                        TeamType.RED;
+  }
+
+  get myTeam(): TeamType {
+    if (this.isMyTurn) return this.currentTeam;
+    return this.currentTeam === TeamType.BLUE ? TeamType.RED : TeamType.BLUE;
   }
 
   /**
@@ -107,8 +126,7 @@ export class GiveClueComponent implements OnInit, OnDestroy {
         maxGuesses: this.clueCount === 0 ? 999 : this.clueCount + 1,
         guessesMade: [],
         createdAt: Date.now(),
-        team: GameStatus.BLUES_TURN === this.game.status ? TeamType.BLUE :
-                                                           TeamType.RED,
+        team: this.currentTeam,
       };
 
       if (askFirst) {
@@ -173,10 +191,13 @@ export class GiveClueComponent implements OnInit, OnDestroy {
       // only check subparts of the clue that are 3 characters or more
       // for example "WELCOME TO THE JUNGLE" should not match "PISTOL" just
       // because "PISTOL" includes "TO" (that clue is still debatable)
-      for (const subword of tile.word.split(' ').filter(s => s.length >= MIN_LENGTH)) {
-        for (const subclue of clue.split(' ').filter(s => s.length >= MIN_LENGTH)) {
+      for (const subword of tile.word.split(' ').filter(
+               s => s.length >= MIN_LENGTH)) {
+        for (const subclue of clue.split(' ').filter(
+                 s => s.length >= MIN_LENGTH)) {
           // ignore the hardcoded list of small words too
-          if (!SMALL_WORDS.includes(subclue) && this.lowerCaseIncludes(subword, subclue)) {
+          if (!SMALL_WORDS.includes(subclue) &&
+              this.lowerCaseIncludes(subword, subclue)) {
             return [subclue, tile.word];
           }
         }
@@ -184,6 +205,23 @@ export class GiveClueComponent implements OnInit, OnDestroy {
     }
 
     return [];
+  }
+
+  /**
+   * Ask ChatGPT for some help
+   */
+  async askChatGpt() {
+    this.askingChatGpt = true;
+    try {
+      const clue = await this.chatGptService.getClue(this.game.id, this.myTeam);
+      this.clue = clue.hint;
+      this.clueCount = clue.number;
+      this.utilService.alert(
+          `${clue.hint} ${clue.number}`, clue.reason, 'Got it');
+    } catch (e) {
+      console.log(e);
+    }
+    this.askingChatGpt = false;
   }
 
   /**

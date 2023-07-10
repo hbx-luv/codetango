@@ -28,7 +28,7 @@ export class PregameComponent {
   lastSettings: Partial<Room>;
 
   wordLists = [
-    {url: './assets/original.png', id: 'default'},
+    {url: './assets/original.png', id: 'original'},
     {url: './assets/emojis.png', id: 'emojis'},
     {url: './assets/memes.png', id: 'memes'},
     {url: './assets/pictures.png', id: 'pictures'},
@@ -176,7 +176,8 @@ export class PregameComponent {
     const timer = this.room.firstTurnTimer || this.room.timer;
     if (timer) {
       const gameType = this.wordListsService.getGameType(this.room.wordList);
-      const hasPictures = (gameType === GameType.PICTURES || gameType === GameType.MEMES);
+      const hasPictures =
+          (gameType === GameType.PICTURES || gameType === GameType.MEMES);
       // set spymaster to the top of the list and set timer
       await this.gameService.updateGame(this.game.id, {
         'blueTeam.userIds': this.sortSpymasterFirst(this.game.blueTeam),

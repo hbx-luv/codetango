@@ -1,7 +1,8 @@
 import * as express from 'express';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { Game, User } from '../../../types';
+
+import {Game, User} from '../types';
 
 
 try {
@@ -31,15 +32,17 @@ app.get('/games', async (request, response) => {
 
   try {
     // incorporate the roomId if provided
-    const query = roomId ? 
-        db.collection('games').where('roomId', '==', roomId).orderBy('completedAt', 'desc') : 
+    const query = roomId ?
+        db.collection('games')
+            .where('roomId', '==', roomId)
+            .orderBy('completedAt', 'desc') :
         db.collection('games').orderBy('completedAt', 'desc');
 
     const snapshot = await query.get();
     const games = snapshot.docs.map(doc => {
-        const game = doc.data() as Game;
-        game.id = doc.id;
-        return game;
+      const game = doc.data() as Game;
+      game.id = doc.id;
+      return game;
     });
     response.json(games);
   } catch (error) {
@@ -50,21 +53,21 @@ app.get('/games', async (request, response) => {
 });
 
 app.get('/users/:userId', async (request, response) => {
-    const {userId} = request.params;
-  
-    try {
-      const snapshot = await db.collection('users').doc(userId).get();
-      const user = snapshot.data() as User;
-      user.id = snapshot.id;
+  const {userId} = request.params;
 
-      // delete some user data
-      user.email = '[redacted]';
-      user.photoURL = '[redacted]';
+  try {
+    const snapshot = await db.collection('users').doc(userId).get();
+    const user = snapshot.data() as User;
+    user.id = snapshot.id;
 
-      response.json(user);
-    } catch (error) {
-      response.status(500).send({
-        error: `could not retrieve games`,
-      });
-    }
-  });
+    // delete some user data
+    user.email = '[redacted]';
+    user.photoURL = '[redacted]';
+
+    response.json(user);
+  } catch (error) {
+    response.status(500).send({
+      error: `could not retrieve games`,
+    });
+  }
+});

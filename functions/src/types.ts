@@ -238,9 +238,3 @@ export enum GameType {
   // first version of emojis RIP
   LEGACY_EMOJIS = 'LEGACY_EMOJIS',
 }
-
-export interface CodenamesClueResponse {
-  hint: string;
-  number: number;
-  reason: string;
-}

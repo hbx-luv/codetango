@@ -1,8 +1,8 @@
 import * as admin from 'firebase-admin';
+import {DocumentSnapshot} from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
-import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
 
-import {ClueStatus, ProposedClue} from '../../../../types';
+import {ClueStatus, ProposedClue} from '../../types';
 import {sendSpymasterMessage} from '../../util/message';
 import {getSpymasterName} from '../clues';
 

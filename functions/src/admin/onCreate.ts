@@ -11,7 +11,7 @@ try {
 const db = admin.firestore() as any;
 
 import {recalcElo} from '../util/elo';
-import {Game} from '../../../types';
+import {Game} from '../types';
 
 export const onCreateAdmin =
     functions.firestore.document('admin/{action}')

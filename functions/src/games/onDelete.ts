@@ -2,15 +2,15 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
 try {
-  admin.initializeApp()
+  admin.initializeApp();
 } catch (e) {
-  console.log(e)
+  // do nothing
 }
 const db = admin.firestore();
 
 import * as _ from 'lodash';
 import {recalcElo, nukeHistoryForGame} from '../util/elo';
-import {Game} from '../../../types';
+import {Game} from '../types';
 
 export const onDeleteGame =
     functions.firestore.document('games/{gameId}').onDelete(gameDoc => {

@@ -1,4 +1,4 @@
-import {Game, User} from '../../../types';
+import {Game, User} from '../types';
 
 export async function getUserName(
     db: any,  // RIP, tried to import firestore.Firestore

@@ -1,8 +1,8 @@
+import {default as firebase} from 'firebase';
 import {firestore} from 'firebase-admin';
 import {toPairs} from 'lodash';
-import {default as firebase} from 'firebase';
 
-import {Game, GameStatus, Stats, Team, UserToUserStats} from '../../../types';
+import {Game, GameStatus, Stats, Team, UserToUserStats} from '../types';
 
 import {BigBatch} from './big-batch';
 import {getChange} from './elo-math';

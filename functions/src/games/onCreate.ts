@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {shuffle} from 'lodash';
 
-import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../../../types';
+import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
 
 try {
   admin.initializeApp();
@@ -15,30 +15,30 @@ const db = admin.firestore();
 
 // @ts-ignore
 function getGameType(game: Game, wordList: string): GameType {
-    if (game) {
-      if (game?.gameType) {
-        return game.gameType;
-      } else if (game.hasPictures) {
-        if (wordList === 'memes') {
-          return GameType.MEMES;
-        } else if (wordList === 'pictures') {
-          return GameType.PICTURES;
-        }
-      } else if (game.hasEmojis) {
-        // hardcoded legacy timestamp of the last game to play with the initial
-        // (legacy) version of codenames emojis
-        if (game.createdAt < 1604606378903) {
-          return GameType.LEGACY_EMOJIS;
-        } else {
-          return GameType.EMOJIS;
-        }
+  if (game) {
+    if (game?.gameType) {
+      return game.gameType;
+    } else if (game.hasPictures) {
+      if (wordList === 'memes') {
+        return GameType.MEMES;
+      } else if (wordList === 'pictures') {
+        return GameType.PICTURES;
       }
-    } // else
+    } else if (game.hasEmojis) {
+      // hardcoded legacy timestamp of the last game to play with the initial
+      // (legacy) version of codenames emojis
+      if (game.createdAt < 1604606378903) {
+        return GameType.LEGACY_EMOJIS;
+      } else {
+        return GameType.EMOJIS;
+      }
+    }
+  }  // else
   if (wordList === 'pictures') {
     return GameType.PICTURES;
-  } else if(wordList === 'memes') {
+  } else if (wordList === 'memes') {
     return GameType.MEMES;
-  } else if(wordList === 'emojis') {
+  } else if (wordList === 'emojis') {
     return GameType.EMOJIS;
   }
   return GameType.WORDS;
@@ -60,7 +60,8 @@ export const onCreateGame =
           if (!game.tiles) {
             const wordList = await getWordList(game.roomId);
 
-            updates.hasPictures = (wordList === 'pictures' || wordList === 'memes') ;
+            updates.hasPictures =
+                (wordList === 'pictures' || wordList === 'memes');
             updates.hasEmojis = wordList === 'emojis';
             updates.gameType = getGameType(game, wordList);
             updates.tiles = await generateNewGameTiles(wordList);

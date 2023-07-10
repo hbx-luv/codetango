@@ -1,9 +1,9 @@
 import * as admin from 'firebase-admin';
+import {DocumentSnapshot} from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
-import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
 import {map, uniqBy} from 'lodash';
 
-import {Clue, Tile} from '../../../../types';
+import {Clue, Tile} from '../../types';
 import {getGame, getUserName} from '../../util/getters';
 import {sendSpymasterMessage} from '../../util/message';
 

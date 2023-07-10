@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
-import {Clue, Game, TeamType} from '../../../../types';
+import {Clue, Game, TeamType} from '../../types';
 import {getGame, getUserName} from '../../util/getters';
 import {sendSpymasterMessage} from '../../util/message';
 

@@ -26,6 +26,16 @@
 </div>
 
 <ng-template #giveClue>
+  <div
+    *ngIf="canUseChatGPT"
+    class="gpt-icon"
+    (click)="askChatGpt()"
+  >
+    <img
+      [class.rotate]="askingChatGpt"
+      src="../../../assets/gpt.png"
+    >
+  </div>
   <div>
     <input
       class="clue"

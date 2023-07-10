@@ -1,9 +1,9 @@
 import * as admin from 'firebase-admin';
+import {DocumentSnapshot} from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
-import {DocumentSnapshot} from 'firebase-functions/lib/providers/firestore';
 import {without} from 'lodash';
 
-import {Game, GameStatus, TileRole, User} from '../../../types';
+import {Game, GameStatus, TileRole, User} from '../types';
 import {recalcElo} from '../util/elo';
 import {sendSpymasterMessage} from '../util/message';
 
@@ -104,7 +104,8 @@ async function addRoomToUsers(game: Game) {
         const userSnapshot = await userRef.get();
         if (userSnapshot.exists) {
           const {rooms = []} = userSnapshot.data() as User;
-          userRef.update({rooms: [roomId].concat(without(rooms, roomId))});
+          await userRef.update(
+              {rooms: [roomId].concat(without(rooms, roomId))});
         }
       }));
 }
