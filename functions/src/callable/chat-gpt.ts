@@ -71,8 +71,8 @@ async function getClue(gameId: string, team: string) {
 
     await sendSpymasterMessage(
         db, gameId,
-        `ChatGPT genrated a hint of ${data.hint} for ${data.number} to the ${
-            team.toLowerCase()} team`);
+        `ChatGPT generated the hint "${data.hint} ${data.number}" for the ${
+            team.toLowerCase()} spymaster`);
 
     return data;
   } catch (error) {
