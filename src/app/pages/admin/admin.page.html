@@ -19,7 +19,7 @@
         <ion-label position="floating">New User Id</ion-label>
         <ion-input [(ngModel)]="migrateNewUserId"></ion-input>
       </ion-item>
-      <ion-button (click)="wordListsService.setupDatabase()" [disabled]="migrateDisabled" (click)="migrate()">Migrate</ion-button>
+      <ion-button [disabled]="migrateDisabled" (click)="migrate()">Migrate</ion-button>
     </div>
   </ion-content>
 </ng-container>
