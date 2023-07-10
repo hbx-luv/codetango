@@ -211,6 +211,11 @@ export class GiveClueComponent implements OnInit, OnDestroy {
    * Ask ChatGPT for some help
    */
   async askChatGpt() {
+    // no-op if busy
+    if (this.askingChatGpt) return;
+
+    // ask chatgpt for help and show the icon as spinning while it's working
+    // alert the user as to the reasoning for the hint
     this.askingChatGpt = true;
     try {
       const clue = await this.chatGptService.getClue(this.game.id, this.myTeam);

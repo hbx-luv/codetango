@@ -29,12 +29,10 @@
   <div
     *ngIf="canUseChatGPT"
     class="gpt-icon"
+    [class.rotate]="askingChatGpt"
     (click)="askChatGpt()"
   >
-    <img
-      [class.rotate]="askingChatGpt"
-      src="../../../assets/gpt.png"
-    >
+    <img src="../../../assets/gpt.png">
   </div>
   <div>
     <input
