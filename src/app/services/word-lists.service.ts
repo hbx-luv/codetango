@@ -12,6 +12,7 @@ import {memesWordList} from './word-lists/memes-word-list';
 import {mlkWordList} from './word-lists/mlk-word-list';
 import {originalWordList} from './word-lists/original-word-list';
 import {popCultureWordList} from './word-lists/pop-culture-word-list';
+import {technologyWordList} from './word-lists/technology-word-list';
 import {thanksgivingWordList} from './word-lists/thanksgiving-word-list';
 import {tvWordList} from './word-lists/tv-word-list';
 
@@ -62,6 +63,7 @@ export class WordListsService {
     this.setWordList('pictures', this.getPicturesWordList());
     this.setWordList('tvWords', tvWordList);
     this.setWordList('popCultureWordList', popCultureWordList);
+    this.setWordList('technologyWords', technologyWordList);
     this.setWordList('thanksgiving', thanksgivingWordList);
     this.setWordList('christmas', christmasWordList);
     this.setWordList('mlk', mlkWordList);

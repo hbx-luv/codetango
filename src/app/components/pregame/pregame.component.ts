@@ -32,8 +32,8 @@ export class PregameComponent {
     {url: './assets/emojis.png', id: 'emojis'},
     {url: './assets/memes.png', id: 'memes'},
     {url: './assets/pictures.png', id: 'pictures'},
-    {url: './assets/tv-words.png', id: 'tvWords'},
-    {url: './assets/winter.png', id: 'winter'},
+    {url: './assets/technology-words.png', id: 'technologyWords'},
+    {url: './assets/thanksgiving-words.png', id: 'thanksgiving'},
   ];
 
   hiddenWordLists = [
@@ -44,7 +44,8 @@ export class PregameComponent {
     },
     {url: './assets/pop-culture-words.png', id: 'popCultureWords'},
     {url: './assets/halloween.png', id: 'halloween'},
-    {url: './assets/thanksgiving.png', id: 'thanksgiving'},
+    {url: './assets/tv-words.png', id: 'tvWords'},
+    {url: './assets/winter.png', id: 'winter'},
   ];
 
   constructor(
