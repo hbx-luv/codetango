@@ -2,7 +2,7 @@
   "name": "codetango",
   "version": "1.0.0",
   "author": "Matt, Alex, Ryan, Armin, Justin, Bob, Tyler, Brik, JJ",
-  "homepage": "https://play.hbx.vision/",
+  "homepage": "https://codetango.web.app/",
   "scripts": {
     "serve": "ionic serve",
     "start": "ionic serve",
@@ -56,7 +56,7 @@
     "fuzzy": "^0.1.3",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.0.1",
-    "jasmine-core": "~3.5.0",
+    "jasmine-core": "^3.8.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~5.0.0",
     "karma-chrome-launcher": "~3.1.0",
