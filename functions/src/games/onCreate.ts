@@ -30,6 +30,9 @@ function getGameType(game: Game, wordList: string): GameType {
       if (game.createdAt < 1604606378903) {
         return GameType.LEGACY_EMOJIS;
       } else {
+        if (wordList === "emoji-remix") {
+          return GameType.EMOJI_REMIX;
+        }
         return GameType.EMOJIS;
       }
     }
@@ -40,6 +43,8 @@ function getGameType(game: Game, wordList: string): GameType {
     return GameType.MEMES;
   } else if (wordList === 'emojis') {
     return GameType.EMOJIS;
+  } else if (wordList === 'emoji-remix') {
+    return GameType.EMOJI_REMIX
   }
   return GameType.WORDS;
 }
@@ -62,7 +67,7 @@ export const onCreateGame =
 
             updates.hasPictures =
                 (wordList === 'pictures' || wordList === 'memes');
-            updates.hasEmojis = wordList === 'emojis';
+            updates.hasEmojis = wordList === 'emojis' || wordList === 'emoji-remix';
             updates.gameType = getGameType(game, wordList);
             updates.tiles = await generateNewGameTiles(wordList);
             const blueTeamTiles = updates.tiles.filter(
