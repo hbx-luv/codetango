@@ -30,6 +30,8 @@ export class WordListsService {
         return GameType.PICTURES;
       case 'emojis':
         return GameType.EMOJIS;
+      case 'emoji-remix':
+        return GameType.EMOJI_REMIX;
       default:
         return GameType.WORDS;
     }
@@ -61,6 +63,7 @@ export class WordListsService {
     this.setWordList('emojis', emojiWordList);
     this.setWordList('memes', memesWordList);
     this.setWordList('pictures', this.getPicturesWordList());
+    this.setWordList('emoji-remix', this.getEmojiRemixWordList());
     this.setWordList('tvWords', tvWordList);
     this.setWordList('popCultureWordList', popCultureWordList);
     this.setWordList('technologyWords', technologyWordList);
@@ -75,5 +78,8 @@ export class WordListsService {
 
   private getPicturesWordList(): string[] {
     return [...Array(100).keys()].map(a => ('00' + a).slice(-2));
+  }
+  private getEmojiRemixWordList(): string[] {
+    return [...Array(100).keys()].map(a => (a.toString()));
   }
 }

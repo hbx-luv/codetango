@@ -20,6 +20,9 @@
           <span *ngSwitchCase="GameType.PICTURES">
             <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
           </span>
+          <span *ngSwitchCase="GameType.EMOJI_REMIX">
+            <ion-img src="./assets/emoji-remix/{{tile.word}}.png"></ion-img>
+          </span>
           <span *ngSwitchCase="GameType.EMOJIS">
             <ion-img src="https://twitter.github.io/twemoji/2/72x72/{{tile.word}}.png"></ion-img>
           </span>

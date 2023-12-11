@@ -234,6 +234,7 @@ export enum GameType {
   PICTURES = 'PICTURES',
   EMOJIS = 'EMOJIS',
   MEMES = 'MEMES',
+  EMOJI_REMIX = 'EMOJI_REMIX',
 
   // first version of emojis RIP
   LEGACY_EMOJIS = 'LEGACY_EMOJIS',

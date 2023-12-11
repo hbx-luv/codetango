@@ -87,7 +87,7 @@ export class HomePage implements OnDestroy {
   }
 
   fullscreen() {
-    location.href = 'https://youtube.com/redirect?q=https://play.hbx.vision';
+    location.href = 'https://youtube.com/redirect?q=https://codetango.web.app/';
   }
 
   getLocalStorage(key: string, defaultValue: any) {
