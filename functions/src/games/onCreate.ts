@@ -30,7 +30,7 @@ function getGameType(game: Game, wordList: string): GameType {
       if (game.createdAt < 1604606378903) {
         return GameType.LEGACY_EMOJIS;
       } else {
-        if (wordList === "emoji-remix") {
+        if (wordList === 'emoji-remix') {
           return GameType.EMOJI_REMIX;
         }
         return GameType.EMOJIS;
@@ -67,7 +67,8 @@ export const onCreateGame =
 
             updates.hasPictures =
                 (wordList === 'pictures' || wordList === 'memes');
-            updates.hasEmojis = wordList === 'emojis' || wordList === 'emoji-remix';
+            updates.hasEmojis =
+                wordList === 'emojis' || wordList === 'emoji-remix';
             updates.gameType = getGameType(game, wordList);
             updates.tiles = await generateNewGameTiles(wordList);
             const blueTeamTiles = updates.tiles.filter(
@@ -116,7 +117,7 @@ async function generateNewGameTiles(wordList: string): Promise<Tile[]> {
 async function getWords(wordList: string): Promise<string[]> {
   const snapshot = await db.collection('wordlists').doc(wordList).get();
   if (snapshot.exists && snapshot.data()) {
-    console.log('defaultWords exists');
+    console.log(`word list "${wordList}" exists`);
     const newWordsForGame = [] as string[];
     const {words} = snapshot.data() as WordList;
 
