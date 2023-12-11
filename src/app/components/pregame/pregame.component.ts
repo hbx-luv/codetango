@@ -33,7 +33,7 @@ export class PregameComponent {
     {url: './assets/memes.png', id: 'memes'},
     {url: './assets/pictures.png', id: 'pictures'},
     {url: './assets/technology-words.png', id: 'technologyWords'},
-    {url: './assets/emoji-remix.png', id: 'emojiRemix'},
+    {url: './assets/emoji-remix.png', id: 'emoji-remix'},
   ];
 
   hiddenWordLists = [
