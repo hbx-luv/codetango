@@ -36,6 +36,6 @@ export class ClueComponent {
   }
 
   getPictureSrc(word: string) {
-    return getSrc(word);
+    return getSrc(this.assetUrlPattern, word);
   }
 }

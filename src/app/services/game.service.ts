@@ -4,6 +4,7 @@ import {default as firebase} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Game, GameType} from 'types';
+import {buildAssetUrlPattern} from '../components/game/tile-util'
 
 @Injectable({providedIn: 'root'})
 export class GameService {
@@ -48,7 +49,9 @@ export class GameService {
         .doc<Game>(gameId)
         .snapshotChanges()
         .pipe(map(game => {
-          return {id: game.payload.id, exists: game.payload.exists, ...game.payload.data()};
+          const thegame = {id: game.payload.id, exists: game.payload.exists, ...game.payload.data()};
+          thegame.assetUrlPattern = buildAssetUrlPattern(thegame.gameType);
+          return thegame;
         }));
   }
 
@@ -69,24 +72,10 @@ export class GameService {
 
           const {doc} = games[0].payload;
           const game = {id: doc.id, ...doc.data()};
-          game.assetUrlPattern = this.buildAssetUrlPattern(game.gameType);
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
           return game;
         }));
   }
-
-  buildAssetUrlPattern(gameType: GameType): string | undefined {
-        const replacementToken = '{replace-me}';
-        if (gameType === GameType.EMOJI_REMIX) {
-            return `./assets/emoji-remix/${replacementToken}.png`;
-        } else if (gameType === GameType.EMOJIS) {
-            return `https://twitter.github.io/twemoji/2/72x72/${replacementToken}.png`;
-        } else if (gameType === GameType.MEMES) {
-            return `./assets/memes/${replacementToken}.jpg`;
-        } else if (gameType === GameType.PICTURES) {
-            return `./assets/pictures/smaller/${replacementToken}.png`;
-        }
-        return undefined;
-    }
 
   getCompletedGames(roomId?: string, limit?: number, startAfter?: number, collection = 'games'):
       Observable<Game[]> {
@@ -117,7 +106,9 @@ export class GameService {
         .pipe(map(actions => {
           return actions.map(action => {
             const {doc} = action.payload;
-            return {id: doc.id, ...doc.data()};
+            const game = {id: doc.id, ...doc.data()};
+            game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+            return game;
           });
         }));
   }

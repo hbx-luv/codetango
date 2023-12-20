@@ -99,7 +99,8 @@ export class GameBoardComponent implements OnChanges {
   }
 
   getPictureSrc(word: string) {
-    return getSrc(word);
+    const pattern = this.game.assetUrlPattern;
+    return getSrc(pattern, word);
   }
 
   getColor(tile: Tile): string {
