@@ -130,6 +130,9 @@ export interface Game {
   hasPictures?: boolean;
   hasEmojis?: boolean;
 
+  // Generated on the client - Tell the frontend where to load the assets
+  assetUrlPattern?: string;
+
   // set by the server for querying
   userIds?: string[];
 

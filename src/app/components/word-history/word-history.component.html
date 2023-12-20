@@ -3,7 +3,12 @@
     Clues
   </h3>
   <div *ngIf="clues$ | async as clues; else loading">
-    <app-clue [clue]="clue" [showTooltip]="!game.hasPictures" [isEmojis]="game.hasEmojis" *ngFor="let clue of clues"></app-clue>
+    <app-clue
+      *ngFor="let clue of clues"
+      [clue]="clue"
+      [assetUrlPattern]="game.assetUrlPattern"
+      >
+    </app-clue>
     <ion-item *ngIf="clues.length === 0">
       No clues given yet!
     </ion-item>

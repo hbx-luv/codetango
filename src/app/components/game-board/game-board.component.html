@@ -14,20 +14,11 @@
       >
         <ng-container [ngSwitch]="type">
           <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
-          <span *ngSwitchCase="GameType.MEMES">
-            <ion-img src="./assets/memes/{{tile.word}}.jpg"></ion-img>
-          </span>
-          <span *ngSwitchCase="GameType.PICTURES">
-            <ion-img src="./assets/pictures/smaller/{{tile.word}}.png"></ion-img>
-          </span>
-          <span *ngSwitchCase="GameType.EMOJI_REMIX">
-            <ion-img src="./assets/emoji-remix/{{tile.word}}.png"></ion-img>
-          </span>
-          <span *ngSwitchCase="GameType.EMOJIS">
-            <ion-img src="https://twitter.github.io/twemoji/2/72x72/{{tile.word}}.png"></ion-img>
-          </span>
           <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
             {{ tile.word }}
+          </span>
+          <span *ngSwitchDefault>
+            <ion-img [src]="getPictureSrc(tile.word)"></ion-img>
           </span>
         </ng-container>
       </ion-button>

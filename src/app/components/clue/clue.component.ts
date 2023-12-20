@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {Clue, TeamType} from 'types';
+import { getSrc } from '../game/tile-util';
 
 @Component({
   selector: 'app-clue',
@@ -8,8 +9,7 @@ import {Clue, TeamType} from 'types';
 })
 export class ClueComponent {
   @Input() clue: Clue;
-  @Input() showTooltip: boolean;
-  @Input() isEmojis: boolean;
+  @Input() assetUrlPattern: string;
 
   constructor() {}
 
@@ -31,9 +31,11 @@ export class ClueComponent {
     }
   }
 
-  // Receive the code (ie: 1f45d)
-  // And create a picture tooltip
-  emojiTooltip(emojiWord: string): string {
-    return `https://twitter.github.io/twemoji/2/72x72/${emojiWord}.png`;
+  get hasPictureSrc(): boolean {
+    return !!this.assetUrlPattern;
+  }
+
+  getPictureSrc(word: string) {
+    return getSrc(word);
   }
 }

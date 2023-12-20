@@ -4,6 +4,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
+import { getSrc } from '../game/tile-util';
 
 @Component({
   selector: 'app-game-board',
@@ -95,6 +96,10 @@ export class GameBoardComponent implements OnChanges {
 
   get isObserver(): boolean {
     return this.myTeam === TeamType.OBSERVER;
+  }
+
+  getPictureSrc(word: string) {
+    return getSrc(word);
   }
 
   getColor(tile: Tile): string {

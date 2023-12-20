@@ -3,7 +3,7 @@ import {AngularFirestore} from '@angular/fire/firestore';
 import {default as firebase} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {Game} from 'types';
+import {Game, GameType} from 'types';
 
 @Injectable({providedIn: 'root'})
 export class GameService {
@@ -68,9 +68,25 @@ export class GameService {
           }
 
           const {doc} = games[0].payload;
-          return {id: doc.id, ...doc.data()};
+          const game = {id: doc.id, ...doc.data()};
+          game.assetUrlPattern = this.buildAssetUrlPattern(game.gameType);
+          return game;
         }));
   }
+
+  buildAssetUrlPattern(gameType: GameType): string | undefined {
+        const replacementToken = '{replace-me}';
+        if (gameType === GameType.EMOJI_REMIX) {
+            return `./assets/emoji-remix/${replacementToken}.png`;
+        } else if (gameType === GameType.EMOJIS) {
+            return `https://twitter.github.io/twemoji/2/72x72/${replacementToken}.png`;
+        } else if (gameType === GameType.MEMES) {
+            return `./assets/memes/${replacementToken}.jpg`;
+        } else if (gameType === GameType.PICTURES) {
+            return `./assets/pictures/smaller/${replacementToken}.png`;
+        }
+        return undefined;
+    }
 
   getCompletedGames(roomId?: string, limit?: number, startAfter?: number, collection = 'games'):
       Observable<Game[]> {
