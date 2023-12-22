@@ -3,7 +3,8 @@ import {AngularFirestore} from '@angular/fire/firestore';
 import {default as firebase} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {Game} from 'types';
+import {Game, GameType} from 'types';
+import {buildAssetUrlPattern} from '../components/game/tile-util'
 
 @Injectable({providedIn: 'root'})
 export class GameService {
@@ -48,7 +49,9 @@ export class GameService {
         .doc<Game>(gameId)
         .snapshotChanges()
         .pipe(map(game => {
-          return {id: game.payload.id, exists: game.payload.exists, ...game.payload.data()};
+          const thegame = {id: game.payload.id, exists: game.payload.exists, ...game.payload.data()};
+          thegame.assetUrlPattern = buildAssetUrlPattern(thegame.gameType);
+          return thegame;
         }));
   }
 
@@ -68,7 +71,9 @@ export class GameService {
           }
 
           const {doc} = games[0].payload;
-          return {id: doc.id, ...doc.data()};
+          const game = {id: doc.id, ...doc.data()};
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
         }));
   }
 
@@ -101,7 +106,9 @@ export class GameService {
         .pipe(map(actions => {
           return actions.map(action => {
             const {doc} = action.payload;
-            return {id: doc.id, ...doc.data()};
+            const game = {id: doc.id, ...doc.data()};
+            game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+            return game;
           });
         }));
   }
