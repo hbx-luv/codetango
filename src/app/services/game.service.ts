@@ -132,7 +132,9 @@ export class GameService {
         .pipe(map(actions => {
           return actions.map(action => {
             const {doc} = action.payload;
-            return {id: doc.id, ...doc.data()};
+            const game = {id: doc.id, ...doc.data()};
+            game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+            return game;
           });
         }));
   }
