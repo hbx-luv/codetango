@@ -20,6 +20,30 @@
   .room-settings {
     width: 550px;
 
+    .word-lists-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0 10px;
+
+      h3 {
+        margin: 0;
+      }
+    }
+
+    .custom-theme {
+      margin-bottom: 64px;
+
+      h5 {
+        display: flex;
+        align-items: center;
+
+        ion-button {
+          margin-left: 16px;
+        }
+      }
+    }
+
     .word-lists {
       display: flex;
       justify-content: center;

@@ -3,6 +3,7 @@ import * as functions from 'firebase-functions';
 import {shuffle} from 'lodash';
 
 import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
+import {getThemedWords} from '../util/chatgpt';
 
 try {
   admin.initializeApp();
@@ -14,7 +15,14 @@ const db = admin.firestore();
 
 
 // @ts-ignore
-function getGameType(game: Game, wordList: string): GameType {
+function getGameType(
+    game: Game,
+    wordList: string,
+    aiWordlistTheme?: string,
+    ): GameType {
+  // if generating an AI word list, it'll always be words
+  if (aiWordlistTheme) return GameType.WORDS;
+
   if (game) {
     if (game?.gameType) {
       return game.gameType;
@@ -63,14 +71,16 @@ export const onCreateGame =
           // If the game is created with tiles already set, this game was
           // probably migrated. Do not modify any of the other fields
           if (!game.tiles) {
-            const wordList = await getWordList(game.roomId);
+            const {wordList = 'original', aiWordlistTheme} =
+                await getRoom(game.roomId);
 
             updates.hasPictures =
                 (wordList === 'pictures' || wordList === 'memes');
             updates.hasEmojis =
                 wordList === 'emojis' || wordList === 'emoji-remix';
-            updates.gameType = getGameType(game, wordList);
-            updates.tiles = await generateNewGameTiles(wordList);
+            updates.gameType = getGameType(game, wordList, aiWordlistTheme);
+            updates.tiles =
+                await generateNewGameTiles(wordList, aiWordlistTheme);
             const blueTeamTiles = updates.tiles.filter(
                 tile => tile.role === TileRole.BLUE && !tile.selected);
             const redTeamTiles = updates.tiles.filter(
@@ -90,8 +100,12 @@ export const onCreateGame =
           return 'Done!';
         });
 
-async function generateNewGameTiles(wordList: string): Promise<Tile[]> {
-  const words = await getWords(wordList);
+async function generateNewGameTiles(
+    wordList: string,
+    aiWordlistTheme?: string,
+    ): Promise<Tile[]> {
+  const words = aiWordlistTheme ? await getThemedWords(aiWordlistTheme) :
+                                  await getWords(wordList);
   const tiles = words.map(word => {
     return {
       word, role: TileRole.CIVILIAN, selected: false
@@ -150,9 +164,9 @@ async function getWords(wordList: string): Promise<string[]> {
   }
 }
 
-async function getWordList(roomId: string): Promise<string> {
+async function getRoom(roomId: string): Promise<Room> {
   const roomSnapshot = await db.collection('rooms').doc(roomId).get();
-  return (roomSnapshot.data() as Room).wordList || 'original';
+  return (roomSnapshot.data() as Room);
 }
 
 function getRoleCounts(wordList: string) {

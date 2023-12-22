@@ -94,6 +94,10 @@ export class PregameComponent {
         this.game?.blueTeam.spymaster === this.authService.currentUserId;
   }
 
+  get hasCustomTheme(): boolean {
+    return !!this.room?.aiWordlistTheme;
+  }
+
   selectWordList(wordList: string) {
     this.roomService.updateRoom(this.room.id, {wordList});
   }
@@ -221,6 +225,24 @@ export class PregameComponent {
           }
         })
         .map(user => user.id!);
+  }
+
+  async promptForTheme() {
+    const theme = await this.utilService.promptForText(
+        'Custom Theme',
+        'Enter a theme for this game, we\'ll generate a board based on your theme.',
+        'e.g. Pop culture, movies, and music',
+        'Save',
+        'Cancel',
+    );
+
+    if (theme) {
+      await this.roomService.updateRoom(this.room.id, {aiWordlistTheme: theme});
+    }
+  }
+
+  clearTheme() {
+    this.roomService.updateRoom(this.room.id, {aiWordlistTheme: null});
   }
 
   toggleRedReady() {

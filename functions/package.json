@@ -22,7 +22,8 @@
     "firebase-admin": "^10.0.1",
     "firebase-functions": "^4.4.1",
     "lodash": "^4.17.21",
-    "luxon": "^1.24.1"
+    "luxon": "^1.24.1",
+    "openai": "^3.2.1"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.1.6",
