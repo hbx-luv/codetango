@@ -237,7 +237,10 @@ export class PregameComponent {
     );
 
     if (theme) {
-      await this.roomService.updateRoom(this.room.id, {aiWordlistTheme: theme});
+      await this.roomService.updateRoom(this.room.id, {
+        aiWordlistTheme: theme,
+        wordList: '',
+      });
     }
   }
 
