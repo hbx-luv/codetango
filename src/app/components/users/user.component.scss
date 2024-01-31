@@ -7,6 +7,7 @@
 
     ion-label {
       overflow-x: clip;
+      overflow-y: visible;
       max-width: 180px;
       text-overflow: ellipsis;
     }
