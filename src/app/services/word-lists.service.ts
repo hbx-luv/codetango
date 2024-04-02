@@ -80,6 +80,6 @@ export class WordListsService {
     return [...Array(100).keys()].map(a => ('00' + a).slice(-2));
   }
   private getEmojiRemixWordList(): string[] {
-    return [...Array(100).keys()].map(a => `${a + 1}`);
+    return [...Array(150).keys()].map(a => `${a}`);
   }
 }
