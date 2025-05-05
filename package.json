@@ -11,7 +11,7 @@
     "deploy-functions:dev": "npm run update && firebase deploy --only functions -P dev",
     "deploy-hosting:dev": "npm run update && ionic build && firebase deploy --only hosting -P dev",
     "build:prod": "ionic build --prod --release",
-    "deploy:prod": "npm run update && npm run build:prod && firebase deploy -P prod",
+    "deploy:prod": "nvm use 14 && npm run update && npm run build:prod && nvm use 18 && firebase deploy -P prod && nvm use 14",
     "deploy-functions:prod": "npm run update && firebase deploy --only functions -P prod",
     "deploy-hosting:prod": "npm run update && npm run build:prod && firebase deploy --only hosting -P prod",
     "indexes": "firebase firestore:indexes > firestore.indexes.json -P prod"

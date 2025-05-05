@@ -15,7 +15,9 @@ If you're a developer interested in contributing, read on:
 
 ### Dev setup
 
-Install Node 16.x.
+Install NVM
+
+Run `nvm use` to install node 14
 
 Install the Ionic CLI, Angular CLI, and the Firebase CLI:  
 `npm install -g @ionic/cli @angular/cli firebase-tools`
