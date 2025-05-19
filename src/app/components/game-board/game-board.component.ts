@@ -240,9 +240,16 @@ export class GameBoardComponent implements OnChanges {
   }
 
   /**
-   * Returns true if the current clue is a color clue
+   * Returns true if the current clue is a color clue and it's the current team's turn
    */
   get shouldGreyscale(): boolean {
-    return this.currentClue && this.isColorClue(this.currentClue.word);
+    if (!this.currentClue) return false;
+    
+    // Only apply greyscale if it's the current team's turn
+    const isCurrentTeamsTurn = 
+      (this.currentClue.team === TeamType.BLUE && this.game.status === GameStatus.BLUES_TURN) ||
+      (this.currentClue.team === TeamType.RED && this.game.status === GameStatus.REDS_TURN);
+    
+    return isCurrentTeamsTurn && this.isColorClue(this.currentClue.word);
   }
 }
