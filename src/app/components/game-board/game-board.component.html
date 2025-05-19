@@ -1,5 +1,5 @@
 <div>
-  <ion-grid class="grid-container">
+  <ion-grid class="grid-container" [class.greyscale]="shouldGreyscale">
     <div class="tile-container" *ngFor="let tile of tiles">
       <ion-button
         [class.spymaster]="spymaster"

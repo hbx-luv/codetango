@@ -6,6 +6,11 @@
   margin-right: auto;
   max-width: 800px;
 
+  &.greyscale {
+    filter: grayscale(100%);
+    transition: filter 0.3s ease-in-out;
+  }
+
   .tile-container {
     position: relative;
     margin: 0 2px;

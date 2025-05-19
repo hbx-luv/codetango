@@ -229,4 +229,20 @@ export class GameBoardComponent implements OnChanges {
   remainingGuesses(clue: Clue): number {
     return clue ? clue.maxGuesses - clue.guessesMade.length : 0;
   }
+
+  /**
+   * Returns true if the given word is a color name (case insensitive)
+   */
+  private isColorClue(word: string): boolean {
+    if (!word) return false;
+    const colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'brown', 'black', 'white', 'gray', 'grey'];
+    return colors.includes(word.toLowerCase());
+  }
+
+  /**
+   * Returns true if the current clue is a color clue
+   */
+  get shouldGreyscale(): boolean {
+    return this.currentClue && this.isColorClue(this.currentClue.word);
+  }
 }
