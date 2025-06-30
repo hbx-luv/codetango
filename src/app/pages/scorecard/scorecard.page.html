@@ -129,6 +129,30 @@
               </ion-list>
             </ion-card-content>
           </ion-card>
+
+          <!-- Game Type Breakdown -->
+          <ng-container *ngIf="gameTypeBreakdownDisplay$ | async as breakdowns">
+            <ion-card class="user-card">
+              <ion-card-header>
+                <ion-card-title>Game Type Breakdown</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-list>
+                  <ion-item *ngFor="let type of breakdowns">
+                    <div class="breakdown-row">
+                      <div class="breakdown-label">{{ type.key }}</div>
+                      <div class="breakdown-bar-bg">
+                        <div class="breakdown-bar-fill" [ngStyle]="{ width: type.barWidth + '%' }"></div>
+                        <span class="breakdown-bar-text">
+                          {{ type.won }} / {{ type.played }} ({{ (type.percent * 100) | number:'1.0-1' }}%)
+                        </span>
+                      </div>
+                    </div>
+                  </ion-item>
+                </ion-list>
+              </ion-card-content>
+            </ion-card>
+          </ng-container>
         </section>
 
         <!-- recent games on the right -->
