@@ -17,8 +17,8 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Install @angular/cli
         run: npm i -D -E @angular/cli --force
-      - name: Install Ionic CLI
-        run: npm install -g @ionic/cli
+      - name: Install Ionic CLI 6.18.0
+        run: npm install -g @ionic/cli@6.18.0
       - name: Install app dependencies
         run: npm ci --force
       - name: Install functions dependencies
