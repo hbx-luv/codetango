@@ -11,6 +11,10 @@ jobs:
       - uses: actions/checkout@master
         with:
           ref: ${{ github.ref }}
+      - name: Use Node.js version from .nvmrc
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
       - name: Install @angular/cli
         run: npm i -D -E @angular/cli --force
       - name: Use coturiv/setup-ionic
