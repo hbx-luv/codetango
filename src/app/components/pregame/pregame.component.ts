@@ -99,7 +99,60 @@ export class PregameComponent {
   }
 
   selectWordList(wordList: string) {
-    this.roomService.updateRoom(this.room.id, {wordList});
+    // If we're in ASSIGNING_ROLES phase and there's an existing game,
+    // we need to delete the current game and create a new one to regenerate the board
+    if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
+      this.regenerateGame({wordList});
+    } else {
+      // In PREGAME phase, just update the word list
+      this.roomService.updateRoom(this.room.id, {wordList});
+    }
+  }
+
+  async regenerateGame(updates: {wordList?: string, aiWordlistTheme?: string | null}) {
+    const loader = await this.utilService.presentLoader('Regenerating board...');
+    
+    try {
+      // Update the room's settings first
+      await this.roomService.updateRoom(this.room.id, updates);
+
+      let idToDelete = this.game?.id;
+      
+      // Create a new game with the same teams
+      await this.gameService.createGame({
+        createdAt: Date.now(),
+        blueTeam: this.game.blueTeam,
+        redTeam: this.game.redTeam,
+        roomId: this.room.id,
+      });
+
+      // Delete the old game
+      if (this.game && this.game.id) {
+        await this.gameService.deleteGame(idToDelete);
+      }
+      
+      // The room will stay in ASSIGNING_ROLES status
+      await loader.dismiss();
+    } catch (error) {
+      await loader.dismiss();
+      console.error('Error regenerating game:', error);
+      this.utilService.showToast('Failed to regenerate board. Please try again.');
+    }
+  }
+
+  async regenerateGameWithNewWordList(wordList: string) {
+    await this.regenerateGame({wordList});
+  }
+
+  async regenerateGameWithNewTheme(theme: string) {
+    await this.regenerateGame({
+      aiWordlistTheme: theme,
+      wordList: '',
+    });
+  }
+
+  async regenerateGameWithClearedTheme() {
+    await this.regenerateGame({aiWordlistTheme: null});
   }
 
   saveTimerSettings() {
@@ -176,6 +229,12 @@ export class PregameComponent {
 
   async startGame() {
     const loader = await this.utilService.presentLoader('Starting game...');
+
+    // wait until the game has a board
+    while (!this.game.tiles || this.game.tiles.length === 0) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
     await this.roomService.updateRoom(this.room.id, {
       status: RoomStatus.GAME_IN_PROGRESS,
     });
@@ -237,15 +296,32 @@ export class PregameComponent {
     );
 
     if (theme) {
-      await this.roomService.updateRoom(this.room.id, {
-        aiWordlistTheme: theme,
-        wordList: '',
-      });
+      // If we're in ASSIGNING_ROLES phase and there's an existing game,
+      // we need to delete the current game and create a new one to regenerate the board
+      if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
+        await this.regenerateGame({
+          aiWordlistTheme: theme,
+          wordList: '',
+        });
+      } else {
+        // In PREGAME phase, just update the theme
+        await this.roomService.updateRoom(this.room.id, {
+          aiWordlistTheme: theme,
+          wordList: '',
+        });
+      }
     }
   }
 
   clearTheme() {
-    this.roomService.updateRoom(this.room.id, {aiWordlistTheme: null});
+    // If we're in ASSIGNING_ROLES phase and there's an existing game,
+    // we need to delete the current game and create a new one to regenerate the board
+    if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
+      this.regenerateGame({aiWordlistTheme: null});
+    } else {
+      // In PREGAME phase, just clear the theme
+      this.roomService.updateRoom(this.room.id, {aiWordlistTheme: null});
+    }
   }
 
   toggleRedReady() {

@@ -1,6 +1,6 @@
-<!-- lobby -->
-<div class="assign-teams" *ngIf="room && room.status === 'PREGAME'">
-  <div class="users-list">
+<div class="assign-teams">
+  <!-- lobby -->
+  <div class="users-list" *ngIf="room && room.status === 'PREGAME'">
     <h3>Players</h3>
     <ion-list>
       <ion-item *ngFor="let userId of room.userIds">
@@ -29,6 +29,33 @@
       Join
     </ion-button>
   </div>
+
+
+  <!-- assign spymaster -->
+  <div class="assign-spymaster" *ngIf="room && room.status === 'ASSIGNING_ROLES' && game">
+    <h4 class="description">Assign your team's Spymaster by clicking their name below</h4>
+    <app-team-lists
+      [room]="room"
+      [game]="game"
+      [setSpymaster]="userInRoom">
+    </app-team-lists>
+    <hr>
+    <div *ngIf="userInRoom">
+      <ion-button color="light" (click)="goBackToLobby(game)">
+        <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+        Go Back
+      </ion-button>
+      <ion-button color="danger" (click)="toggleRedReady()" [disabled]="!redSpymaster">
+        Red Ready
+        <ion-icon class="margin-left" [name]="room.redReady ? 'checkmark' : 'close'"></ion-icon>
+      </ion-button>
+      <ion-button color="primary" (click)="toggleBlueReady()" [disabled]="!blueSpymaster">
+        Blue Ready
+        <ion-icon class="margin-left" [name]="room.blueReady ? 'checkmark' : 'close'"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
   <div class="room-settings">
     <div class="word-lists-header">
       <h3>Choose Word List</h3>
@@ -114,30 +141,5 @@
         </ion-toggle>
       </ion-item> -->
     </div>
-  </div>
-</div>
-
-<!-- assign spymaster -->
-<div class="assign-spymaster" *ngIf="room && room.status === 'ASSIGNING_ROLES' && game">
-  <h4 class="description">Assign your team's Spymaster by clicking their name below</h4>
-  <app-team-lists
-    [room]="room"
-    [game]="game"
-    [setSpymaster]="userInRoom">
-  </app-team-lists>
-  <hr>
-  <div *ngIf="userInRoom">
-    <ion-button color="light" (click)="goBackToLobby(game)">
-      <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
-      Go Back
-    </ion-button>
-    <ion-button color="danger" (click)="toggleRedReady()" [disabled]="!redSpymaster">
-      Red Ready
-      <ion-icon class="margin-left" [name]="room.redReady ? 'checkmark' : 'close'"></ion-icon>
-    </ion-button>
-    <ion-button color="primary" (click)="toggleBlueReady()" [disabled]="!blueSpymaster">
-      Blue Ready
-      <ion-icon class="margin-left" [name]="room.blueReady ? 'checkmark' : 'close'"></ion-icon>
-    </ion-button>
   </div>
 </div>
