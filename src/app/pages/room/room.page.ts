@@ -325,10 +325,12 @@ export class RoomPage implements OnDestroy {
       }
 
       // cycle the current spymaster to the end and set new ones
-      redTeam.userIds.push(redTeam.userIds.shift());
-      blueTeam.userIds.push(blueTeam.userIds.shift());
-      redTeam.spymaster = redTeam.userIds[0];
-      blueTeam.spymaster = blueTeam.userIds[0];
+      [redTeam, blueTeam].forEach(team => {
+        const index = team.userIds.indexOf(team.spymaster);
+        const [spymaster] = team.userIds.splice(index, 1);
+        team.userIds.push(spymaster);
+        team.spymaster = team.userIds[0];
+      });
 
       await this.gameService.createGame({redTeam, blueTeam, roomId});
       await this.roomService.updateRoom(
