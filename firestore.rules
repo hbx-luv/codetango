@@ -58,5 +58,9 @@ service cloud.firestore {
     match /wordlists/{document=**} {
       allow read, write: if true;
     }
+
+    match /settings/{docId} {
+      allow read, write: if true;
+    }
   }
 }

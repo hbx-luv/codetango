@@ -1,17 +1,30 @@
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
 import {get} from 'lodash';
+import {Subscription} from 'rxjs';
+import {AprilFoolsService} from 'src/app/services/april-fools.service';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
 import { getSrc } from '../game/tile-util';
 
+/** Exactly one visual mutation per tile when April Fools is on. */
+export type AprilFoolsTileMutation =
+    'none'|'flipV'|'flipH'|'blink'|'tl'|'tr'|'bl'|'br'|'rotate';
+
+export interface AprilFoolsDisplaySlot {
+  tile: Tile;
+  mutation: AprilFoolsTileMutation;
+  /** Degrees; only set when mutation === 'rotate'. */
+  rotateDeg?: number;
+}
+
 @Component({
   selector: 'app-game-board',
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss'],
 })
-export class GameBoardComponent implements OnChanges {
+export class GameBoardComponent implements OnChanges, OnInit, OnDestroy {
   // readonly versions of the game board won't user the room
   @Input() room?: Room;
 
@@ -26,13 +39,33 @@ export class GameBoardComponent implements OnChanges {
   GameType = GameType;
 
   tiles: Tile[];
+  displaySlots: AprilFoolsDisplaySlot[] = [];
   advice: string;
+
+  private aprilFoolsSub?: Subscription;
 
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly clueService: ClueService,
+      private readonly aprilFoolsService: AprilFoolsService,
+      private readonly cdr: ChangeDetectorRef,
   ) {}
+
+  ngOnInit() {
+    this.aprilFoolsSub = this.aprilFoolsService.enabled$.subscribe(() => {
+      this.rebuildDisplaySlots();
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy() {
+    this.aprilFoolsSub?.unsubscribe();
+  }
+
+  get aprilFoolsBoard(): boolean {
+    return this.aprilFoolsService.enabled;
+  }
 
   ngOnChanges() {
     this.advice = this.getAdvice();
@@ -47,6 +80,44 @@ export class GameBoardComponent implements OnChanges {
         this.tiles = this.game.tiles;
       }
     }
+    this.rebuildDisplaySlots();
+  }
+
+  private rebuildDisplaySlots() {
+    if (!this.tiles?.length) {
+      this.displaySlots = [];
+      return;
+    }
+    if (!this.aprilFoolsService.enabled) {
+      this.displaySlots = this.tiles.map(tile => ({
+        tile,
+        mutation: 'none' as AprilFoolsTileMutation,
+      }));
+      return;
+    }
+    const seed =
+        `${this.game?.id ?? 'game'}|${this.authService.currentUserId || 'anon'}`;
+    const rng = mulberry32(hashString(seed));
+    const pairs = this.tiles.map(tile => ({tile}));
+    for (let i = pairs.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      const t = pairs[i];
+      pairs[i] = pairs[j];
+      pairs[j] = t;
+    }
+    this.displaySlots = pairs.map(({tile}) => {
+      const mutation = pickAprilFoolsMutation(rng);
+      const rotateDeg =
+          mutation === 'rotate' ? rng() * 360 : undefined;
+      return {tile, mutation, rotateDeg};
+    });
+  }
+
+  aprilFoolsRotateTransform(slot: AprilFoolsDisplaySlot): string|null {
+    if (slot.mutation !== 'rotate' || slot.rotateDeg == null) {
+      return null;
+    }
+    return `rotate(${slot.rotateDeg}deg)`;
   }
 
   get type(): GameType {
@@ -252,4 +323,38 @@ export class GameBoardComponent implements OnChanges {
     
     return isCurrentTeamsTurn && this.isColorClue(this.currentClue.word);
   }
+}
+
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed: number): () => number {
+  return () => {
+    let t = (seed += 0x6D2B79F5);
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+const APRIL_FOOLS_MUTATIONS: AprilFoolsTileMutation[] = [
+  'none',
+  'flipV',
+  'flipH',
+  'blink',
+  'tl',
+  'tr',
+  'bl',
+  'br',
+  'rotate',
+];
+
+function pickAprilFoolsMutation(rng: () => number): AprilFoolsTileMutation {
+  const i = Math.floor(rng() * APRIL_FOOLS_MUTATIONS.length);
+  return APRIL_FOOLS_MUTATIONS[i];
 }

@@ -1,29 +1,49 @@
 <div>
-  <ion-grid class="grid-container" [class.greyscale]="shouldGreyscale">
-    <div class="tile-container" *ngFor="let tile of tiles">
+  <ion-grid
+    class="grid-container"
+    [class.greyscale]="shouldGreyscale"
+    [class.april-fools]="aprilFoolsBoard">
+    <div class="tile-container" *ngFor="let slot of displaySlots">
       <ion-button
         [class.spymaster]="spymaster"
-        [class.selected]="tile.selected"
+        [class.selected]="slot.tile.selected"
         [class.readonly]="readonly"
         [class.pictures]="game.hasPictures"
         [class.emojis]="game.hasEmojis"
         [class.meme-picture]="game.gameType == GameType.MEMES"
-        [color]="getColor(tile)"
-        class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
-        (click)="selectTile(tile)"
+        [color]="getColor(slot.tile)"
+        class="word {{ spymaster || game.completedAt ? slot.tile.role : '' }}"
+        (click)="selectTile(slot.tile)"
       >
-        <ng-container [ngSwitch]="type">
-          <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
-          <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
-            {{ tile.word }}
+        <span
+          class="af-tile-fill"
+          [class.af-corner-tl]="slot.mutation === 'tl'"
+          [class.af-corner-tr]="slot.mutation === 'tr'"
+          [class.af-corner-bl]="slot.mutation === 'bl'"
+          [class.af-corner-br]="slot.mutation === 'br'"
+        >
+          <span
+            class="af-flip-layer"
+            [class.af-flip-v]="slot.mutation === 'flipV'"
+            [class.af-flip-h]="slot.mutation === 'flipH'"
+            [class.af-rotate]="slot.mutation === 'rotate'"
+            [style.transform]="aprilFoolsRotateTransform(slot)"
+            [appRandomBlink]="slot.mutation === 'blink'"
+          >
+            <ng-container [ngSwitch]="type">
+              <span *ngSwitchCase="GameType.WORDS">{{ slot.tile.word }}</span>
+              <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
+                {{ slot.tile.word }}
+              </span>
+              <span *ngSwitchDefault>
+                <ion-img [src]="getPictureSrc(slot.tile.word)"></ion-img>
+              </span>
+            </ng-container>
           </span>
-          <span *ngSwitchDefault>
-            <ion-img [src]="getPictureSrc(tile.word)"></ion-img>
-          </span>
-        </ng-container>
+        </span>
       </ion-button>
 
-      <img class="dart" src="../../../assets/{{ tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="tile.dartedBy">
+      <img class="dart" src="../../../assets/{{ slot.tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="slot.tile.dartedBy">
     </div>
   </ion-grid>
   <ion-row class="advice-row" *ngIf="!isObserver">

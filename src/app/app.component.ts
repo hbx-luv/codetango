@@ -4,6 +4,7 @@ import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {StatusBar} from '@ionic-native/status-bar/ngx';
 import {Platform} from '@ionic/angular';
 import {AuthService} from 'src/app/services/auth.service';
+import {AprilFoolsService} from 'src/app/services/april-fools.service';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ export class AppComponent {
       private readonly statusBar: StatusBar,
       private readonly router: Router,
       private readonly authService: AuthService,
+      readonly aprilFoolsService: AprilFoolsService,
   ) {
     this.initializeApp();
   }
@@ -30,6 +32,12 @@ export class AppComponent {
 
   get isLoggedIn() {
     return this.authService.authenticated;
+  }
+
+  /** Matt only: controls global April Fools mode in Firestore for all players. */
+  get showAprilFoolsAdminToggle(): boolean {
+    return this.isLoggedIn &&
+        this.aprilFoolsService.isAdminUser(this.authService.currentUser?.email);
   }
 
   logout() {
