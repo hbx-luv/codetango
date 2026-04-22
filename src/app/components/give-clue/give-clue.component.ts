@@ -18,6 +18,7 @@ const TOAST_OPTIONS = {
 const SMALL_WORDS = ['A', 'AN', 'AND', 'TO', 'THE'];
 
 @Component({
+  standalone: false,
   selector: 'app-give-clue',
   templateUrl: './give-clue.component.html',
   styleUrls: ['./give-clue.component.scss'],

@@ -6,6 +6,7 @@ import {UtilService} from 'src/app/services/util.service';
 import {Clue, Game, GameStatus, Room, TeamType} from 'types';
 
 @Component({
+  standalone: false,
   selector: 'app-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],

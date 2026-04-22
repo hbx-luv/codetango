@@ -6,6 +6,7 @@ import {GameService} from 'src/app/services/game.service';
 import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
 
 @Component({
+  standalone: false,
   selector: 'app-game-board',
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss'],

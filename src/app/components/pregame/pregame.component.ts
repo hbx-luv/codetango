@@ -1,7 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {clone, shuffle} from 'lodash';
-import {Observable} from 'rxjs';
-import {first} from 'rxjs/operators';
+import {firstValueFrom, Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -12,6 +11,7 @@ import {RoomService} from '../../services/room.service';
 import {WordListsService} from '../../services/word-lists.service';
 
 @Component({
+  standalone: false,
   selector: 'app-pregame',
   templateUrl: './pregame.component.html',
   styleUrls: ['./pregame.component.scss'],
@@ -206,7 +206,7 @@ export class PregameComponent {
 
   async sortUsersBySpymasterFrequency(userIds: string[]): Promise<string[]> {
     const users: User[] = await Promise.all(userIds.map(
-        userId => this.userService.getUser(userId).pipe(first()).toPromise()));
+        userId => firstValueFrom(this.userService.getUser(userId))));
 
     return users
         .sort((a, b) => {

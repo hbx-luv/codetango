@@ -1,6 +1,7 @@
 import {Component, Input, OnChanges} from '@angular/core';
 
 @Component({
+  standalone: false,
   selector: 'app-elo-change',
   templateUrl: './elo-change.component.html',
   styleUrls: ['./elo-change.component.scss'],

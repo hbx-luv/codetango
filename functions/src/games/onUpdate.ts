@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import {without} from 'lodash';
 
 import {Game, GameStatus, TileRole, User} from '../types';

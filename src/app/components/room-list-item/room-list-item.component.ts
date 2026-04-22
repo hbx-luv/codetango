@@ -4,6 +4,7 @@ import {RoomService} from 'src/app/services/room.service';
 import {Room} from 'types';
 
 @Component({
+  standalone: false,
   selector: 'app-room-list-item',
   templateUrl: './room-list-item.component.html',
   styleUrls: ['./room-list-item.component.scss'],

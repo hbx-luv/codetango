@@ -9,6 +9,7 @@ import {UserService} from '../../services/user.service';
 import {PopoverAction} from '../actions-popover/actions-popover.component';
 
 @Component({
+  standalone: false,
   selector: 'app-user',
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss'],

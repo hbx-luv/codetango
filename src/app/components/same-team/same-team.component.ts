@@ -4,6 +4,7 @@ import {UserToUserHistoryService} from 'src/app/services/user-to-user-history.se
 import {UserToUserStats} from 'types';
 
 @Component({
+  standalone: false,
   selector: 'app-same-team',
   templateUrl: './same-team.component.html',
   styleUrls: ['./same-team.component.scss'],

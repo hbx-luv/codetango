@@ -7,6 +7,7 @@ import {Game, GameStatus, Room, RoomStatus} from '../../../../types';
 import {RoomService} from '../../services/room.service';
 
 @Component({
+  standalone: false,
   selector: 'app-team-lists',
   templateUrl: './team-lists.component.html',
   styleUrls: ['./team-lists.component.scss'],

@@ -1,4 +1,3 @@
-import {default as firebase} from 'firebase';
 import {firestore} from 'firebase-admin';
 import {toPairs} from 'lodash';
 
@@ -117,7 +116,7 @@ export async function recalcElo(
     const userId: string = pair[0];
     const data = pair[1];
 
-    const updateData: firebase.firestore.UpdateData = {
+    const updateData: firestore.UpdateData<any> = {
       'stats.elo': data.elo,
       'stats.gamesPlayed': data.gamesPlayed,
       'stats.gamesWon': data.gamesWon,

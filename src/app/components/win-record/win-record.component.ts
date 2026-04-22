@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 
 @Component({
+  standalone: false,
   selector: 'app-win-record',
   templateUrl: './win-record.component.html',
   styleUrls: ['./win-record.component.scss'],

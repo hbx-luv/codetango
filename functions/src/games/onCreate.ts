@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import {shuffle} from 'lodash';
 
 import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';

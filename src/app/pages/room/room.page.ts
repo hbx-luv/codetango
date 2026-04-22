@@ -16,6 +16,7 @@ import {Clue, Game, GameStatus, Room, RoomStatus} from 'types';
 import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
+  standalone: false,
   selector: 'app-room',
   templateUrl: './room.page.html',
   styleUrls: ['./room.page.scss'],

@@ -10,6 +10,7 @@ const RECENT_DAYS = 30;
 const MIN_PLAYERS = 5;
 
 @Component({
+  standalone: false,
   selector: 'app-leaderboard',
   templateUrl: './leaderboard.page.html',
   styleUrls: ['./leaderboard.page.scss'],

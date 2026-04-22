@@ -14,6 +14,7 @@ const LIMIT = 3;
 const CHART_LIMIT = 30;
 
 @Component({
+  standalone: false,
   selector: 'app-scorecard',
   templateUrl: './scorecard.page.html',
   styleUrls: ['./scorecard.page.scss'],

@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {Clue, TeamType} from 'types';
 
 @Component({
+  standalone: false,
   selector: 'app-clue',
   templateUrl: './clue.component.html',
   styleUrls: ['./clue.component.scss'],

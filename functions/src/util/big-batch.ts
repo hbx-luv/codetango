@@ -1,11 +1,11 @@
-import {default as firebase} from 'firebase';
+import type {firestore} from 'firebase-admin';
 
 // The limit of actions you can do on a single WriteBatch
 export const MAX_BATCH_SIZE = 500;
 
 export class BigBatch {
   private _size = 0;
-  private batches: firebase.firestore.WriteBatch[] = [];
+  private batches: firestore.WriteBatch[] = [];
   private db: any;
 
   constructor(db: any) {
@@ -31,8 +31,8 @@ export class BigBatch {
    * @return This `WriteBatch` instance. Used for chaining method calls.
    */
   set<T>(
-      documentRef: firebase.firestore.DocumentReference<T>, data: T,
-      options: firebase.firestore.SetOptions = {}): BigBatch {
+      documentRef: firestore.DocumentReference<T>, data: T,
+      options: firestore.SetOptions = {}): BigBatch {
     this.growIfNecessary();
     this._size++;
     this.batch.set(documentRef, data, options);
@@ -50,7 +50,7 @@ export class BigBatch {
    * within the document.
    * @return This `WriteBatch` instance. Used for chaining method calls.
    */
-  update(documentRef: firebase.firestore.DocumentReference, data: firebase.firestore.UpdateData):
+  update(documentRef: firestore.DocumentReference, data: firestore.UpdateData<any>):
       BigBatch {
     this.growIfNecessary();
     this._size++;
@@ -64,7 +64,7 @@ export class BigBatch {
    * @param documentRef A reference to the document to be deleted.
    * @return This `WriteBatch` instance. Used for chaining method calls.
    */
-  delete(documentRef: firebase.firestore.DocumentReference): BigBatch {
+  delete(documentRef: firestore.DocumentReference): BigBatch {
     this.growIfNecessary();
     this._size++;
     this.batch.delete(documentRef);
@@ -90,7 +90,7 @@ export class BigBatch {
    * adding new batches to the list as necessary so we can always safely perform
    * actions on the last batch.
    */
-  private get batch(): firebase.firestore.WriteBatch {
+  private get batch(): firestore.WriteBatch {
     // be super duper safe
     if (this.batches.length === 0) {
       this.growIfNecessary();

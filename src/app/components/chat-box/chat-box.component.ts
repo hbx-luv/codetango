@@ -8,6 +8,7 @@ import {UtilService} from 'src/app/services/util.service';
 import {Game, Message, TeamType} from 'types';
 
 @Component({
+  standalone: false,
   selector: 'app-chat-box',
   templateUrl: './chat-box.component.html',
   styleUrls: ['./chat-box.component.scss'],

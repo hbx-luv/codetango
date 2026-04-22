@@ -3,6 +3,7 @@ import {Game, GameStatus, Room} from 'types';
 import {GameService} from '../../services/game.service';
 
 @Component({
+  standalone: false,
   selector: 'app-timer',
   templateUrl: './timer.component.html',
   styleUrls: ['./timer.component.scss'],

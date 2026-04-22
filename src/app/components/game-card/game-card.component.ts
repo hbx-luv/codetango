@@ -5,6 +5,7 @@ import {Game, GameStatus} from 'types';
 import {cloneDeep} from 'lodash';
 
 @Component({
+  standalone: false,
   selector: 'app-game-card',
   templateUrl: './game-card.component.html',
   styleUrls: ['./game-card.component.scss'],

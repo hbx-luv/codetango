@@ -3,6 +3,7 @@ import {PopoverController} from '@ionic/angular';
 import {PopoverAction} from './actions-popover.component';
 
 @Component({
+  standalone: false,
   selector: 'app-actions-popover-page',
   templateUrl: './actions-popover-page.component.html',
   styleUrls: ['./actions-popover-page.component.scss'],

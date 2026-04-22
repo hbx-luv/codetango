@@ -1,6 +1,14 @@
 import {EventEmitter, Injectable} from '@angular/core';
-import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
-import {default as firebase} from 'firebase';
+import {
+  addDoc,
+  collection,
+  collectionData,
+  DocumentReference,
+  Firestore,
+  orderBy,
+  query,
+  serverTimestamp,
+} from '@angular/fire/firestore';
 import {Observable} from 'rxjs';
 import {Message} from 'types';
 
@@ -11,16 +19,14 @@ export class MessageService {
   chatShown$ = new EventEmitter();
 
   constructor(
-      private readonly afs: AngularFirestore,
+      private readonly firestore: Firestore,
   ) {}
 
   sendSpymasterMessage(gameId: string, message: Partial<Message>):
       Promise<DocumentReference> {
-    return this.afs.collection('games')
-        .doc(gameId)
-        .collection<Message>('spymaster-chat')
-        .add({
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    return addDoc(
+        collection(this.firestore, 'games', gameId, 'spymaster-chat'), {
+          timestamp: serverTimestamp(),
           text: message.text,
           ...message,
         });
@@ -32,10 +38,11 @@ export class MessageService {
   }
 
   getSpymasterMessages(gameId: string): Observable<Message[]> {
-    return this.afs.collection('games')
-        .doc(gameId)
-        .collection<Message>('spymaster-chat', ref => ref.orderBy('timestamp'))
-        .valueChanges();
+    const q = query(
+        collection(this.firestore, 'games', gameId, 'spymaster-chat'),
+        orderBy('timestamp'),
+    );
+    return collectionData(q) as Observable<Message[]>;
   }
 
   toggleChatShown(setTo?: boolean) {

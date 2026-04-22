@@ -8,6 +8,7 @@ import {Clue, Game, TeamType} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
+  standalone: false,
   selector: 'app-word-history',
   templateUrl: './word-history.component.html',
   styleUrls: ['./word-history.component.scss'],
