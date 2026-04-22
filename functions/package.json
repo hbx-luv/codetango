@@ -1,7 +1,6 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "tslint --project tsconfig.json",
     "build": "tsc",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
@@ -10,7 +9,7 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "14"
+    "node": "20"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -26,7 +25,6 @@
   },
   "devDependencies": {
     "firebase-functions-test": "^0.1.6",
-    "tslint": "^5.12.0",
     "typescript": "^5.1.6"
   },
   "private": true
