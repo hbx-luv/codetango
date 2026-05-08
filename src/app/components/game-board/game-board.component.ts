@@ -1,12 +1,9 @@
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {get} from 'lodash';
-import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
-import {UserService} from 'src/app/services/user.service';
-import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole, User} from '../../../../types';
+import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
 import { getSrc } from '../game/tile-util';
 
 @Component({
@@ -14,7 +11,7 @@ import { getSrc } from '../game/tile-util';
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss'],
 })
-export class GameBoardComponent implements OnChanges, OnDestroy {
+export class GameBoardComponent implements OnChanges {
   // readonly versions of the game board won't user the room
   @Input() room?: Room;
 
@@ -31,17 +28,10 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
   tiles: Tile[];
   advice: string;
 
-  // Cache of user docs for users who have marked tiles as candidates,
-  // populated as candidates appear so we can render their avatars.
-  candidateUsers: {[userId: string]: User} = {};
-  private candidateSubscriptions = new Set<string>();
-  private destroyed$ = new Subject<void>();
-
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly clueService: ClueService,
-      private readonly userService: UserService,
   ) {}
 
   ngOnChanges() {
@@ -56,34 +46,7 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
       } else {
         this.tiles = this.game.tiles;
       }
-
-      // Make sure we've loaded user docs for everyone currently marked as a
-      // candidate so their avatars can render.
-      for (const tile of this.tiles) {
-        if (tile.candidates) {
-          for (const userId of tile.candidates) {
-            this.subscribeToCandidateUser(userId);
-          }
-        }
-      }
     }
-  }
-
-  ngOnDestroy() {
-    this.destroyed$.next();
-    this.destroyed$.complete();
-  }
-
-  private subscribeToCandidateUser(userId: string) {
-    if (this.candidateSubscriptions.has(userId)) {
-      return;
-    }
-    this.candidateSubscriptions.add(userId);
-    this.userService.getUser(userId)
-        .pipe(takeUntil(this.destroyed$))
-        .subscribe(user => {
-          this.candidateUsers[userId] = user;
-        });
   }
 
   get type(): GameType {
@@ -166,11 +129,6 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
 
     if (this.throwingDart) {
       tile.dartedBy = `${this.myTeam}` as TileRole;
-    }
-
-    // Once revealed, the candidate avatars are no longer relevant.
-    if (tile.candidates && tile.candidates.length) {
-      tile.candidates = [];
     }
 
     const updates: Partial<Game> = {tiles: this.tiles};
@@ -270,51 +228,6 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
 
   remainingGuesses(clue: Clue): number {
     return clue ? clue.maxGuesses - clue.guessesMade.length : 0;
-  }
-
-  /**
-   * Whether the current user is allowed to mark/unmark candidates on this
-   * board. Spymasters know the answers and observers aren't playing, so we
-   * hide the toggle for them. Completed games (rendered as readonly cards on
-   * history pages, etc.) also shouldn't expose the control. Players can mark
-   * candidates even when it isn't their team's turn so they can plan ahead.
-   */
-  canMarkCandidate(tile: Tile): boolean {
-    if (!tile || tile.selected) return false;
-    if (!this.game || this.game.completedAt) return false;
-    if (this.spymaster) return false;
-    if (this.isObserver) return false;
-    if (!this.authService.currentUserId) return false;
-    return true;
-  }
-
-  isCandidate(tile: Tile): boolean {
-    return !!tile.candidates &&
-        tile.candidates.includes(this.authService.currentUserId);
-  }
-
-  toggleCandidate(event: Event, tile: Tile) {
-    // Stop the click from also triggering selectTile on the underlying tile
-    // button (which would reveal the tile).
-    event.stopPropagation();
-    event.preventDefault();
-
-    if (!this.canMarkCandidate(tile)) {
-      return;
-    }
-
-    const userId = this.authService.currentUserId;
-    const candidates = tile.candidates ? [...tile.candidates] : [];
-    const idx = candidates.indexOf(userId);
-    if (idx === -1) {
-      candidates.push(userId);
-      this.subscribeToCandidateUser(userId);
-    } else {
-      candidates.splice(idx, 1);
-    }
-    tile.candidates = candidates;
-
-    this.gameService.updateGame(this.game.id, {tiles: this.tiles});
   }
 
   /**

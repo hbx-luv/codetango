@@ -52,9 +52,6 @@ export interface Tile {
   dartedBy?: TileRole;
   selected: boolean;
   selectedBy?: string;  // user who clicked
-
-  // user ids who have pinned this tile as a candidate they're considering
-  candidates?: string[];
 }
 
 // The players that make up a team

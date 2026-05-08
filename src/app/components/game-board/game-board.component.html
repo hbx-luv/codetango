@@ -24,33 +24,6 @@
       </ion-button>
 
       <img class="dart" src="../../../assets/{{ tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="tile.dartedBy">
-
-      <!-- candidate toggle: lets a player pin themselves to the tile so
-           teammates can see what they're considering. Click is captured here
-           so it never reveals the tile. -->
-      <button
-        type="button"
-        class="candidate-toggle"
-        [class.active]="isCandidate(tile)"
-        (click)="toggleCandidate($event, tile)"
-        *ngIf="canMarkCandidate(tile)"
-        [attr.aria-label]="isCandidate(tile) ? 'Unmark candidate' : 'Mark as candidate'"
-        [tooltip]="isCandidate(tile) ? 'Unmark candidate' : 'Mark as candidate'"
-      >
-        <ion-icon [name]="isCandidate(tile) ? 'star' : 'star-outline'"></ion-icon>
-      </button>
-
-      <!-- avatars of teammates currently considering this tile, pinned 50%
-           inside / 50% hanging off the bottom edge -->
-      <div class="candidates" *ngIf="!tile.selected && tile.candidates?.length">
-        <ion-avatar
-          class="candidate-avatar"
-          *ngFor="let userId of tile.candidates"
-          [tooltip]="candidateUsers[userId]?.nickname || candidateUsers[userId]?.name"
-        >
-          <ion-img [src]="candidateUsers[userId]?.photoURL"></ion-img>
-        </ion-avatar>
-      </div>
     </div>
   </ion-grid>
   <ion-row class="advice-row" *ngIf="!isObserver">
