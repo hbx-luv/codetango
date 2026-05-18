@@ -16,7 +16,8 @@
     "deploy:prod": "npm run build:prod && firebase deploy -P prod",
     "deploy-functions:prod": "firebase deploy --only functions -P prod",
     "deploy-hosting:prod": "npm run build:prod && firebase deploy --only hosting -P prod",
-    "indexes": "firebase firestore:indexes > firestore.indexes.json -P prod"
+    "indexes": "firebase firestore:indexes > firestore.indexes.json -P prod",
+    "lint": "eslint \"src/**/*.ts\" \"functions/src/**/*.ts\" \"types.ts\""
   },
   "private": true,
   "dependencies": {
@@ -46,7 +47,10 @@
     "@types/node": "^20.12.0",
     "firebase-tools": "~14.3.0",
     "ts-node": "~10.9.0",
-    "typescript": "~5.5.0"
+    "typescript": "~5.8.0",
+    "eslint": "^10.4.0",
+    "@eslint/js": "^9.39.0",
+    "typescript-eslint": "^8.59.0"
   },
   "description": "The best way to play codenames",
   "overrides": {
@@ -132,6 +136,8 @@
     "is-wsl": "2.2.0",
     "jsonfile": "6.2.1",
     "universalify": "2.0.1",
-    "is-what": "5.5.0"
+    "is-what": "5.5.0",
+    "flat-cache": "6.1.21",
+    "hashery": "2.0.0"
   }
 }

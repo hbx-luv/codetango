@@ -52,48 +52,35 @@ export class UtilService {
   /**
    * Show a confirmation popup, return true if they confirm
    */
-  confirm(
+  async confirm(
       header: string, message: string, confirmText: string,
       cancelText: string): Promise<boolean> {
-    return new Promise(async resolve => {
-      const alert = await this.alertCtrl.create({
-        header,
-        message,
-        buttons: [
-          {
-            text: cancelText,
-            role: 'cancel',
-            handler: () => {
-              resolve(false);
-            }
-          },
-          {
-            text: confirmText,
-            handler: () => {
-              resolve(true);
-            }
-          }
-        ]
-      });
-
-      await alert.present();
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [
+        {text: cancelText, role: 'cancel'},
+        {text: confirmText},
+      ],
     });
+    await alert.present();
+    const {role} = await alert.onDidDismiss();
+    return role !== 'cancel';
   }
 
   /**
    * Show a confirmation popup, return true if they confirm
    */
-  alert(header: string, message: string, confirmText: string):
+  async alert(header: string, message: string, confirmText: string):
       Promise<boolean> {
-    return new Promise(async resolve => {
-      const alert = await this.alertCtrl.create({
-        header,
-        message,
-        buttons: [{text: confirmText}],
-      });
-
-      await alert.present();
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [{text: confirmText}],
     });
+    await alert.present();
+    await alert.onDidDismiss();
+    return true;
   }
 
   /**

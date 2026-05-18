@@ -13,7 +13,6 @@ try {
 const db = admin.firestore();
 
 
-// @ts-ignore
 function getGameType(game: Game, wordList: string): GameType {
   if (game) {
     if (game?.gameType) {
