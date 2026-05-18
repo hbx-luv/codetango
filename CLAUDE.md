@@ -78,24 +78,28 @@ the emulator-connect calls would still firewall the app from prod.
 If you find yourself wanting to "make the dev server talk to prod" for any
 reason — don't. Use `npm run start:prod-data` for one-off needs.
 
-## Local emulators currently don't run
+## Local emulators
 
-`npm run emulators` and `npm run start:emulators` will crash with
-`TypeError: pathRegexp is not a function` because firebase-tools 14 uses
-express 4, which hard-codes the `path-to-regexp@~0.1.x` callable-module
-shape, and that whole 0.x line is rejected by the greenflagged mirror as
-vulnerable. The override pins `path-to-regexp@6.3.0` which has a class-based
-API instead.
+`npm run emulators` boots auth, firestore, and functions against the
+`demo-codetango` project. UI at http://127.0.0.1:4001/, hub at 4400,
+auth 9099, firestore 8090, functions 5001.
 
-**Workarounds:**
+This used to crash with `TypeError: pathRegexp is not a function`
+because firebase-tools' emulator code (and its bundled express 4) needs
+the callable `path-to-regexp@~0.1.x` API, and the global override pins
+`6.3.0` (class-based) to satisfy the mirror's CVE policy. Fix is a
+**scoped npm override**:
 
-- Develop without emulators (default `npm start`) — UI works, Firestore/Auth
-  calls fail in the browser console.
-- If you need a real backend, `npm run start:prod-data` — but be aware
-  every action lands on prod.
-- A clean fix would either be (a) getting `path-to-regexp@0.1.10+` vetted
-  (newer 0.1.x has the security patch), or (b) bumping firebase-tools past
-  the express-4 era, or (c) patching express via patch-package.
+```json
+"express@4": { "path-to-regexp": "0.1.13" }
+```
+
+`0.1.13` is patched for the relevant ReDoS CVE and was vetted into the
+mirror specifically to unblock this. The flat `path-to-regexp@6.3.0`
+override stays for every other consumer in the tree (router, superstatic,
+etc.). Don't merge the two — express genuinely needs the 0.1.x callable
+shape *and* the 0.1.x route syntax (`:name(*)` custom-pattern form),
+neither of which 1.x+ supports.
 
 ## Build / test / lint
 

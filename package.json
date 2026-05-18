@@ -67,6 +67,9 @@
     "is-obj": "2.0.0",
     "@apidevtools/json-schema-ref-parser": "15.3.5",
     "path-to-regexp": "6.3.0",
+    "express@4": {
+      "path-to-regexp": "0.1.13"
+    },
     "@sindresorhus/merge-streams": "2.3.0",
     "unicorn-magic": "0.1.0",
     "protobufjs": "8.0.3",
