@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
+import {onCall} from 'firebase-functions/v2/https';
 
 import {Game} from '../types';
 import {sendSpymasterMessage} from '../util/message';
@@ -13,7 +13,8 @@ try {
 
 const db = admin.firestore();
 
-export const askChatGpt = functions.https.onCall(async (gameAndTeam) => {
+export const askChatGpt = onCall(async (req) => {
+  const gameAndTeam = req.data as string;
   const [gameId, team] = gameAndTeam.split('_');
   return getClue(gameId, team);
 });

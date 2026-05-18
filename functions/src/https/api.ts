@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
+import {onRequest} from 'firebase-functions/v2/https';
 
 import {Game, User} from '../types';
 
@@ -19,7 +19,7 @@ main.use('/v1', app);
 main.use(express.json());
 
 // the actual cloud function
-export const api = functions.https.onRequest(main);
+export const api = onRequest(main);
 
 app.get('/', async (request, response) => {
   response.send(`

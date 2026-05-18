@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
-import * as functions from 'firebase-functions/v1';
+import {onDocumentUpdated} from 'firebase-functions/v2/firestore';
 import {without} from 'lodash';
 
 import {Game, GameStatus, TileRole, User} from '../types';
@@ -16,11 +16,13 @@ try {
 const db = admin.firestore();
 
 export const onUpdateGame =
-    functions.firestore.document('games/{gameId}')
-        .onUpdate(async (gameDoc, _context) => {
-          await updateRemainingAgents(gameDoc.after);
-          await determineGameOver(gameDoc.after);
-          await sanitizeBoard(gameDoc.before, gameDoc.after);
+    onDocumentUpdated('games/{gameId}', async (event) => {
+          const change = event.data;
+          if (!change) return 'No change data';
+
+          await updateRemainingAgents(change.after);
+          await determineGameOver(change.after);
+          await sanitizeBoard(change.before, change.after);
 
           return 'Done';
         });

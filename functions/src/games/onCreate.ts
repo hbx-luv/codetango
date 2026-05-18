@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
+import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 import {shuffle} from 'lodash';
 
 import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
@@ -44,8 +44,10 @@ function getGameType(game: Game, wordList: string): GameType {
 }
 
 export const onCreateGame =
-    functions.firestore.document('games/{gameId}')
-        .onCreate(async (snapshot, _context) => {
+    onDocumentCreated('games/{gameId}', async (event) => {
+          const snapshot = event.data;
+          if (!snapshot) return;
+
           // Add the random stuff to this game
           const gameReference = snapshot.ref;
           const gameSnapShot = await gameReference.get();
@@ -81,7 +83,8 @@ export const onCreateGame =
           }
 
           return 'Done!';
-        });
+        },
+    );
 
 async function generateNewGameTiles(wordList: string): Promise<Tile[]> {
   const words = await getWords(wordList);

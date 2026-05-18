@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
+import {onDocumentDeleted} from 'firebase-functions/v2/firestore';
 
 try {
   admin.initializeApp();
@@ -13,7 +13,9 @@ import {recalcElo, nukeHistoryForGame} from '../util/elo';
 import {Game} from '../types';
 
 export const onDeleteGame =
-    functions.firestore.document('games/{gameId}').onDelete(gameDoc => {
+    onDocumentDeleted('games/{gameId}', event => {
+      const gameDoc = event.data;
+      if (!gameDoc) return;
       const game = {...gameDoc.data(), id: gameDoc.id} as Game
       return handleGameDeleted(game);
     });

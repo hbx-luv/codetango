@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
-import * as functions from 'firebase-functions/v1';
+import {onDocumentUpdated} from 'firebase-functions/v2/firestore';
 import {map, uniqBy} from 'lodash';
 
 import {Clue, Tile} from '../../types';
@@ -16,15 +16,17 @@ try {
 const db = admin.firestore();
 
 export const onUpdateClue =
-    functions.firestore.document('games/{gameId}/clues/{clueId}')
-        .onUpdate(async (doc, context) => {
-          const gameId = context.params.gameId;
+    onDocumentUpdated('games/{gameId}/clues/{clueId}', async (event) => {
+          const change = event.data;
+          if (!change) return 'No change data';
 
-          const before = doc.before.exists ? doc.before.data() as Clue : null;
-          const after = doc.after.exists ? doc.after.data() as Clue : null;
+          const gameId = event.params.gameId;
+
+          const before = change.before.exists ? change.before.data() as Clue : null;
+          const after = change.after.exists ? change.after.data() as Clue : null;
 
           if (after) {
-            await sanitizeGuessesMade(after, doc.after);
+            await sanitizeGuessesMade(after, change.after);
 
             // don't send the guess message for games with picture tiles
             const game = await getGame(db, gameId);
