@@ -8,7 +8,7 @@ import {getSpymasterName} from '../clues';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 

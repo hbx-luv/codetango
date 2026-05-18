@@ -6,7 +6,7 @@ import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../typ
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
@@ -45,7 +45,7 @@ function getGameType(game: Game, wordList: string): GameType {
 
 export const onCreateGame =
     functions.firestore.document('games/{gameId}')
-        .onCreate(async (snapshot, context) => {
+        .onCreate(async (snapshot, _context) => {
           // Add the random stuff to this game
           const gameReference = snapshot.ref;
           const gameSnapShot = await gameReference.get();

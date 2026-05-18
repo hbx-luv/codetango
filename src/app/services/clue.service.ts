@@ -67,7 +67,7 @@ export class ClueService {
 
   async approveClue(gameId: string, clue: ProposedClue) {
     await this.setClueStatus(gameId, clue.id, ClueStatus.APPROVED);
-    const {status, id, ...rest} = clue;
+    const {status: _status, id: _id, ...rest} = clue;
     return this.addClue(gameId, rest);
   }
 

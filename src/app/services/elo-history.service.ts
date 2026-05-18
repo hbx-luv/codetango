@@ -90,7 +90,7 @@ export class EloHistoryService {
   }
 
   sanitize(dataPoint: any) {
-    const {date, ...rest} = dataPoint;
+    const {date: _date, ...rest} = dataPoint;
     return rest;
   }
 

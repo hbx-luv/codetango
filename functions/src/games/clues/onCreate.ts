@@ -7,7 +7,7 @@ import {sendSpymasterMessage} from '../../util/message';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 

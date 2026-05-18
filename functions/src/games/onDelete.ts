@@ -3,7 +3,7 @@ import * as functions from 'firebase-functions/v1';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing
 }
 const db = admin.firestore();

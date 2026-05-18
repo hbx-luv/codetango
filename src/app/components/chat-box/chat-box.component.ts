@@ -103,7 +103,7 @@ export class ChatBoxComponent implements OnInit, OnChanges {
       try {
         this.myScrollContainer.nativeElement.scrollTop =
             this.myScrollContainer.nativeElement.scrollHeight;
-      } catch (err) {
+      } catch (_err) {
       }
     }, timeout);
   }

@@ -7,7 +7,7 @@ import {Game, User} from '../types';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 const db: admin.firestore.Firestore = admin.firestore();
@@ -45,7 +45,7 @@ app.get('/games', async (request, response) => {
       return game;
     });
     response.json(games);
-  } catch (error) {
+  } catch (_error) {
     response.status(500).send({
       error: `could not retrieve games`,
     });
@@ -65,7 +65,7 @@ app.get('/users/:userId', async (request, response) => {
     user.photoURL = '[redacted]';
 
     response.json(user);
-  } catch (error) {
+  } catch (_error) {
     response.status(500).send({
       error: `could not retrieve games`,
     });

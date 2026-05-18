@@ -9,7 +9,7 @@ import {sendSpymasterMessage} from '../util/message';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
@@ -17,7 +17,7 @@ const db = admin.firestore();
 
 export const onUpdateGame =
     functions.firestore.document('games/{gameId}')
-        .onUpdate(async (gameDoc, context) => {
+        .onUpdate(async (gameDoc, _context) => {
           await updateRemainingAgents(gameDoc.after);
           await determineGameOver(gameDoc.after);
           await sanitizeBoard(gameDoc.before, gameDoc.after);

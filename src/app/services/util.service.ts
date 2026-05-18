@@ -30,7 +30,7 @@ export class UtilService {
         document.execCommand('copy');
         this.showToast('Copied link to clipboard');
         return true;
-      } catch (ex) {
+      } catch (_ex) {
         this.showToast('Copy to clipboard failed');
         return false;
       } finally {
