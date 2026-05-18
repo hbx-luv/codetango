@@ -16,7 +16,7 @@ export class UtilService {
   // IE: The clipboard feature may be disabled by an administrator. By
   // default a prompt is shown the first time the clipboard is
   // used (per session).
-  copyToClipboard(text) {
+  copyToClipboard(text): boolean | undefined {
     if (document.queryCommandSupported &&
         document.queryCommandSupported('copy')) {
       const textarea = document.createElement('textarea');
@@ -29,6 +29,7 @@ export class UtilService {
         // Security exception may be thrown by some browsers.
         document.execCommand('copy');
         this.showToast('Copied link to clipboard');
+        return true;
       } catch (ex) {
         this.showToast('Copy to clipboard failed');
         return false;
@@ -36,6 +37,7 @@ export class UtilService {
         document.body.removeChild(textarea);
       }
     }
+    return undefined;
   }
 
   async showToast(message: string, duration: number = 2000, options?) {

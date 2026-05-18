@@ -11,8 +11,9 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
-import * as _ from 'lodash';
 import {Subject} from 'rxjs';
+
+let uniqueIdCounter = 0;
 import {takeUntil} from 'rxjs/operators';
 import {EloHistoryService} from 'src/app/services/elo-history.service';
 
@@ -40,7 +41,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
   @Input() userId: string;
   @Input() limit?: number;
   chart: Chart|undefined;
-  uniqueId: string = _.uniqueId();
+  uniqueId: string = String(++uniqueIdCounter);
 
   lastDataString = '';
 
@@ -69,7 +70,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
     }
     this.lastDataString = dataString;
 
-    const eloPoints = _.map(dataPoints, 'elo');
+    const eloPoints: number[] = dataPoints.map(d => d.elo);
     const allTime = !this.limit || this.limit > eloPoints.length;
 
     if (this.chart) {
@@ -79,7 +80,7 @@ export class EloChartComponent implements OnChanges, OnDestroy {
     this.chart = new Chart('chart-' + this.uniqueId, {
       type: 'line',
       data: {
-        labels: _.map(dataPoints, 'date'),
+        labels: dataPoints.map(d => d.date),
         datasets: [{
           label: 'Elo',
           data: eloPoints,
@@ -106,8 +107,8 @@ export class EloChartComponent implements OnChanges, OnDestroy {
             ticks: {
               maxTicksLimit: 6,
             },
-            suggestedMin: _.max(eloPoints),
-            suggestedMax: _.max(eloPoints),
+            suggestedMin: Math.max(...eloPoints),
+            suggestedMax: Math.max(...eloPoints),
           },
           x: {
             grid: {display: false},

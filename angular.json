@@ -36,7 +36,8 @@
               "src/global.scss"
             ],
             "scripts": [],
-            "serviceWorker": "ngsw-config.json"
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
             "production": {
@@ -64,6 +65,14 @@
             },
             "ci": {
               "progress": false
+            },
+            "prod-data": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod-data.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": ""
@@ -79,6 +88,9 @@
             },
             "ci": {
               "progress": false
+            },
+            "prod-data": {
+              "buildTarget": "app:build:prod-data"
             }
           }
         },
@@ -86,36 +98,6 @@
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
             "buildTarget": "app:build"
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/test.ts",
-            "polyfills": ["src/polyfills.ts"],
-            "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "karma.conf.js",
-            "styles": [],
-            "scripts": [],
-            "assets": [
-              {
-                "glob": "favicon.ico",
-                "input": "src/",
-                "output": "/"
-              },
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "/assets"
-              },
-              "src/manifest.webmanifest"
-            ]
-          },
-          "configurations": {
-            "ci": {
-              "progress": false,
-              "watch": false
-            }
           }
         }
       }

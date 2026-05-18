@@ -24,7 +24,7 @@ import {Game} from 'types';
   styleUrls: ['./game-detail.page.scss'],
 })
 export class GameDetailPage implements OnDestroy {
-  private destroyed = new ReplaySubject<never>();
+  private destroyed = new ReplaySubject<void>();
 
   roomId: string;
   gameId: string;
@@ -76,7 +76,7 @@ export class GameDetailPage implements OnDestroy {
     const snap = await getDocs(deletedQuery);
     if (snap.docs.length > 0) {
       const data = snap.docs[0].data();
-      delete data.id;
+      delete data['id'];
       await setDoc(doc(this.firestore, 'games', this.game.id), data);
       await deleteDoc(snap.docs[0].ref);
     } else {

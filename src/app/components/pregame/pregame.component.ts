@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {clone, shuffle} from 'lodash';
 import {firstValueFrom, Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {UserService} from 'src/app/services/user.service';
@@ -117,7 +116,7 @@ export class PregameComponent {
     }
 
     this.roomService.updateRoom(this.room.id, updates);
-    this.lastSettings = clone(this.room);
+    this.lastSettings = {...this.room};
   }
 
   removeUser(userId: string) {
@@ -136,7 +135,8 @@ export class PregameComponent {
   async assignUsersToRandomTeams() {
     const roomSize = this.room.userIds.length;
     const halfway = Math.ceil(roomSize / 2);
-    const randomizedUsers = shuffle(this.room.userIds);
+    const randomizedUsers = [...this.room.userIds]
+        .sort(() => Math.random() - 0.5);
     const blueTeamUsers = randomizedUsers.slice(0, halfway);
     const redTeamUsers = randomizedUsers.slice(halfway);
 

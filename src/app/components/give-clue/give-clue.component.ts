@@ -24,7 +24,7 @@ const SMALL_WORDS = ['A', 'AN', 'AND', 'TO', 'THE'];
   styleUrls: ['./give-clue.component.scss'],
 })
 export class GiveClueComponent implements OnInit, OnDestroy {
-  private destroyed = new ReplaySubject<never>();
+  private destroyed = new ReplaySubject<void>();
 
   @Input() game: Game;
   @Input() isMyTurn: boolean;

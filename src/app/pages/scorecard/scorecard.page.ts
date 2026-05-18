@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {AlertController} from '@ionic/angular';
-import * as moment from 'moment';
+import {DateTime} from 'luxon';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
@@ -54,7 +54,7 @@ export class ScorecardPage {
     this.user$ = this.userService.getUser(this.userId).pipe(map(user => {
       if (user.stats && typeof user.stats.lastPlayed === 'number') {
         user.stats.lastPlayed =
-            moment(user.stats.lastPlayed).format('MMM D, YYYY');
+            DateTime.fromMillis(user.stats.lastPlayed).toFormat('LLL d, yyyy');
 
         this.getRecentChanges(user.stats);
       }

@@ -13,7 +13,6 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import {omit} from 'lodash';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Clue, ClueStatus, ProposedClue, Tile} from 'types';
@@ -68,7 +67,8 @@ export class ClueService {
 
   async approveClue(gameId: string, clue: ProposedClue) {
     await this.setClueStatus(gameId, clue.id, ClueStatus.APPROVED);
-    return this.addClue(gameId, omit(clue, ['status', 'id']));
+    const {status, id, ...rest} = clue;
+    return this.addClue(gameId, rest);
   }
 
   denyClue(gameId: string, clueId: string) {

@@ -38,7 +38,8 @@ export class LeaderboardPage implements OnDestroy {
 
           const recentTimestamp = Date.now() - (ONE_DAY * RECENT_DAYS);
           this.playedRecently = this.hasGames.filter(
-              user => user.stats?.lastPlayed > recentTimestamp);
+              user => typeof user.stats?.lastPlayed === 'number' &&
+                  user.stats.lastPlayed > recentTimestamp);
         });
   }
 

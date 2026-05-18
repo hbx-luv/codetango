@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -48,10 +47,10 @@ export class GameComponent {
 
   get myTeam(): TeamType {
     const {currentUserId} = this.authService;
-    if (get(this.game, 'redTeam.userIds').includes(currentUserId)) {
+    if (this.game?.redTeam?.userIds?.includes(currentUserId)) {
       return TeamType.RED;
     }
-    if (get(this.game, 'blueTeam.userIds').includes(currentUserId)) {
+    if (this.game?.blueTeam?.userIds?.includes(currentUserId)) {
       return TeamType.BLUE;
     }
     return TeamType.OBSERVER;
@@ -63,16 +62,16 @@ export class GameComponent {
 
   get myTurn(): boolean {
     const {currentUserId} = this.authService;
-    return get(this.game, 'redTeam.userIds').includes(currentUserId) &&
-        get(this.game, 'status') === GameStatus.REDS_TURN ||
-        get(this.game, 'blueTeam.userIds').includes(currentUserId) &&
-        get(this.game, 'status') === GameStatus.BLUES_TURN;
+    return this.game?.redTeam?.userIds?.includes(currentUserId) &&
+        this.game?.status === GameStatus.REDS_TURN ||
+        this.game?.blueTeam?.userIds?.includes(currentUserId) &&
+        this.game?.status === GameStatus.BLUES_TURN;
   }
 
   get spymaster(): boolean {
     const {currentUserId} = this.authService;
-    return get(this.game, 'redTeam.spymaster') === currentUserId ||
-        get(this.game, 'blueTeam.spymaster') === currentUserId;
+    return this.game?.redTeam?.spymaster === currentUserId ||
+        this.game?.blueTeam?.spymaster === currentUserId;
   }
 
   get dartColor(): string {

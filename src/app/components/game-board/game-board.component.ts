@@ -1,5 +1,4 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
-import {get} from 'lodash';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
@@ -85,10 +84,10 @@ export class GameBoardComponent implements OnChanges {
 
   get myTeam(): TeamType {
     const {currentUserId} = this.authService;
-    if (get(this.game, 'redTeam.userIds').includes(currentUserId)) {
+    if (this.game?.redTeam?.userIds?.includes(currentUserId)) {
       return TeamType.RED;
     }
-    if (get(this.game, 'blueTeam.userIds').includes(currentUserId)) {
+    if (this.game?.blueTeam?.userIds?.includes(currentUserId)) {
       return TeamType.BLUE;
     }
     return TeamType.OBSERVER;

@@ -6,12 +6,11 @@ import {
   limit,
   orderBy,
   query,
+  QueryConstraint,
   where,
 } from '@angular/fire/firestore';
 import {firstValueFrom} from 'rxjs';
-import * as _ from 'lodash';
 import {DateTime} from 'luxon';
-import moment from 'moment';
 import {map, take} from 'rxjs/operators';
 import {Stats} from 'types';
 
@@ -25,7 +24,7 @@ export class EloHistoryService {
   ) {}
 
   getEloHistoryForUser(userId: string, limitCount?: number) {
-    const constraints = [
+    const constraints: QueryConstraint[] = [
       where('userId', '==', userId),
       orderBy('timestamp', 'desc'),
     ];
@@ -40,7 +39,7 @@ export class EloHistoryService {
         ...constraints,
     );
     return collectionData(q, {idField: 'id'}).pipe(map(actions => {
-      return _(actions).map(this.mapDataPoint.bind(this)).reverse().value();
+      return actions.map(this.mapDataPoint.bind(this)).reverse();
     }));
   }
 
@@ -72,7 +71,7 @@ export class EloHistoryService {
   }
 
   getPeakElo(userId: string, order: 'desc'|'asc') {
-    const constraints = [
+    const constraints: QueryConstraint[] = [
       where('userId', '==', userId),
       orderBy('elo', order),
       limit(1),
@@ -86,12 +85,13 @@ export class EloHistoryService {
 
   mapDataPoint(dataPoint: any) {
     const data = this.sanitize(dataPoint);
-    data.date = moment(data.timestamp).format('MM/DD');
+    data.date = DateTime.fromMillis(data.timestamp).toFormat('MM/dd');
     return data;
   }
 
   sanitize(dataPoint: any) {
-    return _.omit(dataPoint, ['date']);
+    const {date, ...rest} = dataPoint;
+    return rest;
   }
 
   getMidnight(daysAgo: number = 0) {
