@@ -83,6 +83,39 @@ export class UtilService {
     return true;
   }
 
+  async promptForText(
+      header: string,
+      message: string,
+      placeholder: string,
+      confirmText: string,
+      cancelText: string,
+      ): Promise<string|null> {
+    return new Promise(resolve => {
+      this.alertCtrl
+          .create({
+            header,
+            message,
+            inputs: [{name: 'name', type: 'text', placeholder}],
+            buttons: [
+              {
+                text: cancelText,
+                role: 'cancel',
+                handler: () => {
+                  resolve(null);
+                },
+              },
+              {
+                text: confirmText,
+                handler: (response) => {
+                  resolve(response.name || null);
+                },
+              },
+            ],
+          })
+          .then(ionAlert => ionAlert.present());
+    });
+  }
+
   /**
    * Present a loader with the given message, then return the loader
    * so the caller can dismiss it with loading.dismiss();

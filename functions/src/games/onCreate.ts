@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
 import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 
 import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
+import {chatgptApiKey, getThemedWords} from '../util/chatgpt';
 
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
@@ -21,7 +22,14 @@ try {
 const db = admin.firestore();
 
 
-function getGameType(game: Game, wordList: string): GameType {
+function getGameType(
+    game: Game,
+    wordList: string,
+    aiWordlistTheme?: string,
+    ): GameType {
+  // if generating an AI word list, it'll always be words
+  if (aiWordlistTheme) return GameType.WORDS;
+
   if (game) {
     if (game?.gameType) {
       return game.gameType;
@@ -37,6 +45,9 @@ function getGameType(game: Game, wordList: string): GameType {
       if (game.createdAt < 1604606378903) {
         return GameType.LEGACY_EMOJIS;
       } else {
+        if (wordList === 'emoji-remix') {
+          return GameType.EMOJI_REMIX;
+        }
         return GameType.EMOJIS;
       }
     }
@@ -47,12 +58,16 @@ function getGameType(game: Game, wordList: string): GameType {
     return GameType.MEMES;
   } else if (wordList === 'emojis') {
     return GameType.EMOJIS;
+  } else if (wordList === 'emoji-remix') {
+    return GameType.EMOJI_REMIX
   }
   return GameType.WORDS;
 }
 
 export const onCreateGame =
-    onDocumentCreated('games/{gameId}', async (event) => {
+    onDocumentCreated(
+        {document: 'games/{gameId}', secrets: [chatgptApiKey]},
+        async (event) => {
           const snapshot = event.data;
           if (!snapshot) return;
 
@@ -67,13 +82,16 @@ export const onCreateGame =
           // If the game is created with tiles already set, this game was
           // probably migrated. Do not modify any of the other fields
           if (!game.tiles) {
-            const wordList = await getWordList(game.roomId);
+            const {wordList = 'original', aiWordlistTheme} =
+                await getRoom(game.roomId);
 
             updates.hasPictures =
                 (wordList === 'pictures' || wordList === 'memes');
-            updates.hasEmojis = wordList === 'emojis';
-            updates.gameType = getGameType(game, wordList);
-            updates.tiles = await generateNewGameTiles(wordList);
+            updates.hasEmojis =
+                wordList === 'emojis' || wordList === 'emoji-remix';
+            updates.gameType = getGameType(game, wordList, aiWordlistTheme);
+            updates.tiles =
+                await generateNewGameTiles(wordList, aiWordlistTheme);
             const blueTeamTiles = updates.tiles.filter(
                 tile => tile.role === TileRole.BLUE && !tile.selected);
             const redTeamTiles = updates.tiles.filter(
@@ -94,8 +112,12 @@ export const onCreateGame =
         },
     );
 
-async function generateNewGameTiles(wordList: string): Promise<Tile[]> {
-  const words = await getWords(wordList);
+async function generateNewGameTiles(
+    wordList: string,
+    aiWordlistTheme?: string,
+    ): Promise<Tile[]> {
+  const words = aiWordlistTheme ? await getThemedWords(aiWordlistTheme) :
+                                  await getWords(wordList);
   const tiles = words.map(word => {
     return {
       word, role: TileRole.CIVILIAN, selected: false
@@ -121,7 +143,7 @@ async function generateNewGameTiles(wordList: string): Promise<Tile[]> {
 async function getWords(wordList: string): Promise<string[]> {
   const snapshot = await db.collection('wordlists').doc(wordList).get();
   if (snapshot.exists && snapshot.data()) {
-    console.log('defaultWords exists');
+    console.log(`word list "${wordList}" exists`);
     const newWordsForGame = [] as string[];
     const {words} = snapshot.data() as WordList;
 
@@ -154,9 +176,9 @@ async function getWords(wordList: string): Promise<string[]> {
   }
 }
 
-async function getWordList(roomId: string): Promise<string> {
+async function getRoom(roomId: string): Promise<Room> {
   const roomSnapshot = await db.collection('rooms').doc(roomId).get();
-  return (roomSnapshot.data() as Room).wordList || 'original';
+  return (roomSnapshot.data() as Room);
 }
 
 function getRoleCounts(wordList: string) {

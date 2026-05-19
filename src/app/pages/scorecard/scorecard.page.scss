@@ -1,4 +1,4 @@
-// Ionic adds a “can-go-back” class to the page which the
+// Ionic adds a "can-go-back" class to the page which the
 // ionic-back-button uses this to determine if it should
 // be visible. Hide our custom back in that case
 ::ng-deep .can-go-back .custom-back {
@@ -98,4 +98,49 @@
       padding-left: 16px;
     }
   }
+}
+
+.breakdown-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.breakdown-label {
+  flex: 0 0 120px;
+  font-weight: 600;
+  font-size: 16px;
+  margin-right: 16px;
+}
+
+.breakdown-bar-bg {
+  position: relative;
+  background: #eee;
+  border-radius: 8px;
+  height: 18px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.breakdown-bar-fill {
+  background: #3dc2ff;
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.3s;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.breakdown-bar-text {
+  position: relative;
+  z-index: 1;
+  padding-left: 12px;
+  font-size: 13px;
+  color: #222;
+  line-height: 18px;
 }

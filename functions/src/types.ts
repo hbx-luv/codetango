@@ -107,6 +107,10 @@ export interface Room {
   // server defaults to 'original'
   wordList?: string;
 
+  // when provided, use this string as a seed for the ChatGPT prompt to generate
+  // words to use
+  aiWordlistTheme?: string;
+
   // client fields
   id?: string;
   exists?: boolean;
@@ -234,6 +238,7 @@ export enum GameType {
   PICTURES = 'PICTURES',
   EMOJIS = 'EMOJIS',
   MEMES = 'MEMES',
+  EMOJI_REMIX = 'EMOJI_REMIX',
 
   // first version of emojis RIP
   LEGACY_EMOJIS = 'LEGACY_EMOJIS',

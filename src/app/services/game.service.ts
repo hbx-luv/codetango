@@ -20,6 +20,7 @@ import {
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Game} from 'types';
+import {buildAssetUrlPattern} from '../components/game/tile-util'
 
 @Injectable({providedIn: 'root'})
 export class GameService {
@@ -66,7 +67,9 @@ export class GameService {
           if (!data) {
             return {id: gameId, exists: false} as unknown as Game;
           }
-          return {...(data as Game), id: gameId, exists: true};
+          const game = {...(data as Game), id: gameId, exists: true};
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
         }),
     ) as Observable<Game>;
   }
@@ -83,7 +86,9 @@ export class GameService {
           if (!games || !games.length) {
             return null;
           }
-          return games[0] as Game;
+          const game = games[0] as Game;
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
         }),
     );
   }
@@ -103,7 +108,12 @@ export class GameService {
     }
 
     const q = query(collection(this.firestore, collectionName), ...constraints);
-    return collectionData(q, {idField: 'id'}) as Observable<Game[]>;
+    return collectionData(q, {idField: 'id'}).pipe(
+        map(games => (games as Game[]).map(game => {
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
+        })),
+    ) as Observable<Game[]>;
   }
 
   getUserGames(userId: string, limitCount?: number): Observable<Game[]> {
@@ -115,7 +125,12 @@ export class GameService {
       constraints.push(limit(limitCount));
     }
     const q = query(collection(this.firestore, 'games'), ...constraints);
-    return collectionData(q, {idField: 'id'}) as Observable<Game[]>;
+    return collectionData(q, {idField: 'id'}).pipe(
+        map(games => (games as Game[]).map(game => {
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
+        })),
+    ) as Observable<Game[]>;
   }
 
   deleteGame(id: string): Promise<void> {

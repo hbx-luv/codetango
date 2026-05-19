@@ -3,6 +3,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
+import { getSrc } from '../game/tile-util';
 
 @Component({
   standalone: false,
@@ -95,6 +96,11 @@ export class GameBoardComponent implements OnChanges {
 
   get isObserver(): boolean {
     return this.myTeam === TeamType.OBSERVER;
+  }
+
+  getPictureSrc(word: string) {
+    const pattern = this.game.assetUrlPattern;
+    return getSrc(pattern, word);
   }
 
   getColor(tile: Tile): string {
@@ -222,5 +228,28 @@ export class GameBoardComponent implements OnChanges {
 
   remainingGuesses(clue: Clue): number {
     return clue ? clue.maxGuesses - clue.guessesMade.length : 0;
+  }
+
+  /**
+   * Returns true if the given word is a color name (case insensitive)
+   */
+  private isColorClue(word: string): boolean {
+    if (!word) return false;
+    const colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'brown', 'black', 'white', 'gray', 'grey'];
+    return colors.includes(word.toLowerCase());
+  }
+
+  /**
+   * Returns true if the current clue is a color clue and it's the current team's turn
+   */
+  get shouldGreyscale(): boolean {
+    if (!this.currentClue) return false;
+    
+    // Only apply greyscale if it's the current team's turn
+    const isCurrentTeamsTurn = 
+      (this.currentClue.team === TeamType.BLUE && this.game.status === GameStatus.BLUES_TURN) ||
+      (this.currentClue.team === TeamType.RED && this.game.status === GameStatus.REDS_TURN);
+    
+    return isCurrentTeamsTurn && this.isColorClue(this.currentClue.word);
   }
 }

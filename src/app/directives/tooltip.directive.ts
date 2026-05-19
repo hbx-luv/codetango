@@ -40,7 +40,7 @@ export class TooltipDirective {
   }
 
   create() {
-    if (this.tooltip && this.tooltip.startsWith('http')) {
+    if (this.tooltip && (this.tooltip.startsWith('http') || this.tooltip.startsWith('./assets/'))) {
       this.createImg();
     } else {
       this.createText();
