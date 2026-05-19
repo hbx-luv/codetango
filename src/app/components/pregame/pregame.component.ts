@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {firstValueFrom, Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {UserService} from 'src/app/services/user.service';
@@ -15,7 +15,7 @@ import {WordListsService} from '../../services/word-lists.service';
   templateUrl: './pregame.component.html',
   styleUrls: ['./pregame.component.scss'],
 })
-export class PregameComponent {
+export class PregameComponent implements OnChanges {
   @Input() room: Room;
   @Input() game: Game;
 

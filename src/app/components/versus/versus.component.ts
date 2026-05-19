@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {Observable} from 'rxjs';
 import {UserToUserHistoryService} from 'src/app/services/user-to-user-history.service';
 import {UserToUserStats} from 'types';
@@ -9,7 +9,7 @@ import {UserToUserStats} from 'types';
   templateUrl: './versus.component.html',
   styleUrls: ['./versus.component.scss'],
 })
-export class VersusComponent {
+export class VersusComponent implements OnChanges {
   @Input() myUserId: string;
   @Input() theirUserId: string;
 

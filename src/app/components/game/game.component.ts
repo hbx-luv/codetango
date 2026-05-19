@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -10,7 +10,7 @@ import {Clue, Game, GameStatus, Room, TeamType} from 'types';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent {
+export class GameComponent implements OnInit, OnDestroy {
   @Input() game: Game;
   @Input() room?: Room;
   @Input() selectedTab = 'board-tab';

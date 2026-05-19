@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import angular from 'angular-eslint';
 
 export default tseslint.config(
   {
@@ -12,9 +13,14 @@ export default tseslint.config(
       'functions/node_modules/**',
     ],
   },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
   {
+    files: ['**/*.ts'],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...angular.configs.tsRecommended,
+    ],
+    processor: angular.processInlineTemplates,
     rules: {
       // Project-specific carve-outs. Tighten over time.
       '@typescript-eslint/no-explicit-any': 'off',
@@ -26,6 +32,16 @@ export default tseslint.config(
       'no-empty': ['warn', { allowEmptyCatch: true }],
       'no-prototype-builtins': 'off',
       'prefer-const': 'warn',
+      // Project uses NgModules + constructor DI by design; defer
+      // Angular 20-idiom migrations to a focused PR.
+      '@angular-eslint/prefer-standalone': 'off',
+      '@angular-eslint/prefer-inject': 'off',
     },
+  },
+  {
+    files: ['**/*.html'],
+    extends: [
+      ...angular.configs.templateRecommended,
+    ],
   },
 );
