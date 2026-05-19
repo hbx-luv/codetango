@@ -138,22 +138,13 @@ cd functions && npm install && npm run build
 
 ## Known modernization next steps
 
-1. **firebase-tools 14 → 15.** `functions.config()` was removed in
-   firebase-functions v7, but firebase-tools 14.3.1's emulator runtime
-   still probes it on every function load
-   (`functionsEmulatorRuntime.js:initializeFunctionsConfigHelper`),
-   killing every v2 function with `Your function was killed because it
-   raised an unhandled error`. firebase-tools 15.x drops the probe.
-   Blocked on `pg-gateway@^0.3.0-beta.4` being vetted in the mirror
-   (failed-install request queued).
-
-2. **Angular 20 → 21.** The registry has Angular 21 vetted but
+1. **Angular 20 → 21.** The registry has Angular 21 vetted but
    `@angular/fire` tops out at 20.0.1 (peers `@angular/core@^20.0.0`).
    When `@angular/fire@21` lands, bump all `@angular/*` to 21 plus the
    toolchain (`@angular-devkit/build-angular`, `@angular/cli`,
    `angular-eslint` to 21.x).
 
-3. **angular-eslint integration.** Right now `npm run lint` only lints
+2. **angular-eslint integration.** Right now `npm run lint` only lints
    TypeScript, not Angular templates. After Angular 21 bump, add
    `angular-eslint` (also 21.x) for template linting.
 
