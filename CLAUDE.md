@@ -25,34 +25,41 @@ legacy-peer-deps=true
 
 Two things follow from this:
 
-1. **Most transitive deps aren't vetted by default.** `package.json` has
-   ~90 entries in `overrides` that pin each transitive dep to whatever the
-   mirror has vetted. Some pin **forward** (to drop CVE-tainted versions —
-   `serialize-javascript`, `path-to-regexp@6`, `tar@7`); some pin **back**
-   (to keep CJS-only versions because firebase-tools' chain breaks at
-   runtime on ESM-only newer versions — `xdg-basedir@4`, `unique-string@2`,
-   `bl@4`, `is-obj@2`, etc.). **Don't delete overrides blindly.** Each
-   exists for one of those two reasons.
+1. **The `overrides` block is small and principled — keep it that way.**
+   `package.json` carries 1 scoped + 9 flat overrides. Each one is there
+   for an explicit reason: a global CVE forward-pin
+   (`path-to-regexp: 6.3.0`), a scoped emulator unblock
+   (`express@4 → path-to-regexp: 0.1.13`), a peer-mismatch pin
+   (`babel-loader: 9.2.1` — Angular wants 10, mirror tops at 9), or a
+   transitive whose desired version was rejected/needs_review by the
+   mirror (`debug`, `flat-cache`, `pac-resolver`, `jsesc`, `spdy`,
+   `fresh`). **Don't add a new override without first trying
+   `mcp__greenflagged__request_package`** — most clean transitive
+   versions auto-vet within seconds, and growing the mirror's vetted set
+   is preferred over papering over with a pin. **Don't delete an
+   existing override without first confirming `npm install`,
+   `npm run build`, `npm run lint`, and `npm run emulators` all still
+   pass** — some overrides exist for runtime compat that doesn't show up
+   as an install error.
 
 2. **`npm install` from scratch may fail** if the mirror's vetted set
    doesn't match `package.json`'s declared versions. The remedy depends on
    what's missing:
 
-   - **ETARGET** (version not in range): the existing overrides were picked
-     by hand for this project; on a fresh clone, just re-running `npm install`
-     against the locked `package.json` should be enough. If a new transitive
-     dep is in range and unvetted, manually pin to the highest vetted version
-     that satisfies, and request the missing range via greenflagged's web UI
-     or MCP.
-   - **E404** (package not in mirror): the registry auto-prioritizes
-     packages requested via failed installs. Re-run `npm install` after
-     ~30 s. If still missing after a few tries, request explicitly via the
-     greenflagged MCP tool or web UI.
+   - **ETARGET** (version not in range): the requested version isn't
+     vetted. Call `mcp__greenflagged__request_package` with the exact
+     version from the error message, then
+     `mcp__greenflagged__check_package` to confirm it lands. Most clean
+     packages auto-vet in seconds. If the mirror returns
+     `needs_review` / `pending` / `rejected`, pin the version to whatever
+     the mirror has (highest vetted) via an override and document it.
+   - **E404** (package not in mirror): same path —
+     `mcp__greenflagged__request_package`. The mirror's auto-prioritize
+     handles both E404 and ETARGET.
    - **Runtime TypeError** (`X is not a function`, `Cannot find module
      '...../package.json' is not defined by exports`): the override picked
      an ESM-only version of a CJS-consumed package. Find the older
-     CJS-friendly version and pin to that instead. Pattern in
-     `package.json` overrides: `bl: 4.1.0`, `unique-string: 2.0.0`, etc.
+     CJS-friendly version and pin to that instead.
 
 ## Local dev — the env story
 
