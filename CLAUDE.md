@@ -142,11 +142,14 @@ cd functions && npm install && npm run build
    `@angular/fire` tops out at 20.0.1 (peers `@angular/core@^20.0.0`).
    When `@angular/fire@21` lands, bump all `@angular/*` to 21 plus the
    toolchain (`@angular-devkit/build-angular`, `@angular/cli`,
-   `angular-eslint` to 21.x).
+   `angular-eslint` to 21.x). Note that angular-eslint@21 also peers
+   `@angular/cli >= 21`, so this bump goes hand-in-hand.
 
-2. **angular-eslint integration.** Right now `npm run lint` only lints
-   TypeScript, not Angular templates. After Angular 21 bump, add
-   `angular-eslint` (also 21.x) for template linting.
+2. **inject() migration.** Angular 20 prefers the `inject()` function
+   over constructor parameter DI; `@angular-eslint/prefer-inject` flags
+   91 such sites across the services and components. Rule is currently
+   off in `eslint.config.mjs`. Use `ng generate @angular/core:inject`
+   to auto-migrate when ready, then re-enable the rule.
 
 ## Things that already exist — don't reinvent
 
