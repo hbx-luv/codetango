@@ -8,8 +8,8 @@ CodeTango — a Codenames-style web game. Ionic + Angular frontend, Firebase
 Auth/Firestore/Functions backend, deployed at https://codetango.web.app/.
 Originally a hackathon project, still actively developed.
 
-- Frontend: `src/` (Angular 19.2, Ionic 8, RxJS 7, chart.js 4)
-- Cloud Functions: `functions/src/` (Firebase Functions 7 v1 API, Node 20)
+- Frontend: `src/` (Angular 20.3, Ionic 8, RxJS 7, chart.js 4)
+- Cloud Functions: `functions/src/` (Firebase Functions 7 v2 API, Node 20)
 - Shared types: `types.ts` at repo root (imported as bare `'types'` via
   tsconfig path mapping)
 
@@ -129,7 +129,7 @@ cd functions && npm install && npm run build
 - **Catch errors that aren't used start with `_`** (`catch (_e) {}`) — the
   ESLint config allows the `^_` prefix to opt out of `no-unused-vars`.
 - **Components are non-standalone by default** (`standalone: false` in the
-  decorator). Angular 19 defaults to standalone if not specified, but this
+  decorator). Angular 20 defaults to standalone if not specified, but this
   project uses NgModules; adding `standalone: false` keeps it consistent
   with the existing app/page modules.
 - **Firebase access is via the modular SDK** (`@angular/fire/firestore`,
@@ -138,18 +138,20 @@ cd functions && npm install && npm run build
 
 ## Known modernization next steps
 
-1. **firebase-functions v1 → v2 API migration.** `functions/src/**` still
-   uses `firebase-functions/v1` imports (`functions.firestore.document(...)
-   .onCreate(...)`). The v2 API (`onDocumentCreated`, etc.) is the modern
-   surface and has better cold-start / scaling characteristics. Gen 2
-   Cloud Run runtime is also recommended for new functions.
+1. **firebase-tools 14 → 15.** `functions.config()` was removed in
+   firebase-functions v7, but firebase-tools 14.3.1's emulator runtime
+   still probes it on every function load
+   (`functionsEmulatorRuntime.js:initializeFunctionsConfigHelper`),
+   killing every v2 function with `Your function was killed because it
+   raised an unhandled error`. firebase-tools 15.x drops the probe.
+   Blocked on `pg-gateway@^0.3.0-beta.4` being vetted in the mirror
+   (failed-install request queued).
 
-2. **Angular 19 → 21.** The registry's "latest vetted" target is Angular 21.
-   Blocked on `@angular/fire@21` being vetted (currently pending). When
-   that lands, bumping all `@angular/*` to 21 plus the related toolchain
-   (`@angular-devkit/build-angular`, `@angular/cli`, `typescript-eslint` to
-   8.59+, `angular-eslint` to 21.x) should remove several of the current
-   overrides.
+2. **Angular 20 → 21.** The registry has Angular 21 vetted but
+   `@angular/fire` tops out at 20.0.1 (peers `@angular/core@^20.0.0`).
+   When `@angular/fire@21` lands, bump all `@angular/*` to 21 plus the
+   toolchain (`@angular-devkit/build-angular`, `@angular/cli`,
+   `angular-eslint` to 21.x).
 
 3. **angular-eslint integration.** Right now `npm run lint` only lints
    TypeScript, not Angular templates. After Angular 21 bump, add
