@@ -1,7 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
 import {onDocumentUpdated} from 'firebase-functions/v2/firestore';
-import {map, uniqBy} from 'lodash';
 
 import {Clue, Tile} from '../../types';
 import {getGame, getUserName} from '../../util/getters';
@@ -48,7 +47,8 @@ async function sanitizeGuessesMade(
 
   if (guessesMade) {
     const sanitized =
-        uniqBy(guessesMade, 'word').sort((a, b) => sortGuesses(team, a, b));
+        Array.from(new Map(guessesMade.map(g => [g.word, g])).values())
+            .sort((a, b) => sortGuesses(team, a, b));
 
     if (hash(guessesMade) !== hash(sanitized)) {
       console.log('guessesMase sanitized!!', guessesMade, sanitized);
@@ -79,7 +79,7 @@ function sortGuesses(team: string, a: Tile, b: Tile): number {
 }
 
 function hash(guessesMade: Tile[]): string {
-  return map(guessesMade, 'word').join('_');
+  return guessesMade.map(g => g.word).join('_');
 }
 
 /**

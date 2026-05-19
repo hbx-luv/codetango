@@ -1,7 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
 import {onDocumentUpdated} from 'firebase-functions/v2/firestore';
-import {without} from 'lodash';
 
 import {Game, GameStatus, TileRole, User} from '../types';
 import {recalcElo} from '../util/elo';
@@ -107,7 +106,7 @@ async function addRoomToUsers(game: Game) {
         if (userSnapshot.exists) {
           const {rooms = []} = userSnapshot.data() as User;
           await userRef.update(
-              {rooms: [roomId].concat(without(rooms, roomId))});
+              {rooms: [roomId, ...rooms.filter(r => r !== roomId)]});
         }
       }));
 }

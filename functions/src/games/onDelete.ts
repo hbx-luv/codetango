@@ -8,7 +8,6 @@ try {
 }
 const db = admin.firestore();
 
-import * as _ from 'lodash';
 import {recalcElo, nukeHistoryForGame} from '../util/elo';
 import {Game} from '../types';
 
