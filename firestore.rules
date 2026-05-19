@@ -2,12 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+      return request.auth != null
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
     }
 
-    // This rule allows anyone on the internet to view, edit, and delete
-    // all data in your Firestore database. It is useful for getting
-    // started, but it leaves your app open to attackers.
+    // Default deny — overridden by more specific matches below.
     match /{document=**} {
       allow read, write: if false;
     }
@@ -16,8 +15,12 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Writes only happen server-side via the admin SDK (onDeleteGame).
+    // Reads stay open to support the deleted-games recovery UI in
+    // game-detail / game-history.
     match /deletedGames/{document=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if false;
     }
 
     match /eloHistory/{document=**} {
@@ -33,30 +36,41 @@ service cloud.firestore {
     match /games/{document=**} {
       // TODO: get to the bottom of doc mmmNCiIPKhnU0qiYxeYO beign written to over and over
       allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow create, update, delete: if request.auth != null;
     }
 
     match /rooms/{document=**} {
-      allow read, write: if true;
-    }
-
-    match /users/{document=**} {
-      function onlyWhitelistedKeys() {
-      	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'rooms', 'nickname', 'photoURL']);
-      }
-      function isOwner() {
-      	return request.auth.uid == resource.id;
-      }
-
-      // Allow reading/writing to your own user doc
       allow read: if true;
-      allow write: if request.auth.uid == request.resource.id;
+      allow write: if request.auth != null;
     }
 
+    match /users/{userId} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      allow read: if true;
+
+      // On create, the new doc may only contain whitelisted fields.
+      allow create: if isOwner()
+                    && request.resource.data.keys().hasOnly(
+                        ['name', 'email', 'rooms', 'nickname', 'photoURL']);
+
+      // On update, only whitelisted fields may change. This is what blocks
+      // a user from self-promoting to role: 'Admin'. Server-side writes
+      // (e.g. addRoomToUsers, stats recalc) go through the admin SDK and
+      // bypass this rule.
+      allow update: if isOwner()
+                    && request.resource.data.diff(resource.data)
+                        .affectedKeys()
+                        .hasOnly(['name', 'email', 'rooms', 'nickname', 'photoURL']);
+    }
+
+    // Word lists are public game content; only admins can edit.
+    // Cloud Functions read these via the admin SDK and bypass the rule.
     match /wordlists/{document=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
