@@ -20,6 +20,9 @@
     "lint": "eslint \"src/**/*.{ts,html}\" \"functions/src/**/*.ts\" \"types.ts\""
   },
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "dependencies": {
     "@angular/common": "~20.3.0",
     "@angular/core": "~20.3.0",
