@@ -1,7 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
-import * as functions from 'firebase-functions';
-import {map, uniqBy} from 'lodash';
+import {onDocumentUpdated} from 'firebase-functions/v2/firestore';
 
 import {Clue, Tile} from '../../types';
 import {getGame, getUserName} from '../../util/getters';
@@ -9,22 +8,24 @@ import {sendSpymasterMessage} from '../../util/message';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
 const db = admin.firestore();
 
 export const onUpdateClue =
-    functions.firestore.document('games/{gameId}/clues/{clueId}')
-        .onUpdate(async (doc, context) => {
-          const gameId = context.params.gameId;
+    onDocumentUpdated('games/{gameId}/clues/{clueId}', async (event) => {
+          const change = event.data;
+          if (!change) return 'No change data';
 
-          const before = doc.before.exists ? doc.before.data() as Clue : null;
-          const after = doc.after.exists ? doc.after.data() as Clue : null;
+          const gameId = event.params.gameId;
+
+          const before = change.before.exists ? change.before.data() as Clue : null;
+          const after = change.after.exists ? change.after.data() as Clue : null;
 
           if (after) {
-            await sanitizeGuessesMade(after, doc.after);
+            await sanitizeGuessesMade(after, change.after);
 
             // don't send the guess message for games with picture tiles
             const game = await getGame(db, gameId);
@@ -46,7 +47,8 @@ async function sanitizeGuessesMade(
 
   if (guessesMade) {
     const sanitized =
-        uniqBy(guessesMade, 'word').sort((a, b) => sortGuesses(team, a, b));
+        Array.from(new Map(guessesMade.map(g => [g.word, g])).values())
+            .sort((a, b) => sortGuesses(team, a, b));
 
     if (hash(guessesMade) !== hash(sanitized)) {
       console.log('guessesMase sanitized!!', guessesMade, sanitized);
@@ -77,7 +79,7 @@ function sortGuesses(team: string, a: Tile, b: Tile): number {
 }
 
 function hash(guessesMade: Tile[]): string {
-  return map(guessesMade, 'word').join('_');
+  return guessesMade.map(g => g.word).join('_');
 }
 
 /**

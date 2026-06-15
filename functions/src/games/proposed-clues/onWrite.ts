@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
-import * as functions from 'firebase-functions';
+import {onDocumentWritten} from 'firebase-functions/v2/firestore';
 
 import {ClueStatus, ProposedClue} from '../../types';
 import {sendSpymasterMessage} from '../../util/message';
@@ -8,17 +8,18 @@ import {getSpymasterName} from '../clues';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
 const db = admin.firestore();
 
 export const onWriteProposedClues =
-    functions.firestore.document('games/{gameId}/proposed-clues/{clueId}')
-        .onWrite((clueDoc, context) => {
-          const gameId = context.params.gameId;
-          return sendMessage(gameId, clueDoc.before, clueDoc.after);
+    onDocumentWritten('games/{gameId}/proposed-clues/{clueId}', (event) => {
+          const change = event.data;
+          if (!change) return;
+          const gameId = event.params.gameId;
+          return sendMessage(gameId, change.before, change.after);
         });
 
 async function sendMessage(

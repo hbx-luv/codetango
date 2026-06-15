@@ -1,19 +1,20 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import {onDocumentDeleted} from 'firebase-functions/v2/firestore';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing
 }
 const db = admin.firestore();
 
-import * as _ from 'lodash';
 import {recalcElo, nukeHistoryForGame} from '../util/elo';
 import {Game} from '../types';
 
 export const onDeleteGame =
-    functions.firestore.document('games/{gameId}').onDelete(gameDoc => {
+    onDocumentDeleted('games/{gameId}', event => {
+      const gameDoc = event.data;
+      if (!gameDoc) return;
       const game = {...gameDoc.data(), id: gameDoc.id} as Game
       return handleGameDeleted(game);
     });

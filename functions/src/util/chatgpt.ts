@@ -1,28 +1,26 @@
-// firebase functions:config:set chatgpt.apikey="YOURAPIKEY" -P prod
-import * as functions from 'firebase-functions';
-import {shuffle} from 'lodash';
-import {ChatCompletionRequestMessage, Configuration, OpenAIApi} from 'openai';
+import {defineSecret} from 'firebase-functions/params';
+import OpenAI from 'openai';
 
-const CHATGPT_API_KEY = functions.config().chatgpt.apikey;
-const configuration = new Configuration({
-  apiKey: CHATGPT_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+export const chatgptApiKey = defineSecret('CHATGPT_API_KEY');
+
+function shuffle<T>(arr: T[]): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 async function promptChatGpt(
     prompt: string, errorMessage: string): Promise<string> {
-  const messages: ChatCompletionRequestMessage[] = [];
-
-  messages.push({role: 'user', content: prompt});
-
   try {
-    const completion = await openai.createChatCompletion({
+    const openai = new OpenAI({apiKey: chatgptApiKey.value()});
+    const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages: messages,
+      messages: [{role: 'user', content: prompt}],
     });
-
-    const completion_text = completion?.data?.choices[0]?.message?.content;
-    return completion_text || errorMessage;
+    return completion.choices[0]?.message?.content ?? errorMessage;
   } catch (_error) {
     return errorMessage;
   }
@@ -37,9 +35,7 @@ export async function getThemedWords(theme: string): Promise<string[]> {
 
   try {
     const response = await promptChatGpt(prompt, '');
-
-    // parse out the links from the response from ChatGPT
-    const {words = []} = JSON.parse(response);
+    const {words = []} = JSON.parse(response) as {words?: string[]};
     return shuffle(words).slice(0, 25);
   } catch (e) {
     console.log(e);

@@ -9,6 +9,7 @@ export interface PopoverAction {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-actions-popover',
   templateUrl: './actions-popover.component.html',
   styleUrls: ['./actions-popover.component.scss'],

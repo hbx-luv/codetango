@@ -1,13 +1,13 @@
 import * as express from 'express';
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import {onRequest} from 'firebase-functions/v2/https';
 
 import {Game, User} from '../types';
 
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 const db: admin.firestore.Firestore = admin.firestore();
@@ -19,7 +19,7 @@ main.use('/v1', app);
 main.use(express.json());
 
 // the actual cloud function
-export const api = functions.https.onRequest(main);
+export const api = onRequest(main);
 
 app.get('/', async (request, response) => {
   response.send(`
@@ -45,7 +45,7 @@ app.get('/games', async (request, response) => {
       return game;
     });
     response.json(games);
-  } catch (error) {
+  } catch (_error) {
     response.status(500).send({
       error: `could not retrieve games`,
     });
@@ -65,7 +65,7 @@ app.get('/users/:userId', async (request, response) => {
     user.photoURL = '[redacted]';
 
     response.json(user);
-  } catch (error) {
+  } catch (_error) {
     response.status(500).send({
       error: `could not retrieve games`,
     });

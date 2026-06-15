@@ -8,6 +8,7 @@ import {UtilService} from 'src/app/services/util.service';
 import {Game, Message, TeamType} from 'types';
 
 @Component({
+  standalone: false,
   selector: 'app-chat-box',
   templateUrl: './chat-box.component.html',
   styleUrls: ['./chat-box.component.scss'],
@@ -102,7 +103,7 @@ export class ChatBoxComponent implements OnInit, OnChanges {
       try {
         this.myScrollContainer.nativeElement.scrollTop =
             this.myScrollContainer.nativeElement.scrollHeight;
-      } catch (err) {
+      } catch (_err) {
       }
     }, timeout);
   }

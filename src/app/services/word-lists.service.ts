@@ -1,5 +1,14 @@
 import {Injectable} from '@angular/core';
-import {AngularFirestore, DocumentReference} from '@angular/fire/firestore';
+import {
+  addDoc,
+  collection,
+  collectionData,
+  doc,
+  DocumentReference,
+  Firestore,
+  setDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
 import {Observable} from 'rxjs';
 import {GameType, WordList} from 'types';
 
@@ -19,7 +28,7 @@ import {tvWordList} from './word-lists/tv-word-list';
 @Injectable({providedIn: 'root'})
 export class WordListsService {
   constructor(
-      private afs: AngularFirestore,
+      private firestore: Firestore,
   ) {}
 
   getGameType(wordList: string): GameType {
@@ -38,20 +47,21 @@ export class WordListsService {
   }
 
   getWordLists(): Observable<WordList[]> {
-    return this.afs.collection<WordList>('wordlists').valueChanges();
+    return collectionData(collection(this.firestore, 'wordlists')) as
+        Observable<WordList[]>;
   }
 
   createWordList(name: string, words: string[]): Promise<DocumentReference> {
-    return this.afs.collection('wordlists').add({name, words});
+    return addDoc(collection(this.firestore, 'wordlists'), {name, words});
   }
 
   setWordList(name: string, words: string[]): Promise<void> {
-    return this.afs.collection('wordlists').doc(name).set({name, words});
+    return setDoc(doc(this.firestore, 'wordlists', name), {name, words});
   }
 
   // Warning - this is a complete replacement update
   updateWordList(id: string, words: string[]): Promise<void> {
-    return this.afs.collection('wordlists').doc(id).update({words});
+    return updateDoc(doc(this.firestore, 'wordlists', id), {words});
   }
 
   // Use this if you need to setup a new database with the word lists

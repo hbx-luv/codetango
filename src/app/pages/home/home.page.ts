@@ -10,6 +10,7 @@ const LOCALSTORAGE_ROOMS = 'CODETANGO_LOCALSTORAGE_ROOMS';
 const LOCALSTORAGE_USER_ID = 'CODETANGO_LOCALSTORAGE_USER_ID';
 
 @Component({
+  standalone: false,
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],

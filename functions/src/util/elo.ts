@@ -1,6 +1,4 @@
-import {default as firebase} from 'firebase';
 import {firestore} from 'firebase-admin';
-import {toPairs} from 'lodash';
 
 import {Game, GameStatus, Stats, Team, UserToUserStats} from '../types';
 
@@ -112,12 +110,9 @@ export async function recalcElo(
 
   console.log('done with games, iterating through users');
 
-  const userMapPairs = toPairs(userMap);
-  for (const pair of userMapPairs) {
-    const userId: string = pair[0];
-    const data = pair[1];
+  for (const [userId, data] of Object.entries(userMap)) {
 
-    const updateData: firebase.firestore.UpdateData = {
+    const updateData: firestore.UpdateData<any> = {
       'stats.elo': data.elo,
       'stats.gamesPlayed': data.gamesPlayed,
       'stats.gamesWon': data.gamesWon,

@@ -3,6 +3,7 @@ import {Clue, TeamType} from 'types';
 import { getSrc } from '../game/tile-util';
 
 @Component({
+  standalone: false,
   selector: 'app-clue',
   templateUrl: './clue.component.html',
   styleUrls: ['./clue.component.scss'],

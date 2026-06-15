@@ -1,8 +1,16 @@
 import {Injectable} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/firestore';
-import * as _ from 'lodash';
+import {
+  collection,
+  collectionData,
+  Firestore,
+  limit,
+  orderBy,
+  query,
+  QueryConstraint,
+  where,
+} from '@angular/fire/firestore';
+import {firstValueFrom} from 'rxjs';
 import {DateTime} from 'luxon';
-import * as moment from 'moment';
 import {map, take} from 'rxjs/operators';
 import {Stats} from 'types';
 
@@ -12,34 +20,27 @@ const NO_PROVISIONAL = false;
 @Injectable({providedIn: 'root'})
 export class EloHistoryService {
   constructor(
-      private readonly afs: AngularFirestore,
+      private readonly firestore: Firestore,
   ) {}
 
-  getEloHistoryForUser(userId: string, limit?: number) {
-    return this.afs
-        .collection(
-            'eloHistory',
-            ref => {
-              let query = ref.where('userId', '==', userId)
-                              .orderBy('timestamp', 'desc');
-
-              if (NO_PROVISIONAL) {
-                query = query.where('provisional', '==', false);
-              }
-
-              if (limit) {
-                query = query.limit(limit);
-              }
-
-              return query;
-            })
-        .snapshotChanges()
-        .pipe(map(actions => {
-          return _(actions)
-              .map(this.mapDataPoints.bind(this))
-              .reverse()
-              .value();
-        }));
+  getEloHistoryForUser(userId: string, limitCount?: number) {
+    const constraints: QueryConstraint[] = [
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc'),
+    ];
+    if (NO_PROVISIONAL) {
+      constraints.push(where('provisional', '==', false));
+    }
+    if (limitCount) {
+      constraints.push(limit(limitCount));
+    }
+    const q = query(
+        collection(this.firestore, 'eloHistory'),
+        ...constraints,
+    );
+    return collectionData(q, {idField: 'id'}).pipe(map(actions => {
+      return actions.map(this.mapDataPoint.bind(this)).reverse();
+    }));
   }
 
   getHighestElo(userId: string) {
@@ -54,56 +55,43 @@ export class EloHistoryService {
    * Returns either the first record for a player before a given
    * timestamp, or undefined if none are found before the timestamp
    */
-  getEloAt(timestamp: number, userId: string): Promise<Stats|undefined> {
-    return new Promise(resolve => {
-      this.afs
-          .collection<Stats>(
-              'eloHistory',
-              ref => {
-                return ref.where('userId', '==', userId)
-                    .where('timestamp', '<=', timestamp)
-                    .orderBy('timestamp', 'desc')
-                    .limit(1);
-              })
-          .valueChanges()
-          .pipe(take(1))
-          .subscribe(elo => {
-            resolve(elo.length ? elo[0] : undefined);
-          });
-    });
+  async getEloAt(timestamp: number, userId: string):
+      Promise<Stats|undefined> {
+    const q = query(
+        collection(this.firestore, 'eloHistory'),
+        where('userId', '==', userId),
+        where('timestamp', '<=', timestamp),
+        orderBy('timestamp', 'desc'),
+        limit(1),
+    );
+    const elo = await firstValueFrom(
+        collectionData(q).pipe(take(1)) as any,
+    ) as Stats[];
+    return elo.length ? elo[0] : undefined;
   }
 
   getPeakElo(userId: string, order: 'desc'|'asc') {
-    return this.afs
-        .collection(
-            'eloHistory',
-            ref => {
-              let query = ref.where('userId', '==', userId)
-                              .orderBy('elo', order)
-                              .limit(1);
-
-              if (NO_PROVISIONAL) {
-                query = query.where('provisional', '==', false);
-              }
-
-              return query;
-            })
-        .valueChanges();
+    const constraints: QueryConstraint[] = [
+      where('userId', '==', userId),
+      orderBy('elo', order),
+      limit(1),
+    ];
+    if (NO_PROVISIONAL) {
+      constraints.push(where('provisional', '==', false));
+    }
+    const q = query(collection(this.firestore, 'eloHistory'), ...constraints);
+    return collectionData(q);
   }
 
-  mapDataPoints(dataPoint) {
-    const doc = dataPoint.payload.doc || dataPoint.payload;
-
-    const data = this.sanitize(doc.data());
-    const id = doc.id;
-
-    data.date = moment(data.timestamp).format('MM/DD');
-
-    return {id, ...data};
+  mapDataPoint(dataPoint: any) {
+    const data = this.sanitize(dataPoint);
+    data.date = DateTime.fromMillis(data.timestamp).toFormat('MM/dd');
+    return data;
   }
 
-  sanitize(dataPoint) {
-    return _.omit(dataPoint, ['date']);
+  sanitize(dataPoint: any) {
+    const {date: _date, ...rest} = dataPoint;
+    return rest;
   }
 
   getMidnight(daysAgo: number = 0) {

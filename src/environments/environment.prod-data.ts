@@ -1,8 +1,10 @@
+// Opt-in: dev server pointed at PRODUCTION Firebase data. Used by
+// `npm run start:prod-data` only. Do not import directly elsewhere.
 import {version} from '../../package.json';
 
 export const environment = {
   version,
-  production: true,
+  production: false,
   useEmulators: false,
   emulators: null,
   firebase: {

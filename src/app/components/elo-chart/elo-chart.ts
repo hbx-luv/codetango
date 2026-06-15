@@ -1,11 +1,36 @@
 import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
-import Chart from 'chart.js';
-import * as _ from 'lodash';
+import {
+  CategoryScale,
+  Chart,
+  Filler,
+  Legend,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+} from 'chart.js';
 import {Subject} from 'rxjs';
+
+let uniqueIdCounter = 0;
 import {takeUntil} from 'rxjs/operators';
 import {EloHistoryService} from 'src/app/services/elo-history.service';
 
+Chart.register(
+    LineController,
+    LineElement,
+    PointElement,
+    LinearScale,
+    CategoryScale,
+    Legend,
+    Title,
+    Tooltip,
+    Filler,
+);
+
 @Component({
+  standalone: false,
   selector: 'app-elo-chart',
   templateUrl: './elo-chart.html',
   styleUrls: ['./elo-chart.scss'],
@@ -15,8 +40,8 @@ export class EloChartComponent implements OnChanges, OnDestroy {
 
   @Input() userId: string;
   @Input() limit?: number;
-  chart: any;
-  uniqueId: string = _.uniqueId();
+  chart: Chart|undefined;
+  uniqueId: string = String(++uniqueIdCounter);
 
   lastDataString = '';
 
@@ -25,16 +50,12 @@ export class EloChartComponent implements OnChanges, OnDestroy {
   ) {}
 
   ngOnChanges() {
-    // always kill the previous observable
     this.destroyed$.next();
 
-    // if the id is undefined, return
     if (this.userId === undefined) {
       return;
     }
 
-    // subscribe to this player's elo history and update the chart whenever that
-    // changes
     this.charts.getEloHistoryForUser(this.userId, this.limit)
         .pipe(takeUntil(this.destroyed$))
         .subscribe(dataPoints => {
@@ -42,60 +63,67 @@ export class EloChartComponent implements OnChanges, OnDestroy {
         });
   }
 
-  updateChart(dataPoints) {
-    // prevent the chart from updating if there is nothing different
+  updateChart(dataPoints: any[]) {
     const dataString = JSON.stringify(dataPoints);
     if (this.lastDataString === dataString) {
       return;
     }
-    // if this is a new chart, save the data, then continue
-    else {
-      this.lastDataString = dataString;
-    }
+    this.lastDataString = dataString;
 
-    const eloPoints = _.map(dataPoints, 'elo');
+    const eloPoints: number[] = dataPoints.map(d => d.elo);
     const allTime = !this.limit || this.limit > eloPoints.length;
+
+    if (this.chart) {
+      this.chart.destroy();
+    }
 
     this.chart = new Chart('chart-' + this.uniqueId, {
       type: 'line',
       data: {
-        labels: _.map(dataPoints, 'date'),
+        labels: dataPoints.map(d => d.date),
         datasets: [{
           label: 'Elo',
           data: eloPoints,
           backgroundColor: 'rgba(72,138,255,0)',
           borderColor: '#71a8e7',
-          borderWidth: 2
-        }]
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 0,
+        }],
       },
       options: {
-        elements: {
-          point: {radius: 0},
-          line: {tension: 0.3},  // tension: 0 is no curves
-        },
         layout: {padding: {left: 0, right: 0, top: 0, bottom: 0}},
-        legend: {display: false},
+        plugins: {
+          legend: {display: false},
+          title: {
+            display: true,
+            text: allTime ? 'Data from all time' :
+                            'Data from the last ' + dataPoints.length +
+                                ' games',
+          },
+        },
         scales: {
-          yAxes: [{
+          y: {
             ticks: {
               maxTicksLimit: 6,
-              suggestedMin: _.max(eloPoints),
-              suggestedMax: _.max(eloPoints)
-            }
-          }],
-          xAxes: [{gridLines: {display: false}, ticks: {autoSkipPadding: 10}}]
+            },
+            suggestedMin: Math.max(...eloPoints),
+            suggestedMax: Math.max(...eloPoints),
+          },
+          x: {
+            grid: {display: false},
+            ticks: {autoSkipPadding: 10},
+          },
         },
-        title: {
-          display: true,
-          text: allTime ? 'Data from all time' :
-                          'Data from the last ' + dataPoints.length + ' games'
-        },
-        maintainAspectRatio: false
-      }
+        maintainAspectRatio: false,
+      },
     });
   }
 
   ngOnDestroy() {
     this.destroyed$.next();
+    if (this.chart) {
+      this.chart.destroy();
+    }
   }
 }

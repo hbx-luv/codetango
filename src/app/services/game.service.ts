@@ -1,145 +1,139 @@
 import {Injectable} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/firestore';
-import {default as firebase} from 'firebase';
+import {
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  collectionData,
+  deleteDoc,
+  doc,
+  docData,
+  Firestore,
+  limit,
+  orderBy,
+  query,
+  QueryConstraint,
+  startAfter,
+  updateDoc,
+  where,
+} from '@angular/fire/firestore';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {Game, GameType} from 'types';
+import {Game} from 'types';
 import {buildAssetUrlPattern} from '../components/game/tile-util'
 
 @Injectable({providedIn: 'root'})
 export class GameService {
   constructor(
-      private readonly afs: AngularFirestore,
+      private readonly firestore: Firestore,
   ) {}
 
   createGame(game: Partial<Game>) {
     const createdAt = Date.now();
-    return this.afs.collection('games').add({createdAt, ...game});
+    return addDoc(collection(this.firestore, 'games'), {createdAt, ...game});
   }
 
   updateGame(id: string, game: Partial<any>) {
-    return this.afs.collection('games').doc(id).update(game);
+    return updateDoc(doc(this.firestore, 'games', id), game);
   }
 
   removePlayerFromGame(gameId: string, userIdToRemove: string) {
-    return this.afs.collection('games').doc(gameId).update({
-      'redTeam.userIds': firebase.firestore.FieldValue.arrayRemove(userIdToRemove),
-      'blueTeam.userIds': firebase.firestore.FieldValue.arrayRemove(userIdToRemove),
+    return updateDoc(doc(this.firestore, 'games', gameId), {
+      'redTeam.userIds': arrayRemove(userIdToRemove),
+      'blueTeam.userIds': arrayRemove(userIdToRemove),
     });
   }
 
   addPlayerToTeam(
       gameId: string, playerId: string, team: 'redTeam'|'blueTeam') {
     const oppositeTeam = team === 'redTeam' ? 'blueTeam' : 'redTeam';
-    return this.afs.collection('games').doc(gameId).update({
-      [`${team}.userIds`]: firebase.firestore.FieldValue.arrayUnion(playerId),
-      [`${oppositeTeam}.userIds`]: firebase.firestore.FieldValue.arrayRemove(playerId),
+    return updateDoc(doc(this.firestore, 'games', gameId), {
+      [`${team}.userIds`]: arrayUnion(playerId),
+      [`${oppositeTeam}.userIds`]: arrayRemove(playerId),
     });
   }
 
   assignSpymaster(
       gameId: string, playerId: string, team: 'redTeam'|'blueTeam') {
-    return this.afs.collection('games').doc(gameId).update({
+    return updateDoc(doc(this.firestore, 'games', gameId), {
       [`${team}.spymaster`]: playerId,
     });
   }
 
   getGame(gameId: string): Observable<Game> {
-    return this.afs.collection('games')
-        .doc<Game>(gameId)
-        .snapshotChanges()
-        .pipe(map(game => {
-          const thegame = {id: game.payload.id, exists: game.payload.exists, ...game.payload.data()};
-          thegame.assetUrlPattern = buildAssetUrlPattern(thegame.gameType);
-          return thegame;
-        }));
+    const ref = doc(this.firestore, 'games', gameId);
+    return docData(ref, {idField: 'id'}).pipe(
+        map(data => {
+          if (!data) {
+            return {id: gameId, exists: false} as unknown as Game;
+          }
+          const game = {...(data as Game), id: gameId, exists: true};
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
+        }),
+    ) as Observable<Game>;
   }
 
   getCurrentGame(roomId: string): Observable<Game|null> {
-    return this.afs
-        .collection<Game>(
-            'games',
-            ref => {
-              return ref.where('roomId', '==', roomId)
-                  .orderBy('createdAt', 'desc')
-                  .limit(1);
-            })
-        .snapshotChanges()
-        .pipe(map(games => {
+    const q = query(
+        collection(this.firestore, 'games'),
+        where('roomId', '==', roomId),
+        orderBy('createdAt', 'desc'),
+        limit(1),
+    );
+    return collectionData(q, {idField: 'id'}).pipe(
+        map(games => {
           if (!games || !games.length) {
             return null;
           }
-
-          const {doc} = games[0].payload;
-          const game = {id: doc.id, ...doc.data()};
+          const game = games[0] as Game;
           game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
           return game;
-        }));
+        }),
+    );
   }
 
-  getCompletedGames(roomId?: string, limit?: number, startAfter?: number, collection = 'games'):
-      Observable<Game[]> {
-    return this.afs
-        .collection<Game>(
-            collection,
-            ref => {
-              let query = ref.orderBy('completedAt', 'desc');
+  getCompletedGames(
+      roomId?: string, limitCount?: number, startAfterValue?: number,
+      collectionName = 'games'): Observable<Game[]> {
+    const constraints: QueryConstraint[] = [orderBy('completedAt', 'desc')];
+    if (roomId) {
+      constraints.push(where('roomId', '==', roomId));
+    }
+    if (limitCount) {
+      constraints.push(limit(limitCount));
+    }
+    if (startAfterValue) {
+      constraints.push(startAfter(startAfterValue));
+    }
 
-              // filter by given room
-              if (roomId) {
-                query = query.where('roomId', '==', roomId);
-              }
-
-              // support limiting
-              if (limit) {
-                query = query.limit(limit);
-              }
-
-              // start after a given completedAt timestamp
-              if (startAfter) {
-                query = query.startAfter(startAfter);
-              }
-
-              return query;
-            })
-        .snapshotChanges()
-        .pipe(map(actions => {
-          return actions.map(action => {
-            const {doc} = action.payload;
-            const game = {id: doc.id, ...doc.data()};
-            game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
-            return game;
-          });
-        }));
+    const q = query(collection(this.firestore, collectionName), ...constraints);
+    return collectionData(q, {idField: 'id'}).pipe(
+        map(games => (games as Game[]).map(game => {
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
+        })),
+    ) as Observable<Game[]>;
   }
 
-  getUserGames(userId: string, limit?: number): Observable<Game[]> {
-    return this.afs
-        .collection<Game>(
-            'games',
-            ref => {
-              let query = ref.where('userIds', 'array-contains', userId)
-                              .orderBy('completedAt', 'desc');
-
-              // support limiting
-              if (limit) {
-                query = query.limit(limit);
-              }
-
-              return query;
-            })
-        .snapshotChanges()
-        .pipe(map(actions => {
-          return actions.map(action => {
-            const {doc} = action.payload;
-            const game = {id: doc.id, ...doc.data()};
-            game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
-            return game;
-          });
-        }));
+  getUserGames(userId: string, limitCount?: number): Observable<Game[]> {
+    const constraints: QueryConstraint[] = [
+      where('userIds', 'array-contains', userId),
+      orderBy('completedAt', 'desc'),
+    ];
+    if (limitCount) {
+      constraints.push(limit(limitCount));
+    }
+    const q = query(collection(this.firestore, 'games'), ...constraints);
+    return collectionData(q, {idField: 'id'}).pipe(
+        map(games => (games as Game[]).map(game => {
+          game.assetUrlPattern = buildAssetUrlPattern(game.gameType);
+          return game;
+        })),
+    ) as Observable<Game[]>;
   }
 
   deleteGame(id: string): Promise<void> {
-    return this.afs.collection('games').doc(id).delete();
+    return deleteDoc(doc(this.firestore, 'games', id));
   }
 }

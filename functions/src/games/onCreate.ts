@@ -1,20 +1,27 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
-import {shuffle} from 'lodash';
+import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 
 import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
-import {getThemedWords} from '../util/chatgpt';
+import {chatgptApiKey, getThemedWords} from '../util/chatgpt';
+
+function shuffle<T>(arr: T[]): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
 const db = admin.firestore();
 
 
-// @ts-ignore
 function getGameType(
     game: Game,
     wordList: string,
@@ -58,8 +65,12 @@ function getGameType(
 }
 
 export const onCreateGame =
-    functions.firestore.document('games/{gameId}')
-        .onCreate(async (snapshot, context) => {
+    onDocumentCreated(
+        {document: 'games/{gameId}', secrets: [chatgptApiKey]},
+        async (event) => {
+          const snapshot = event.data;
+          if (!snapshot) return;
+
           // Add the random stuff to this game
           const gameReference = snapshot.ref;
           const gameSnapShot = await gameReference.get();
@@ -98,7 +109,8 @@ export const onCreateGame =
           }
 
           return 'Done!';
-        });
+        },
+    );
 
 async function generateNewGameTiles(
     wordList: string,

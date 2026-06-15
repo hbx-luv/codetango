@@ -1,7 +1,5 @@
-import {Component, Input} from '@angular/core';
-import {clone, shuffle} from 'lodash';
-import {Observable} from 'rxjs';
-import {first} from 'rxjs/operators';
+import {Component, Input, OnChanges} from '@angular/core';
+import {firstValueFrom, Observable} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -12,11 +10,12 @@ import {RoomService} from '../../services/room.service';
 import {WordListsService} from '../../services/word-lists.service';
 
 @Component({
+  standalone: false,
   selector: 'app-pregame',
   templateUrl: './pregame.component.html',
   styleUrls: ['./pregame.component.scss'],
 })
-export class PregameComponent {
+export class PregameComponent implements OnChanges {
   @Input() room: Room;
   @Input() game: Game;
 
@@ -116,7 +115,7 @@ export class PregameComponent {
       // Update the room's settings first
       await this.roomService.updateRoom(this.room.id, updates);
 
-      let idToDelete = this.game?.id;
+      const idToDelete = this.game?.id;
       
       // Create a new game with the same teams
       await this.gameService.createGame({
@@ -175,7 +174,7 @@ export class PregameComponent {
     }
 
     this.roomService.updateRoom(this.room.id, updates);
-    this.lastSettings = clone(this.room);
+    this.lastSettings = {...this.room};
   }
 
   removeUser(userId: string) {
@@ -194,7 +193,8 @@ export class PregameComponent {
   async assignUsersToRandomTeams() {
     const roomSize = this.room.userIds.length;
     const halfway = Math.ceil(roomSize / 2);
-    const randomizedUsers = shuffle(this.room.userIds);
+    const randomizedUsers = [...this.room.userIds]
+        .sort(() => Math.random() - 0.5);
     const blueTeamUsers = randomizedUsers.slice(0, halfway);
     const redTeamUsers = randomizedUsers.slice(halfway);
 
@@ -270,7 +270,7 @@ export class PregameComponent {
 
   async sortUsersBySpymasterFrequency(userIds: string[]): Promise<string[]> {
     const users: User[] = await Promise.all(userIds.map(
-        userId => this.userService.getUser(userId).pipe(first()).toPromise()));
+        userId => firstValueFrom(this.userService.getUser(userId))));
 
     return users
         .sort((a, b) => {

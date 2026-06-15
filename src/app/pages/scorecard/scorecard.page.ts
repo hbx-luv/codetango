@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {AlertController} from '@ionic/angular';
-import * as moment from 'moment';
+import {DateTime} from 'luxon';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
@@ -14,6 +14,7 @@ const LIMIT = 3;
 const CHART_LIMIT = 30;
 
 @Component({
+  standalone: false,
   selector: 'app-scorecard',
   templateUrl: './scorecard.page.html',
   styleUrls: ['./scorecard.page.scss'],
@@ -61,7 +62,8 @@ export class ScorecardPage {
 
   private formatUserData(user: User): User {
     if (user.stats && typeof user.stats.lastPlayed === 'number') {
-      user.stats.lastPlayed = moment(user.stats.lastPlayed).format('MMM D, YYYY');
+      user.stats.lastPlayed =
+          DateTime.fromMillis(user.stats.lastPlayed).toFormat('LLL d, yyyy');
       this.getRecentChanges(user.stats);
     }
     return user;

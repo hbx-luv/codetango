@@ -1,7 +1,15 @@
 import {Injectable} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/firestore';
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  docData,
+  Firestore,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
 import {Router} from '@angular/router';
-import {default as firebase} from 'firebase';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Room, RoomStatus} from 'types';
@@ -20,8 +28,6 @@ const defaultRoom = {
 
 @Injectable({providedIn: 'root'})
 export class RoomService {
-  private db: firebase.firestore.Firestore;
-
   // the purpose of this map is to allow room generation with a fun name that
   // isn't just the id. when a user navs to a room via the input on the home
   // page, we'll save that name and use it if we end up needing to create the
@@ -32,52 +38,46 @@ export class RoomService {
 
   constructor(
       private readonly authService: AuthService,
-      private readonly afs: AngularFirestore,
+      private readonly firestore: Firestore,
       private readonly router: Router,
-  ) {
-    this.db = firebase.firestore();
-  }
+  ) {}
 
   async createRoom(partial: Partial<Room>): Promise<string> {
     const id = this.getRoomId(partial.id);
-    const room = await this.db.collection('rooms').doc(id).get();
+    const ref = doc(this.firestore, 'rooms', id);
+    const snap = await getDoc(ref);
 
-    // if the game doesn't exist, create it
-    if (!room.exists) {
-      // see if there is a stored room name from navigating to a new room,
-      // otherwise default the name to the id
+    if (!snap.exists()) {
       if (!partial.name) {
         partial.name = this.roomNames[id] || id;
       }
-
-      // create the new room with default settings and any values passed in
-      await this.afs.collection('rooms').doc(id).set(
-          {...defaultRoom, ...partial, id});
+      await setDoc(ref, {...defaultRoom, ...partial, id});
     }
 
-    // return the doc id
     return id;
   }
 
   updateRoom(id: string, room: Partial<Room>) {
-    return this.afs.collection('rooms').doc(id).update(room);
+    return updateDoc(doc(this.firestore, 'rooms', id), room);
   }
 
   getRoom(id: string): Observable<Room> {
-    // load from cache when we can
     if (this.roomObservables[id]) {
       return this.roomObservables[id];
     }
 
-    // otherwise query for the room
-    const room$ =
-        this.afs.collection('rooms').doc<Room>(id).snapshotChanges().pipe(
-            map(room => {
-              const {id: docId, exists} = room.payload;
-              return {...room.payload.data(), id: docId, exists};
-            }));
+    const ref = doc(this.firestore, 'rooms', id);
+    const room$ = docData(ref, {idField: 'id'}).pipe(
+        map(data => {
+          // docData returns undefined when doc doesn't exist; preserve
+          // backward-compatible {exists: false} shape for callers
+          if (!data) {
+            return {id, exists: false} as unknown as Room;
+          }
+          return {...(data as Room), id, exists: true};
+        }),
+    );
 
-    // save to cache and return
     this.roomObservables[id] = room$;
     return room$;
   }
@@ -85,37 +85,27 @@ export class RoomService {
   async joinRoom(roomId: string): Promise<void> {
     if (this.authService.authenticated) {
       const {currentUserId} = this.authService;
-
-      // join the room
-      await this.afs.collection('rooms').doc(roomId).update({
-        userIds: firebase.firestore.FieldValue.arrayUnion(currentUserId),
+      await updateDoc(doc(this.firestore, 'rooms', roomId), {
+        userIds: arrayUnion(currentUserId),
       });
     }
   }
 
   removeUserFromRoom(roomId: string, userId: string) {
-    return this.afs.collection('rooms').doc(roomId).update({
-      userIds: firebase.firestore.FieldValue.arrayRemove(userId),
+    return updateDoc(doc(this.firestore, 'rooms', roomId), {
+      userIds: arrayRemove(userId),
     });
   }
 
-  /**
-   * Given a room's name or id, nav to that room and save the parameter as the
-   * name of the room so we can use this when creating the room if need be
-   * @param nameOrId either the room name or id
-   */
   navToRoom(nameOrId: string) {
     const id = this.getRoomId(nameOrId);
     this.roomNames[id] = nameOrId;
     this.router.navigate([id]);
   }
 
-  /**
-   * "Suh dude!" turns into "suh-dude"
-   */
   getRoomId(name: string = ''): string {
     return name.toLowerCase()
-        .replace(/[^a-zA-Z0-9 \-]/g, '')  // remove illegal values
-        .replace(/[ ]/g, '-');            // spaces to dashes
+        .replace(/[^a-zA-Z0-9 -]/g, '')
+        .replace(/[ ]/g, '-');
   }
 }

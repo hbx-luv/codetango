@@ -1,6 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {get} from 'lodash';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopoverAction} from 'src/app/components/actions-popover/actions-popover.component';
@@ -16,12 +15,13 @@ import {Clue, Game, GameStatus, Room, RoomStatus} from 'types';
 import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
+  standalone: false,
   selector: 'app-room',
   templateUrl: './room.page.html',
   styleUrls: ['./room.page.scss'],
 })
 export class RoomPage implements OnDestroy {
-  private destroyed = new ReplaySubject<never>();
+  private destroyed = new ReplaySubject<void>();
 
   selectedTab = 'board-tab';
   roomId: string;
@@ -169,8 +169,8 @@ export class RoomPage implements OnDestroy {
 
   get spymaster(): boolean {
     const {currentUserId} = this.authService;
-    return get(this.game, 'redTeam.spymaster') === currentUserId ||
-        get(this.game, 'blueTeam.spymaster') === currentUserId;
+    return this.game?.redTeam?.spymaster === currentUserId ||
+        this.game?.blueTeam?.spymaster === currentUserId;
   }
 
   determineResetRoom() {
@@ -250,7 +250,7 @@ export class RoomPage implements OnDestroy {
   }
 
   isUserInRoom(userId: string): boolean {
-    return get(this.room, 'userIds', []).includes(userId);
+    return (this.room?.userIds ?? []).includes(userId);
   }
 
   selectTab(tab: string) {

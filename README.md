@@ -15,40 +15,48 @@ If you're a developer interested in contributing, read on:
 
 ### Dev setup
 
-Install NVM
+Install Node 20 (Functions runtime) or 22 (local dev). Then:
 
-Run `nvm use` to install node 14
+```
+npm install
+npm start
+```
 
-Install the Ionic CLI, Angular CLI, and the Firebase CLI:  
-`npm install -g @ionic/cli @angular/cli firebase-tools`
+The dev server runs at http://localhost:4200.
 
-Install all the dependencies:  
-`npm run update` 
+`npm start` is **local-only by default** — `src/environments/environment.ts` points the app at the `demo-codetango` Firebase project ID, so the SDK will refuse to talk to a real Firebase backend. Auth, Firestore, and Functions calls all try to reach a local emulator on `127.0.0.1`. This is intentional so an accidental write never lands in prod data.
 
-Serve the project:  
-`ionic serve`
+### Running modes
 
-Ionic Framework docs:  
-https://ionicframework.com/docs/components
+| Command | What it does | Talks to prod? |
+| --- | --- | --- |
+| `npm start` | `ng serve` against the demo Firebase config; emulator-bound | No (firewalled) |
+| `npm run emulators` | Boots the Firebase emulator suite (auth/firestore/functions/UI) | No |
+| `npm run start:emulators` | Starts emulators + `ng serve` together (one Ctrl-C kills both) | No |
+| `npm run start:prod-data` | `ng serve` against the **production** Firebase project — explicit opt-in, prints a red warning banner | **Yes** |
+| `npm run build` | Dev `ng build` (uses `environment.ts`) | No |
+| `npm run build:prod` | Production `ng build` (uses `environment.prod.ts`) | N/A (build output) |
+| `npm run lint` | ESLint on `src/`, `functions/src/`, `types.ts` | N/A |
 
-Firestore Docs:  
-https://firebase.google.com/docs/firestore
+### Vetted package registry
+
+`.npmrc` points npm at `https://greenflagged.dev/npm`, the org's vetted package mirror. Most transitive deps had no satisfying vetted version on the first install — `package.json` has ~90 `overrides` entries that pin each to whatever was both vetted and compatible with the rest of the tree (some pinned forward to drop CVE-tainted versions, some pinned back to the last CJS-friendly release because firebase-tools' internals are CJS).
+
+If a fresh `npm install` ever fails with `ETARGET` (mirror lacks a satisfying version), the registry can usually auto-prioritize the request — re-run `npm install` after ~30 s. For unblocked work, `legacy-peer-deps=true` is on in `.npmrc` for one optional peer (`@angular/fire` → `firebase-tools`).
 
 ### CLI niceties
 
-You can leverage the Ionic CLI for creating pages, components, and services. It uses the Angular CLI under the hood for most of the heavy lifting.
+This project uses the Angular CLI directly (no Ionic CLI required):
 
-Create a new page:  
-`ionic g page "pages/Game Detail"`
+```
+npx ng g page pages/game-detail
+npx ng g component components/board
+npx ng g service services/auth
+```
 
-Create a new component:  
-`ionic g component components/board`
+Ionic Framework docs: https://ionicframework.com/docs/components
 
-Create a new service:  
-`ionic g service services/auth`
-
-More options through interactive CLI:
-`ionic generate`
+Firestore Docs: https://firebase.google.com/docs/firestore
 
 ### CI/CD
 
@@ -58,22 +66,20 @@ When a pull request is created (and any future commits are pushed to that branch
 
 First, you'll need to be invited to the [firebase cloud console for this project](https://console.firebase.google.com/u/0/project/codetango) and then login to the cli via `firebase login`.
 
-You need to run `ionic build` in the root of the project to get the static webapp built for deployment in `www/`. At that point you can just `firebase deploy --only hosting -P [env]` to deploy just that content. Here are some aliases in the `package.json` and other quick commands:
+`npm run build:prod` produces a static webapp in `www/`. `firebase deploy --only hosting -P [env]` ships just that content. The `package.json` has aliases for the common combinations:
 
-You can deploy to either the `dev` database or the `prod` database. By default, when serving the application, it uses the `dev` project, so we don't mess with `prod` data. These configurations are stored in `environment.ts` and `environment.prod.ts`
+```
+npm run deploy:dev          # build + deploy everything to dev
+npm run deploy:prod         # build + deploy everything to prod
+npm run deploy-hosting:dev  # build + deploy only hosting to dev
+npm run deploy-hosting:prod # build + deploy only hosting to prod
+npm run deploy-functions:dev
+npm run deploy-functions:prod
+```
 
-Deploy everything in one go:  
-`npm run deploy:dev`  
-`npm run deploy:prod`  
+To deploy a single cloud function:
 
-Deploy hosting separately:  
-`npm run deploy-hosting:dev`  
-`npm run deploy-hosting:prod`  
-
-Deploy functions separately:  
-`firebase deploy --only functions -P dev`  
-`firebase deploy --only functions -P prod`  
-
-Or just deploy a single cloud function like so:  
-`firebase deploy --only functions:onGameCreate -P dev`  
-`firebase deploy --only functions:onGameCreate -P prod`  
+```
+firebase deploy --only functions:onGameCreate -P dev
+firebase deploy --only functions:onGameCreate -P prod
+```

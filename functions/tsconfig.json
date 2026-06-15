@@ -6,7 +6,8 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2020",
+    "types": ["node", "luxon", "lodash"]
   },
   "compileOnSave": true,
   "include": [

@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 
 import {Clue, Game, TeamType} from '../../types';
 import {getGame, getUserName} from '../../util/getters';
@@ -7,7 +7,7 @@ import {sendSpymasterMessage} from '../../util/message';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
@@ -17,9 +17,11 @@ const db = admin.firestore();
  * When clues are created, add a server message to the spymaster chat
  */
 export const onCreateClue =
-    functions.firestore.document('games/{gameId}/clues/{clueId}')
-        .onCreate(async (snapshot, context) => {
-          const gameId = context.params.gameId;
+    onDocumentCreated('games/{gameId}/clues/{clueId}', async (event) => {
+          const snapshot = event.data;
+          if (!snapshot) return;
+
+          const gameId = event.params.gameId;
 
           const clueReference = snapshot.ref;
           const clueSnapShot = await clueReference.get();

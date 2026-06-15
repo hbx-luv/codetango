@@ -1,11 +1,11 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 
 import {BigBatch} from '../util/big-batch';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 const db = admin.firestore() as any;
@@ -14,9 +14,10 @@ import {recalcElo} from '../util/elo';
 import {Game} from '../types';
 
 export const onCreateAdmin =
-    functions.firestore.document('admin/{action}')
-        .onCreate(async (doc, context) => {
-          const action = context.params.action;
+    onDocumentCreated('admin/{action}', async (event) => {
+          const doc = event.data;
+          if (!doc) return;
+          const action = event.params.action;
           const data = doc.data();
 
           console.log('admin action: ' + action);

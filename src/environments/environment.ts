@@ -1,29 +1,25 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+// Default development environment — never connects to production.
+// Uses the Firebase emulator suite started by `npm start`.
+// To intentionally develop against production data, run `npm run start:prod-data`.
 import {version} from '../../package.json';
 
 export const environment = {
   version,
-  production: true,
+  production: false,
+  useEmulators: true,
+  emulators: {
+    firestore: {host: '127.0.0.1', port: 8090},
+    auth: {url: 'http://127.0.0.1:9099'},
+    functions: {host: '127.0.0.1', port: 5001},
+  },
+  // Demo-only Firebase config — projectId prefixed with `demo-` so the SDK
+  // refuses to talk to a real Firebase backend even if emulator connect fails.
   firebase: {
-    apiKey: 'AIzaSyDTncO1ABukAWNm1TROLRVTeW-y8DemgoA',
-    authDomain: 'codetango.firebaseapp.com',
-    databaseURL: 'https://codetango.firebaseio.com',
-    projectId: 'codetango',
-    storageBucket: 'codetango.appspot.com',
-    messagingSenderId: '552807035418',
-    appId: '1:552807035418:web:545b44bf7b7884d7d2d7a3',
-    measurementId: 'G-MD21480XBY'
-  }
+    apiKey: 'demo-api-key',
+    authDomain: 'localhost',
+    projectId: 'demo-codetango',
+    storageBucket: 'demo-codetango.appspot.com',
+    messagingSenderId: '0',
+    appId: '1:0:web:demo',
+  },
 };
-
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`,
- * `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a
- * negative impact on performance if an error is thrown.
- */
-// import 'zone.js/dist/zone-error';  // Included with Angular CLI.

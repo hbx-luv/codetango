@@ -1,6 +1,6 @@
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output} from '@angular/core';
 import {Router} from '@angular/router';
-import {Observable, Subject} from 'rxjs';
+import {Subject} from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 
@@ -9,11 +9,12 @@ import {UserService} from '../../services/user.service';
 import {PopoverAction} from '../actions-popover/actions-popover.component';
 
 @Component({
+  standalone: false,
   selector: 'app-user',
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss'],
 })
-export class UsersComponent implements OnChanges {
+export class UsersComponent implements OnChanges, OnDestroy {
   private destroyed$ = new Subject<void>();
 
   BASE_WIDTH = 75;

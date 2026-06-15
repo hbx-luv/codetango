@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {first} from 'rxjs/operators';
+import {firstValueFrom} from 'rxjs';
 import {GameService} from 'src/app/services/game.service';
 import {Game} from 'types';
 
@@ -8,6 +8,7 @@ const PATTERN = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'A
 const LIMIT = 10;
 
 @Component({
+  standalone: false,
   selector: 'app-game-history',
   templateUrl: './game-history.page.html',
   styleUrls: ['./game-history.page.scss'],
@@ -59,9 +60,8 @@ export class GameHistoryPage {
     // fetch LIMIT more games
     const collection = this.showDeleted ? 'deletedGames' : 'games';
     const moreGames =
-        await this.gameService.getCompletedGames(this.roomId, LIMIT, startAfter, collection)
-            .pipe(first())
-            .toPromise();
+        await firstValueFrom(this.gameService.getCompletedGames(
+            this.roomId, LIMIT, startAfter, collection));
 
     // instantiate the games array if undefined
     if (this.games === undefined) {

@@ -1,7 +1,6 @@
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
-import * as functions from 'firebase-functions';
-import {without} from 'lodash';
+import {onDocumentUpdated} from 'firebase-functions/v2/firestore';
 
 import {Game, GameStatus, TileRole, User} from '../types';
 import {recalcElo} from '../util/elo';
@@ -9,18 +8,20 @@ import {sendSpymasterMessage} from '../util/message';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
 const db = admin.firestore();
 
 export const onUpdateGame =
-    functions.firestore.document('games/{gameId}')
-        .onUpdate(async (gameDoc, context) => {
-          await updateRemainingAgents(gameDoc.after);
-          await determineGameOver(gameDoc.after);
-          await sanitizeBoard(gameDoc.before, gameDoc.after);
+    onDocumentUpdated('games/{gameId}', async (event) => {
+          const change = event.data;
+          if (!change) return 'No change data';
+
+          await updateRemainingAgents(change.after);
+          await determineGameOver(change.after);
+          await sanitizeBoard(change.before, change.after);
 
           return 'Done';
         });
@@ -105,7 +106,7 @@ async function addRoomToUsers(game: Game) {
         if (userSnapshot.exists) {
           const {rooms = []} = userSnapshot.data() as User;
           await userRef.update(
-              {rooms: [roomId].concat(without(rooms, roomId))});
+              {rooms: [roomId, ...rooms.filter(r => r !== roomId)]});
         }
       }));
 }

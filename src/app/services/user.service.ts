@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable} from '@angular/core';
-import {AngularFireAuth} from '@angular/fire/auth';
-import {AngularFirestore} from '@angular/fire/firestore';
+import {Auth, authState} from '@angular/fire/auth';
+import {doc, docData, Firestore, updateDoc} from '@angular/fire/firestore';
 import {Observable, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 
@@ -15,10 +15,10 @@ export class UserService {
   userChanged$: EventEmitter<User>;
 
   constructor(
-      private readonly afAuth: AngularFireAuth,
-      private readonly afs: AngularFirestore,
+      private readonly auth: Auth,
+      private readonly firestore: Firestore,
   ) {
-    this.afAuth.authState.subscribe(observer => {
+    authState(this.auth).subscribe(observer => {
       if (observer && observer.uid) {
         this.subscribeToUser(observer.uid);
       } else {
@@ -34,12 +34,10 @@ export class UserService {
   }
 
   subscribeToUser(uid: string) {
-    // unsubscribe from current user observable
     if (this.currentUser$) {
       this.currentUser$.unsubscribe();
     }
 
-    // subscribe to user changes
     this.currentUser$ = this.getUser(uid).subscribe(user => {
       this.currentUser = user;
       this.userChanged$.emit(user);
@@ -47,29 +45,28 @@ export class UserService {
   }
 
   getUser(userId: string): Observable<User> {
-    // load from cache when we can
     if (this.userObservables[userId]) {
       return this.userObservables[userId];
     }
 
-    // otherwise query for the user
-    const user$ =
-        this.afs.collection('users').doc<User>(userId).valueChanges().pipe(
-            map(user => {
-              if (user === undefined) {
-                user = {name: userId, email: userId, rooms: []};
-              }
-              user.rooms = user.rooms || [];
-              user.id = userId;
-              return user;
-            }));
+    const ref = doc(this.firestore, 'users', userId);
+    const user$ = docData(ref).pipe(
+        map(data => {
+          let user = data as User | undefined;
+          if (user === undefined) {
+            user = {name: userId, email: userId, rooms: []};
+          }
+          user.rooms = user.rooms || [];
+          user.id = userId;
+          return user;
+        }),
+    );
 
-    // save to cache and return
     this.userObservables[userId] = user$;
     return user$;
   }
 
   updateUser(userId: string, data: Partial<User>): Promise<void> {
-    return this.afs.collection('users').doc(userId).update(data);
+    return updateDoc(doc(this.firestore, 'users', userId), data);
   }
 }

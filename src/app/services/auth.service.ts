@@ -1,87 +1,88 @@
 import {Injectable} from '@angular/core';
-import {AngularFireAuth} from '@angular/fire/auth';
-import {AngularFirestore} from '@angular/fire/firestore';
-import {default as firebase} from 'firebase';
+import {
+  Auth,
+  authState,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  User as FirebaseUser,
+} from '@angular/fire/auth';
+import {doc, Firestore, setDoc} from '@angular/fire/firestore';
 import {User} from 'types';
 
 import {UtilService} from './util.service';
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
-  authState: firebase.User|null = null;
-  auth: firebase.auth.Auth;
+  authState: FirebaseUser|null = null;
 
   constructor(
-      private afAuth: AngularFireAuth,
-      private afs: AngularFirestore,
-      private utilService: UtilService,
+      private readonly auth: Auth,
+      private readonly firestore: Firestore,
+      private readonly utilService: UtilService,
   ) {
-    this.auth = firebase.auth();
+    authState(this.auth).subscribe(user => {
+      this.authState = user;
+    });
   }
 
-  // Returns current user data
   get authenticated(): boolean {
     return this.auth.currentUser !== null;
   }
 
-  // Returns current user data
-  get currentUser(): firebase.User|null {
+  get currentUser(): FirebaseUser|null {
     return this.auth.currentUser;
   }
 
-  // Returns current user ID
   get currentUserId(): string {
     return this.auth.currentUser ? this.auth.currentUser.uid : '';
   }
 
-  /**
-   * Authenticate with Google Login and return uid
-   */
   async loginWithGoogle(): Promise<string> {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const userCredential = await this.afAuth.signInWithPopup(provider).catch(
-        this.errorHandler.bind(this));
-
-    // if we have a valid user credential, add/update the user document
-    if (userCredential && userCredential.user !== null) {
-      this.updateUserData(userCredential.user);
+    const provider = new GoogleAuthProvider();
+    try {
+      const userCredential = await signInWithPopup(this.auth, provider);
+      if (userCredential && userCredential.user !== null) {
+        this.updateUserData(userCredential.user);
+      }
+      return userCredential.user.uid;
+    } catch (error) {
+      this.errorHandler(error as {code: string, message: string});
+      throw error;
     }
-    return userCredential.user.uid;
   }
 
-  /**
-   * Login given an email and password
-   */
   async loginWithEmailAndPassword(email: string, password: string) {
-    return this.afAuth.signInWithEmailAndPassword(email, password)
-        .catch(this.errorHandler.bind(this));
+    try {
+      return await signInWithEmailAndPassword(this.auth, email, password);
+    } catch (error) {
+      this.errorHandler(error as {code: string, message: string});
+      throw error;
+    }
   }
 
-  /**
-   * Create an account with the given email and password then save the given
-   * name to their user document
-   */
   async signUpWithEmailAndPassword(
       name: string, email: string, password: string) {
-    const userCredential =
-        await this.afAuth.createUserWithEmailAndPassword(email, password)
-            .catch(this.errorHandler.bind(this));
-
-    // if we have a valid user credential, add/update the user document
-    if (userCredential && userCredential.user !== null) {
-      this.updateUserData(userCredential.user, {name});
+    try {
+      const userCredential =
+          await createUserWithEmailAndPassword(this.auth, email, password);
+      if (userCredential && userCredential.user !== null) {
+        this.updateUserData(userCredential.user, {name});
+      }
+    } catch (error) {
+      this.errorHandler(error as {code: string, message: string});
     }
   }
 
-  /**
-   * Send a password reset email and catch errors
-   */
   async sendPasswordResetEmail(email: string) {
     try {
-      await this.afAuth.sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(this.auth, email);
     } catch (error) {
-      // do nothing in the case of a failure except re-throw
-      if (!error.code.startsWith('auth/')) {
+      const code = (error as {code: string}).code ?? '';
+      if (!code.startsWith('auth/')) {
         throw error;
       }
     }
@@ -91,9 +92,6 @@ export class AuthService {
         5000);
   }
 
-  /**
-   * Handle AngularFireAuth errors and present toasts
-   */
   errorHandler(error: {code: string, message: string}) {
     const {code} = error;
     let {message} = error;
@@ -111,25 +109,19 @@ export class AuthService {
         message = 'This email is already in use. Login or reset password';
         break;
       case 'auth/popup-closed-by-user':
-        // if they close the popup, just do nothing
         return;
       default:
         break;
     }
 
-    // show a toast and re-throw the error if it's not from Firebase Auth
     this.utilService.showToast(message);
-    if (!error.code.startsWith('auth/')) {
+    if (!code || !code.startsWith('auth/')) {
       throw error;
     }
   }
 
-  /**
-   * Whenever a user logs in in with any auth service, call this function to
-   * add/update that user's data in Firestore
-   */
   private async updateUserData(
-      firebaseUser: firebase.User, additionalInfo?: Partial<User>) {
+      firebaseUser: FirebaseUser, additionalInfo?: Partial<User>) {
     const path = `users/${firebaseUser.uid}`;
     const data: Partial<User> = {};
 
@@ -143,18 +135,13 @@ export class AuthService {
       data.photoURL = firebaseUser.photoURL;
     }
 
-    // assign any additional info passed in
     Object.assign(data, additionalInfo);
 
-    await this.afs.doc(path).set(data, {merge: true});
+    await setDoc(doc(this.firestore, path), data, {merge: true});
   }
 
-  /**
-   * You can never fully log out of the mobile app, logging out just spawns a
-   * new anonymous account
-   */
   public async logout(): Promise<void> {
     this.authState = null;
-    await this.afAuth.signOut();
+    await signOut(this.auth);
   }
 }

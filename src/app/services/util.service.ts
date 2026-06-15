@@ -16,7 +16,7 @@ export class UtilService {
   // IE: The clipboard feature may be disabled by an administrator. By
   // default a prompt is shown the first time the clipboard is
   // used (per session).
-  copyToClipboard(text) {
+  copyToClipboard(text): boolean | undefined {
     if (document.queryCommandSupported &&
         document.queryCommandSupported('copy')) {
       const textarea = document.createElement('textarea');
@@ -29,13 +29,15 @@ export class UtilService {
         // Security exception may be thrown by some browsers.
         document.execCommand('copy');
         this.showToast('Copied link to clipboard');
-      } catch (ex) {
+        return true;
+      } catch (_ex) {
         this.showToast('Copy to clipboard failed');
         return false;
       } finally {
         document.body.removeChild(textarea);
       }
     }
+    return undefined;
   }
 
   async showToast(message: string, duration: number = 2000, options?) {
@@ -50,48 +52,35 @@ export class UtilService {
   /**
    * Show a confirmation popup, return true if they confirm
    */
-  confirm(
+  async confirm(
       header: string, message: string, confirmText: string,
       cancelText: string): Promise<boolean> {
-    return new Promise(async resolve => {
-      const alert = await this.alertCtrl.create({
-        header,
-        message,
-        buttons: [
-          {
-            text: cancelText,
-            role: 'cancel',
-            handler: () => {
-              resolve(false);
-            }
-          },
-          {
-            text: confirmText,
-            handler: () => {
-              resolve(true);
-            }
-          }
-        ]
-      });
-
-      await alert.present();
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [
+        {text: cancelText, role: 'cancel'},
+        {text: confirmText},
+      ],
     });
+    await alert.present();
+    const {role} = await alert.onDidDismiss();
+    return role !== 'cancel';
   }
 
   /**
    * Show a confirmation popup, return true if they confirm
    */
-  alert(header: string, message: string, confirmText: string):
+  async alert(header: string, message: string, confirmText: string):
       Promise<boolean> {
-    return new Promise(async resolve => {
-      const alert = await this.alertCtrl.create({
-        header,
-        message,
-        buttons: [{text: confirmText}],
-      });
-
-      await alert.present();
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [{text: confirmText}],
     });
+    await alert.present();
+    await alert.onDidDismiss();
+    return true;
   }
 
   async promptForText(
@@ -101,29 +90,29 @@ export class UtilService {
       confirmText: string,
       cancelText: string,
       ): Promise<string|null> {
-    return new Promise(async resolve => {
-      const ionAlert = await this.alertCtrl.create({
-        header,
-        message,
-        inputs: [{name: 'name', type: 'text', placeholder}],
-        buttons: [
-          {
-            text: cancelText,
-            role: 'cancel',
-            handler: () => {
-              resolve(null);
-            }
-          },
-          {
-            text: confirmText,
-            handler: (response) => {
-              resolve(response.name || null)
-            }
-          }
-        ]
-      });
-
-      await ionAlert.present();
+    return new Promise(resolve => {
+      this.alertCtrl
+          .create({
+            header,
+            message,
+            inputs: [{name: 'name', type: 'text', placeholder}],
+            buttons: [
+              {
+                text: cancelText,
+                role: 'cancel',
+                handler: () => {
+                  resolve(null);
+                },
+              },
+              {
+                text: confirmText,
+                handler: (response) => {
+                  resolve(response.name || null);
+                },
+              },
+            ],
+          })
+          .then(ionAlert => ionAlert.present());
     });
   }
 

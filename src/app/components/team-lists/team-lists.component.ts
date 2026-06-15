@@ -3,10 +3,11 @@ import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, GameStatus, Room, RoomStatus} from '../../../../types';
+import {Game, Room, RoomStatus} from '../../../../types';
 import {RoomService} from '../../services/room.service';
 
 @Component({
+  standalone: false,
   selector: 'app-team-lists',
   templateUrl: './team-lists.component.html',
   styleUrls: ['./team-lists.component.scss'],

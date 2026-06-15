@@ -1,10 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import * as moment from 'moment';
+import {DateTime} from 'luxon';
 import {Game, GameStatus} from 'types';
-import {cloneDeep} from 'lodash';
 
 @Component({
+  standalone: false,
   selector: 'app-game-card',
   templateUrl: './game-card.component.html',
   styleUrls: ['./game-card.component.scss'],
@@ -12,14 +12,14 @@ import {cloneDeep} from 'lodash';
 export class GameCardComponent implements OnInit {
   @Input() game: Game;
   @Input() showRoom = false;
-  completedMoment: moment.Moment;
+  completedAtDateTime: DateTime;
 
   constructor(
       private readonly router: Router,
   ) {}
 
   ngOnInit() {
-    this.completedMoment = moment(this.game.completedAt);
+    this.completedAtDateTime = DateTime.fromMillis(this.game.completedAt);
   }
 
   get blueWon(): boolean {
@@ -64,27 +64,28 @@ export class GameCardComponent implements OnInit {
     let date = '';
     let time = '';
 
-    const clone = cloneDeep(this.completedMoment).startOf('day')
-    const days = moment().startOf('day').diff(clone, 'days');
+    const completedDay = this.completedAtDateTime.startOf('day');
+    const days = Math.floor(
+        DateTime.local().startOf('day').diff(completedDay, 'days').days);
 
-    if (this.completedMoment) {
-      time = this.completedMoment.format('h:mma');
+    if (this.completedAtDateTime) {
+      time = this.completedAtDateTime.toFormat('h:mma');
 
       // relative times
       if (days === 0) {
         date = 'Today';
-        time = this.completedMoment.fromNow();
+        time = this.completedAtDateTime.toRelative() ?? time;
       } else if (days === 1) {
         date = 'Yesterday';
       } else if (days > 1 && days < 7) {
-        date = this.completedMoment.format('dddd');
+        date = this.completedAtDateTime.toFormat('cccc');
       } else {
-        date = this.completedMoment.format('dddd, MMM D');
+        date = this.completedAtDateTime.toFormat('cccc, LLL d');
       }
 
       // dates a year in the past should include year to be more clear
       if (days >= 365) {
-        date += ` ${this.completedMoment.format('YYYY')}`;
+        date += ` ${this.completedAtDateTime.toFormat('yyyy')}`;
       }
     }
 

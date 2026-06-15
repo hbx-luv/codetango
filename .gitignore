@@ -30,3 +30,20 @@ npm-debug.log*
 /plugins
 /www
 *.cache
+
+# Angular build cache
+/.angular
+
+# Firestore emulator local state (when emulators are used)
+/data
+/firebase-debug.log
+/firestore-debug.log
+/ui-debug.log
+
+# Local scratchpads (not part of project source)
+/404s.txt
+/greenflagged-*.md
+/greenflagged-*.txt
+
+# Empty project-local MCP config — don't commit
+/.mcp.json

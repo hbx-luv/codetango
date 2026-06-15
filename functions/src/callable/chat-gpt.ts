@@ -1,19 +1,20 @@
 import axios from 'axios';
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import {onCall} from 'firebase-functions/v2/https';
 
 import {Game} from '../types';
 import {sendSpymasterMessage} from '../util/message';
 
 try {
   admin.initializeApp();
-} catch (e) {
+} catch (_e) {
   // do nothing, this is fine
 }
 
 const db = admin.firestore();
 
-export const askChatGpt = functions.https.onCall(async (gameAndTeam) => {
+export const askChatGpt = onCall(async (req) => {
+  const gameAndTeam = req.data as string;
   const [gameId, team] = gameAndTeam.split('_');
   return getClue(gameId, team);
 });
@@ -66,16 +67,12 @@ async function getClue(gameId: string, team: string) {
     data: postData,
   };
 
-  try {
-    const {data} = await axios(options);
+  const {data} = await axios(options);
 
-    await sendSpymasterMessage(
-        db, gameId,
-        `ChatGPT generated the hint "${data.hint} ${data.number}" for the ${
-            team.toLowerCase()} spymaster. Reasoning: \n${data.reason}`);
+  await sendSpymasterMessage(
+      db, gameId,
+      `ChatGPT generated the hint "${data.hint} ${data.number}" for the ${
+          team.toLowerCase()} spymaster. Reasoning: \n${data.reason}`);
 
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  return data;
 }
