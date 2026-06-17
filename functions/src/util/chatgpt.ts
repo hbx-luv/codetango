@@ -1,5 +1,5 @@
 import {defineSecret} from 'firebase-functions/params';
-import {OpenAI} from 'openai';
+import OpenAI from 'openai';
 
 export const chatgptApiKey = defineSecret('CHATGPT_API_KEY');
 
