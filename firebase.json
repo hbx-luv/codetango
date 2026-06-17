@@ -15,6 +15,7 @@
     "singleProjectMode": true
   },
   "hosting": {
+    "target": "master",
     "public": "www",
     "ignore": [
       "firebase.json",
