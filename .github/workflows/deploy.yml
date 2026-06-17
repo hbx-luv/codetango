@@ -2,31 +2,36 @@ name: Deploy to Firebase
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          ref: ${{ github.ref }}
-      - name: Use Node.js version from .nvmrc
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-      - name: Install @angular/cli
-        run: npm i -D -E @angular/cli --force
-      - name: Install Ionic CLI 6.18.0
-        run: npm install -g @ionic/cli@6.18.0
-      - name: Install app dependencies
-        run: npm ci --force
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Install functions dependencies
-        run: cd functions && npm i && cd ..
-      - name: Build prod app
+        working-directory: functions
+        run: npm ci
+
+      - name: Build production app
         run: npm run build:prod
-      - uses: w9jds/firebase-action@master
-        with:
-          args: deploy -P prod
+
+      - name: Deploy to Firebase
+        run: npx firebase deploy -P prod --non-interactive
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

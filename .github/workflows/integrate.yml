@@ -1,19 +1,41 @@
-name: Build Prod App
+name: CI
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Install @angular/cli
-        run: npm i -D -E @angular/cli --force
-      - name: Use coturiv/setup-ionic
-        uses: coturiv/setup-ionic@v1.0.4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          cordova-version: 8
-      - run: npm ci --force
-      - run: npm run build:prod
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install functions dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build functions
+        working-directory: functions
+        run: npm run build
+
+      - name: Build production app
+        run: npm run build:prod
