@@ -112,7 +112,7 @@ export async function recalcElo(
 
   for (const [userId, data] of Object.entries(userMap)) {
 
-    const updateData: firestore.UpdateData<any> = {
+    const updateData: {[fieldPath: string]: any} = {
       'stats.elo': data.elo,
       'stats.gamesPlayed': data.gamesPlayed,
       'stats.gamesWon': data.gamesWon,

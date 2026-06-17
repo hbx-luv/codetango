@@ -50,7 +50,7 @@ export class BigBatch {
    * within the document.
    * @return This `WriteBatch` instance. Used for chaining method calls.
    */
-  update(documentRef: firestore.DocumentReference, data: firestore.UpdateData<any>):
+  update(documentRef: firestore.DocumentReference, data: {[fieldPath: string]: any}):
       BigBatch {
     this.growIfNecessary();
     this._size++;
