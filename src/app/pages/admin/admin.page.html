@@ -7,19 +7,165 @@
 
   <ion-content>
     <div class="padding">
-      <h1>Set up word database</h1>
-      <ion-button (click)="wordListsService.setupDatabase()">Set up</ion-button>
 
-      <h1>Migrate user</h1>
-      <ion-item>
-        <ion-label position="floating">Old User Id</ion-label>
-        <ion-input [(ngModel)]="migrateOldUserId"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label position="floating">New User Id</ion-label>
-        <ion-input [(ngModel)]="migrateNewUserId"></ion-input>
-      </ion-item>
-      <ion-button [disabled]="migrateDisabled" (click)="migrate()">Migrate</ion-button>
+      <!-- Live job status -->
+      <section class="job-status" *ngIf="jobDisplay.job" [attr.data-phase]="jobDisplay.job.phase">
+        <div class="job-header">
+          <ion-spinner *ngIf="jobDisplay.active" name="dots"></ion-spinner>
+          <ion-icon *ngIf="jobDisplay.finished && !jobDisplay.errored" name="checkmark-circle" color="success"></ion-icon>
+          <ion-icon *ngIf="jobDisplay.errored" name="alert-circle" color="danger"></ion-icon>
+          <div class="job-title">
+            <h2>{{ jobDisplay.label }}</h2>
+            <p>{{ jobDisplay.detail }}</p>
+          </div>
+        </div>
+        <ion-progress-bar
+          *ngIf="jobDisplay.showBar"
+          [value]="jobDisplay.progress"
+          [color]="jobDisplay.color">
+        </ion-progress-bar>
+        <ion-progress-bar
+          *ngIf="jobDisplay.active && !jobDisplay.showBar"
+          type="indeterminate"
+          [color]="jobDisplay.color">
+        </ion-progress-bar>
+      </section>
+
+      <!-- Merge players -->
+      <section class="section">
+        <h1>Merge players</h1>
+        <p class="hint">
+          Move all games and history from one account into another. The
+          recalc runs into a staging area first — live stats stay put until
+          it's ready to swap.
+        </p>
+
+        <div class="merge-grid">
+          <!-- FROM (old) -->
+          <div class="picker" [class.picked]="oldUser">
+            <label>Merge from</label>
+            <ion-item *ngIf="oldUser; else oldSearch" lines="full">
+              <ion-avatar slot="start" *ngIf="oldUser.photoURL">
+                <img [src]="oldUser.photoURL" alt="">
+              </ion-avatar>
+              <ion-label>
+                <h3>{{ displayName(oldUser) }}</h3>
+                <p>{{ oldUser.email || oldUser.id }}</p>
+                <p *ngIf="oldUserGameCount !== undefined">
+                  {{ oldUserGameCount }} game{{ oldUserGameCount === 1 ? '' : 's' }}
+                </p>
+              </ion-label>
+              <ion-button
+                fill="clear"
+                slot="end"
+                (click)="clearOldUser()"
+                [disabled]="jobDisplay.active">
+                <ion-icon slot="icon-only" name="close-circle"></ion-icon>
+              </ion-button>
+            </ion-item>
+            <ng-template #oldSearch>
+              <ion-searchbar
+                placeholder="Search users to merge from"
+                [value]="oldUserQuery"
+                (ionInput)="onOldQueryChange($event.detail.value)"
+                [disabled]="jobDisplay.active">
+              </ion-searchbar>
+              <ion-list *ngIf="filteredOldUsers.length" class="picker-results" lines="full">
+                <ion-item
+                  *ngFor="let u of filteredOldUsers"
+                  button
+                  (click)="selectOldUser(u)">
+                  <ion-avatar slot="start" *ngIf="u.photoURL">
+                    <img [src]="u.photoURL" alt="">
+                  </ion-avatar>
+                  <ion-label>
+                    <h3>{{ displayName(u) }}</h3>
+                    <p>{{ u.email || u.id }}</p>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+            </ng-template>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <!-- INTO (new) -->
+          <div class="picker" [class.picked]="newUser">
+            <label>Merge into</label>
+            <ion-item *ngIf="newUser; else newSearch" lines="full">
+              <ion-avatar slot="start" *ngIf="newUser.photoURL">
+                <img [src]="newUser.photoURL" alt="">
+              </ion-avatar>
+              <ion-label>
+                <h3>{{ displayName(newUser) }}</h3>
+                <p>{{ newUser.email || newUser.id }}</p>
+              </ion-label>
+              <ion-button
+                fill="clear"
+                slot="end"
+                (click)="clearNewUser()"
+                [disabled]="jobDisplay.active">
+                <ion-icon slot="icon-only" name="close-circle"></ion-icon>
+              </ion-button>
+            </ion-item>
+            <ng-template #newSearch>
+              <ion-searchbar
+                placeholder="Search users to merge into"
+                [value]="newUserQuery"
+                (ionInput)="onNewQueryChange($event.detail.value)"
+                [disabled]="jobDisplay.active">
+              </ion-searchbar>
+              <ion-list *ngIf="filteredNewUsers.length" class="picker-results" lines="full">
+                <ion-item
+                  *ngFor="let u of filteredNewUsers"
+                  button
+                  (click)="selectNewUser(u)">
+                  <ion-avatar slot="start" *ngIf="u.photoURL">
+                    <img [src]="u.photoURL" alt="">
+                  </ion-avatar>
+                  <ion-label>
+                    <h3>{{ displayName(u) }}</h3>
+                    <p>{{ u.email || u.id }}</p>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+            </ng-template>
+          </div>
+        </div>
+
+        <div class="actions">
+          <ion-button
+            [disabled]="!mergeReady"
+            (click)="mergeUsers()">
+            Merge
+          </ion-button>
+          <span class="hint" *ngIf="!mergeReady">{{ mergeDisabledReason }}</span>
+        </div>
+      </section>
+
+      <!-- Recalculate all stats -->
+      <section class="section">
+        <h1>Recalculate all stats</h1>
+        <p class="hint">
+          Rebuild every user's stats and Elo history from every completed
+          game. Runs into a staging area first; live stats swap in during the
+          commit phase.
+        </p>
+        <ion-button
+          color="secondary"
+          [disabled]="jobDisplay.active"
+          (click)="recalcAll()">
+          Recalculate now
+        </ion-button>
+      </section>
+
+      <!-- Word database -->
+      <section class="section">
+        <h1>Set up word database</h1>
+        <p class="hint">Seed the wordlist collection with the built-in lists.</p>
+        <ion-button (click)="wordListsService.setupDatabase()">Set up</ion-button>
+      </section>
+
     </div>
   </ion-content>
 </ng-container>

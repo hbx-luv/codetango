@@ -1,6 +1,6 @@
 import {firestore} from 'firebase-admin';
 
-import {Game, GameStatus, Stats, Team, UserToUserStats} from '../types';
+import {Game, GameStatus, Stats, Team, UserStats, UserToUserStats} from '../types';
 
 import {BigBatch} from './big-batch';
 import {getChange} from './elo-math';
@@ -9,6 +9,22 @@ import {getChange} from './elo-math';
 const BASE_ELO = 1200;
 // removed this for now (set to 0), not sure I like the results - MT
 const PROVISIONAL_GAMES = 0;
+
+// Live collection names.
+export const ELO_HISTORY = 'eloHistory';
+export const USER_TO_USER_HISTORY = 'userToUserHistory';
+
+// Staging collections written during a staged recalc; only the commit phase
+// copies them onto the live collections above.
+export const ELO_HISTORY_STAGING = 'eloHistoryStaging';
+export const USER_TO_USER_HISTORY_STAGING = 'userToUserHistoryStaging';
+// Per-user final UserStats snapshot for a staged recalc; the commit phase
+// copies these into users/{userId}.stats.
+export const USER_STATS_STAGING = 'userStatsStaging';
+
+// Max completed games to process in a single recalcElo invocation. Chosen so
+// the Cloud Function stays well under its execution timeout.
+export const RECALC_GAMES_PER_BATCH = 100;
 
 interface UserMap {
   [field: string]: Stats;
@@ -23,37 +39,62 @@ interface UserToUserMap {
   };
 }
 
+export interface RecalcOptions {
+  // When true, the recalc reads prior state from and writes new state into
+  // the *Staging collections and userStatsStaging. Live users.stats and
+  // history remain untouched, and the function does NOT auto-chain via
+  // admin/recalc — the caller drives chaining.
+  staged?: boolean;
+
+  // Overrides the default per-invocation game limit.
+  gamesLimit?: number;
+}
+
+export interface RecalcResult {
+  // Number of completed games this invocation processed.
+  processed: number;
+  // completedAt of the last game processed, or the input timestamp if none.
+  lastTimestamp: number;
+}
+
 export async function recalcElo(
     db: any,  // RIP, tried to import firestore.Firestore
     timestamp: number,
     deletedGame?: Game,
-) {
-  // Update:
-  //      eloHistory collection
-  //          -> set one record per user so we can query them later for charts
-  //      users collection with all affected users
-  //          -> update the relevant stats for each user affected
+    options: RecalcOptions = {},
+    ): Promise<RecalcResult> {
+  const staged = options.staged ?? false;
+  const gamesLimit = options.gamesLimit ?? RECALC_GAMES_PER_BATCH;
+  const historyCollection = staged ? ELO_HISTORY_STAGING : ELO_HISTORY;
+  const u2uHistoryCollection =
+      staged ? USER_TO_USER_HISTORY_STAGING : USER_TO_USER_HISTORY;
 
-  const games =
-      await db.collection('games')
-          .where('completedAt', '>=', timestamp)
-          .orderBy('completedAt', 'asc')
-          .limit(100)  // only do 100 games at a time so we don't timeout
-          .get();
+  // Update:
+  //      history collection (live or staging)
+  //          -> set one record per user so we can query them later for charts
+  //      In live mode: users collection with stats for each affected user
+  //      In staged mode: userStatsStaging with final UserStats per user
+
+  const games = await db.collection('games')
+                    .where('completedAt', '>=', timestamp)
+                    .orderBy('completedAt', 'asc')
+                    .limit(gamesLimit)
+                    .get();
 
   console.log(`${games.size} games got got. starting calc`);
 
   const userMap: UserMap = {};
   const userToUserMap: UserToUserMap = {};
   const batch = new BigBatch(db);
-  let lastTimestamp = 0;
+  let lastTimestamp = timestamp;
 
   // if the game was deleted, we need to make sure the users in that
   // deleted game get added to the user map so their records get updated
   if (deletedGame) {
     console.log('adding users from deleted game', deletedGame);
-    await populateUserMap(db, userMap, deletedGame);
-    await populateUserToUserMap(db, userToUserMap, userMap, deletedGame);
+    await populateUserMap(db, userMap, deletedGame, historyCollection);
+    await populateUserToUserMap(
+        db, userToUserMap, userMap, deletedGame, u2uHistoryCollection);
   }
 
   for (let i = 0; i < games.size; i++) {
@@ -66,20 +107,21 @@ export async function recalcElo(
 
     // ensure all of the users are in the userMap before
     // passing that off to the elo function
-    await populateUserMap(db, userMap, game);
+    await populateUserMap(db, userMap, game, historyCollection);
 
     // populate the userToUserMap as well, using the userMap to get the record
     // for current nemesis and ally for each player
-    await populateUserToUserMap(db, userToUserMap, userMap, game);
+    await populateUserToUserMap(
+        db, userToUserMap, userMap, game, u2uHistoryCollection);
 
     // the setStats method will update several stats in the userMap and
     // userToUserMap for each user that played in the game
     setStats(game, userMap, userToUserMap);
 
-    // update eloHistory and userToUserHistory for all users involved
+    // update history for all users involved
     for (const myUserId of userIds) {
       batch.set(
-          db.collection('eloHistory').doc(`${myUserId}_${game.id}`),
+          db.collection(historyCollection).doc(`${myUserId}_${game.id}`),
           {
             // clone the object and set gameId and timestamp
             ...userMap[myUserId],
@@ -92,7 +134,7 @@ export async function recalcElo(
       for (const theirUserId of userIds) {
         if (myUserId !== theirUserId) {
           batch.set(
-              db.collection('userToUserHistory')
+              db.collection(u2uHistoryCollection)
                   .doc(`${myUserId}_${theirUserId}_${game.id}`),
               {
                 // clone the object and set gameId and timestamp
@@ -110,36 +152,49 @@ export async function recalcElo(
 
   console.log('done with games, iterating through users');
 
-  for (const [userId, data] of Object.entries(userMap)) {
-
-    const updateData: firestore.UpdateData<any> = {
-      'stats.elo': data.elo,
-      'stats.gamesPlayed': data.gamesPlayed,
-      'stats.gamesWon': data.gamesWon,
-      'stats.spymasterGames': data.spymasterGames,
-      'stats.spymasterWins': data.spymasterWins,
-      'stats.spymasterStreak': data.spymasterStreak,
-      'stats.spymasterBestStreak': data.spymasterBestStreak,
-      'stats.assassinsAsSpymaster': data.assassinsAsSpymaster,
-      'stats.currentStreak': data.currentStreak,
-      'stats.bestStreak': data.bestStreak,
-      'stats.provisional': data.provisional,
-      'stats.lastPlayed': data.timestamp
-    };
-
-    // we have to do these outside, because you cannot set undefined as a value
-    // in firestore
-    if (data.ally) {
-      updateData['stats.ally'] = data.ally;
+  if (staged) {
+    // In staged mode, persist the cumulative UserStats to userStatsStaging.
+    // The commit phase reads this collection to update live users.stats.
+    for (const [userId, data] of Object.entries(userMap)) {
+      const stats = statsToUserStats(userId, data);
+      batch.set(
+          db.collection(USER_STATS_STAGING).doc(userId),
+          {userId, stats, updatedAt: Date.now()},
+          {merge: true},
+      );
     }
-    if (data.nemesis) {
-      updateData['stats.nemesis'] = data.nemesis;
-    }
+  } else {
+    // Live mode: write straight to users/{userId}.stats.* as before.
+    for (const [userId, data] of Object.entries(userMap)) {
+      const updateData: firestore.UpdateData<any> = {
+        'stats.elo': data.elo,
+        'stats.gamesPlayed': data.gamesPlayed,
+        'stats.gamesWon': data.gamesWon,
+        'stats.spymasterGames': data.spymasterGames,
+        'stats.spymasterWins': data.spymasterWins,
+        'stats.spymasterStreak': data.spymasterStreak,
+        'stats.spymasterBestStreak': data.spymasterBestStreak,
+        'stats.assassinsAsSpymaster': data.assassinsAsSpymaster,
+        'stats.currentStreak': data.currentStreak,
+        'stats.bestStreak': data.bestStreak,
+        'stats.provisional': data.provisional,
+        'stats.lastPlayed': data.timestamp,
+      };
 
-    const userRef = db.collection('users').doc(userId);
-    const userSnapshot = await userRef.get();
-    if (userSnapshot.exists) {
-      batch.update(userRef, updateData);
+      // we have to do these outside, because you cannot set undefined as a
+      // value in firestore
+      if (data.ally) {
+        updateData['stats.ally'] = data.ally;
+      }
+      if (data.nemesis) {
+        updateData['stats.nemesis'] = data.nemesis;
+      }
+
+      const userRef = db.collection('users').doc(userId);
+      const userSnapshot = await userRef.get();
+      if (userSnapshot.exists) {
+        batch.update(userRef, updateData);
+      }
     }
   }
 
@@ -147,19 +202,41 @@ export async function recalcElo(
   console.log('committing batches');
   await batch.commit();
 
-  // "queue up" a new recalc starting where we left off
-  console.log(`schedule? (${lastTimestamp} > ${timestamp})`);
-  if (lastTimestamp > timestamp) {
+  // In live mode, self-schedule the next batch via admin/recalc so
+  // onCreateAdmin picks it up. In staged mode, the job runner is in charge.
+  if (!staged && lastTimestamp > timestamp) {
+    console.log(`scheduling a new recalc starting from ${lastTimestamp}`);
     await db.collection('admin').doc('recalc').delete();
     await db.collection('admin').doc('recalc').set({timestamp: lastTimestamp});
-    console.log('scheduling a new recalc starting from ' + lastTimestamp);
   }
 
-  return 'ja!';
+  return {processed: games.size, lastTimestamp};
+}
+
+// Extract the storable UserStats out of a Stats snapshot. Mirrors the
+// dot-path field list used in live mode above.
+function statsToUserStats(userId: string, data: Stats): UserStats {
+  const stats: UserStats = {
+    elo: data.elo,
+    gamesPlayed: data.gamesPlayed,
+    gamesWon: data.gamesWon,
+    spymasterGames: data.spymasterGames,
+    spymasterWins: data.spymasterWins,
+    spymasterStreak: data.spymasterStreak,
+    spymasterBestStreak: data.spymasterBestStreak,
+    assassinsAsSpymaster: data.assassinsAsSpymaster,
+    currentStreak: data.currentStreak,
+    bestStreak: data.bestStreak,
+    provisional: data.provisional,
+    lastPlayed: data.timestamp,
+  };
+  if (data.ally) stats.ally = data.ally;
+  if (data.nemesis) stats.nemesis = data.nemesis;
+  return stats;
 }
 
 export async function getHighestElo(db: any, userId: string) {
-  const snapshot = await db.collection('eloHistory')
+  const snapshot = await db.collection(ELO_HISTORY)
                        .where('id', '==', userId)
                        .where('provisional', '==', false)
                        .orderBy('elo', 'desc')
@@ -169,11 +246,12 @@ export async function getHighestElo(db: any, userId: string) {
   return snapshot.size === 1 ? snapshot.docs[0].data().elo : undefined;
 }
 
-async function populateUserMap(db: any, userMap: UserMap, game: Game) {
+async function populateUserMap(
+    db: any, userMap: UserMap, game: Game, historyCollection: string) {
   for (const userId of game.blueTeam.userIds.concat(game.redTeam.userIds)) {
     if (userMap[userId] === undefined) {
-      userMap[userId] =
-          await getEloHistoryForUser(db, userId, game.id!, game.completedAt!);
+      userMap[userId] = await getEloHistoryForUser(
+          db, userId, game.id!, game.completedAt!, historyCollection);
     }
   }
 }
@@ -187,8 +265,9 @@ export async function getEloHistoryForUser(
     userId: string,
     gameId: string,
     timestamp: number,
+    collectionName: string = ELO_HISTORY,
     ): Promise<Stats> {
-  const snapshot = await db.collection('eloHistory')
+  const snapshot = await db.collection(collectionName)
                        .orderBy('timestamp', 'desc')  // desc is most recent
                        .where('userId', '==', userId)
                        .where('timestamp', '<', timestamp)
@@ -220,6 +299,7 @@ async function populateUserToUserMap(
     userTouserMap: UserToUserMap,
     userMap: UserMap,
     game: Game,
+    u2uHistoryCollection: string,
 ) {
   const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
 
@@ -240,7 +320,8 @@ async function populateUserToUserMap(
         if (userTouserMap[myUserId][theirUserId] === undefined) {
           userTouserMap[myUserId][theirUserId] =
               await getUserToUserHistoryForUser(
-                  db, myUserId, theirUserId, game.id!, game.completedAt!);
+                  db, myUserId, theirUserId, game.id!, game.completedAt!,
+                  u2uHistoryCollection);
         }
       }
     }
@@ -256,8 +337,9 @@ export async function getUserToUserHistoryForUser(
     theirUserId: string,
     gameId: string,
     timestamp: number,
+    collectionName: string = USER_TO_USER_HISTORY,
     ): Promise<UserToUserStats> {
-  const snapshot = await db.collection('userToUserHistory')
+  const snapshot = await db.collection(collectionName)
                        .orderBy('timestamp', 'desc')  // desc is most recent
                        .where('myUserId', '==', myUserId)
                        .where('theirUserId', '==', theirUserId)

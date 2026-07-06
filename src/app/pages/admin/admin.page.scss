@@ -1,3 +1,144 @@
 .padding {
-  padding: 10px 20px;
+  padding: 16px 20px 40px;
+}
+
+.section {
+  margin-top: 32px;
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+  }
+
+  .hint {
+    margin: 0 0 12px;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+
+  .hint {
+    color: var(--ion-color-medium);
+    font-size: 13px;
+  }
+}
+
+// -- Live job status ------------------------------------------------------
+
+.job-status {
+  border: 1px solid var(--ion-color-step-150, #e0e0e0);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--ion-color-step-50, #fafafa);
+  margin-bottom: 24px;
+
+  .job-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    ion-spinner {
+      flex: 0 0 auto;
+    }
+
+    ion-icon {
+      font-size: 24px;
+      flex: 0 0 auto;
+    }
+
+    .job-title {
+      flex: 1 1 auto;
+
+      h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 2px 0 0;
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  ion-progress-bar {
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  &[data-phase='error'] {
+    border-color: var(--ion-color-danger);
+  }
+}
+
+// -- Merge grid -----------------------------------------------------------
+
+.merge-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: start;
+  margin-top: 8px;
+
+  .arrow {
+    padding-top: 34px;
+    font-size: 24px;
+    color: var(--ion-color-medium);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+
+    .arrow {
+      padding-top: 4px;
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.picker {
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  ion-searchbar {
+    padding: 0;
+    --box-shadow: none;
+    --background: var(--ion-color-step-50, #fafafa);
+    --border-radius: 8px;
+  }
+
+  &.picked ion-item {
+    --background: var(--ion-color-step-50, #fafafa);
+    border-radius: 8px;
+  }
+}
+
+.picker-results {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--ion-color-step-150, #e0e0e0);
+  border-radius: 8px;
+  margin-top: 4px;
+  padding: 0;
+
+  ion-item {
+    --min-height: 52px;
+  }
 }

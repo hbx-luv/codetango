@@ -243,3 +243,62 @@ export enum GameType {
   // first version of emojis RIP
   LEGACY_EMOJIS = 'LEGACY_EMOJIS',
 }
+
+// Phases of an admin-triggered merge/recalc job. Advance strictly forward:
+//   migrating -> recalculating -> committing -> done
+// or from any phase -> error on failure.
+export enum RecalcPhase {
+  MIGRATING = 'migrating',
+  RECALCULATING = 'recalculating',
+  COMMITTING = 'committing',
+  DONE = 'done',
+  ERROR = 'error',
+}
+
+export enum RecalcJobType {
+  MERGE = 'merge',
+  RECALC = 'recalc',
+}
+
+// Live status doc at /adminJobs/current. Written only by the Cloud Function;
+// the admin page reads it via docData() to render progress.
+export interface RecalcJob {
+  jobId: string;
+  type: RecalcJobType;
+  phase: RecalcPhase;
+
+  // merge-only
+  oldUserId?: string;
+  newUserId?: string;
+  oldUserName?: string;
+  newUserName?: string;
+
+  // progress counters
+  totalGames: number;
+  processedGames: number;
+  migratedGames: number;
+  committedItems: number;
+  totalCommitItems: number;
+
+  // timing (ms since epoch)
+  startedAt: number;
+  updatedAt: number;
+  finishedAt?: number;
+
+  // chaining cursor for the recalculating phase
+  cursorTimestamp: number;
+
+  // committing-phase state machine
+  commitStep?: CommitStep;
+
+  // populated when phase === ERROR
+  error?: string;
+}
+
+export enum CommitStep {
+  USERS = 'users',
+  NUKE_OLD_USER = 'nuke_old_user',
+  COPY_ELO_HISTORY = 'copy_elo_history',
+  COPY_USER_TO_USER = 'copy_user_to_user',
+  CLEANUP_STAGING = 'cleanup_staging',
+}
