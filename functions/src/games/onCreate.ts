@@ -2,7 +2,8 @@ import * as admin from 'firebase-admin';
 import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 
 import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
-import {chatgptApiKey, getThemedWords} from '../util/chatgpt';
+import {getThemedWords} from '../util/chatgpt';
+import {anthropicApiKey, chatgptApiKey} from '../util/llm';
 
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
@@ -66,7 +67,10 @@ function getGameType(
 
 export const onCreateGame =
     onDocumentCreated(
-        {document: 'games/{gameId}', secrets: [chatgptApiKey]},
+        {
+          document: 'games/{gameId}',
+          secrets: [chatgptApiKey, anthropicApiKey],
+        },
         async (event) => {
           const snapshot = event.data;
           if (!snapshot) return;
@@ -116,8 +120,19 @@ async function generateNewGameTiles(
     wordList: string,
     aiWordlistTheme?: string,
     ): Promise<Tile[]> {
-  const words = aiWordlistTheme ? await getThemedWords(aiWordlistTheme) :
-                                  await getWords(wordList);
+  let words: string[];
+  if (aiWordlistTheme) {
+    try {
+      words = await getThemedWords(aiWordlistTheme);
+    } catch (_e) {
+      console.error(
+          'themed word generation failed; falling back to original list');
+      words = await getWords('original');
+    }
+  } else {
+    words = await getWords(wordList);
+  }
+
   const tiles = words.map(word => {
     return {
       word, role: TileRole.CIVILIAN, selected: false
@@ -126,14 +141,16 @@ async function generateNewGameTiles(
 
   // get red, blue, and assassin counts
   // assign the roles then shuffle the tiles
+  // each loop is bounded by tiles.length as defense-in-depth against a short
+  // word list (the fallback normally yields a full 25-tile board)
   const {red, blue, assassins} = getRoleCounts(wordList);
-  for (let i = 0; i < red; i++) {
+  for (let i = 0; i < red && i < tiles.length; i++) {
     tiles[i].role = TileRole.RED;
   }
-  for (let i = red; i < red + blue; i++) {
+  for (let i = red; i < red + blue && i < tiles.length; i++) {
     tiles[i].role = TileRole.BLUE;
   }
-  for (let i = red + blue; i < red + blue + assassins; i++) {
+  for (let i = red + blue; i < red + blue + assassins && i < tiles.length; i++) {
     tiles[i].role = TileRole.ASSASSIN;
   }
 
@@ -145,35 +162,48 @@ async function getWords(wordList: string): Promise<string[]> {
   if (snapshot.exists && snapshot.data()) {
     console.log(`word list "${wordList}" exists`);
     const newWordsForGame = [] as string[];
-    const {words} = snapshot.data() as WordList;
+    const {words = []} = snapshot.data() as WordList;
+    // copy so we can splice without mutating the fetched doc data
+    const available = [...words];
 
     const isPictures = (wordList === 'pictures' || wordList === 'memes');
     // in codenames pictures (and memes), you only get 20 tiles
     const count = isPictures ? 20 : 25;
 
-    while (newWordsForGame.length < count) {
-      const randomIndex = Math.floor(Math.random() * words.length);
-      const word = words.splice(randomIndex, 1)[0];
+    // Bound the loop on `available` so a short or empty doc terminates rather
+    // than spinning forever pushing `undefined` (the previous latent hang).
+    while (newWordsForGame.length < count && available.length > 0) {
+      const randomIndex = Math.floor(Math.random() * available.length);
+      const word = available.splice(randomIndex, 1)[0];
 
-      // ensure no dupes (since there are some in the word list)
-      if (!newWordsForGame.includes(word)) {
+      // ensure no dupes / empties (since there are some in the word list)
+      if (word !== undefined && word !== '' &&
+          !newWordsForGame.includes(word)) {
         newWordsForGame.push(word);
       }
     }
 
-    console.log('newWordsForGame has ' + newWordsForGame.length + ' words.');
-    return newWordsForGame;
+    if (newWordsForGame.length >= count) {
+      console.log('newWordsForGame has ' + newWordsForGame.length + ' words.');
+      return newWordsForGame;
+    }
+
+    // Doc existed but didn't hold enough usable words — fall through to the
+    // hardcoded default rather than returning a too-short board.
+    console.log(`word list "${wordList}" had only ${
+        newWordsForGame.length} usable words; using hardcoded default`);
   } else {
     console.log('defaultWords did not exist')
-    const hardcodedfornow = [
-      'AFRICA', 'AGENT',     'AIR',      'ALIEN',     'ALPS',
-      'AMAZON', 'AMBULANCE', 'AMERICA',  'ANGEL',     'ANTARCTICA',
-      'APPLE',  'ARM',       'ATLANTIS', 'AUSTRALIA', 'AZTEC',
-      'BACK',   'BALL',      'BAND',     'BANK',      'BAR',
-      'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
-    ];
-    return hardcodedfornow;
   }
+
+  const hardcodedfornow = [
+    'AFRICA', 'AGENT',     'AIR',      'ALIEN',     'ALPS',
+    'AMAZON', 'AMBULANCE', 'AMERICA',  'ANGEL',     'ANTARCTICA',
+    'APPLE',  'ARM',       'ATLANTIS', 'AUSTRALIA', 'AZTEC',
+    'BACK',   'BALL',      'BAND',     'BANK',      'BAR',
+    'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
+  ];
+  return hardcodedfornow;
 }
 
 async function getRoom(roomId: string): Promise<Room> {

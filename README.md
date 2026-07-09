@@ -38,11 +38,11 @@ The dev server runs at http://localhost:4200.
 | `npm run build:prod` | Production `ng build` (uses `environment.prod.ts`) | N/A (build output) |
 | `npm run lint` | ESLint on `src/`, `functions/src/`, `types.ts` | N/A |
 
-### Vetted package registry
+### Dependencies
 
-`.npmrc` points npm at `https://greenflagged.dev/npm`, the org's vetted package mirror. Most transitive deps had no satisfying vetted version on the first install — `package.json` has ~90 `overrides` entries that pin each to whatever was both vetted and compatible with the rest of the tree (some pinned forward to drop CVE-tainted versions, some pinned back to the last CJS-friendly release because firebase-tools' internals are CJS).
+Both package trees install from public npm. `legacy-peer-deps=true` is set in the root `.npmrc` because Angular and Ionic disagree about peer ranges and a strict install fails.
 
-If a fresh `npm install` ever fails with `ETARGET` (mirror lacks a satisfying version), the registry can usually auto-prioritize the request — re-run `npm install` after ~30 s. For unblocked work, `legacy-peer-deps=true` is on in `.npmrc` for one optional peer (`@angular/fire` → `firebase-tools`).
+`package.json` carries ten `overrides`: a CVE forward-pin on `path-to-regexp`, a scoped `express@4 → path-to-regexp@0.1.13` that keeps the Firebase emulator working, a `babel-loader` peer pin, and a handful of transitive pins (some pinned back to the last CJS-friendly release, because firebase-tools' internals are CJS). Verify `npm install`, `npm run build`, `npm run lint`, and `npm run emulators` before removing any of them.
 
 ### CLI niceties
 

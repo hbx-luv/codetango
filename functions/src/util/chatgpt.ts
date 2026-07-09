@@ -1,7 +1,7 @@
-import {defineSecret} from 'firebase-functions/params';
-import OpenAI from 'openai';
+import {complete} from './llm';
 
-export const chatgptApiKey = defineSecret('CHATGPT_API_KEY');
+// Re-exported for callers that historically imported the secret from here.
+export {chatgptApiKey} from './llm';
 
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
@@ -12,33 +12,88 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-async function promptChatGpt(
-    prompt: string, errorMessage: string): Promise<string> {
-  try {
-    const openai = new OpenAI({apiKey: chatgptApiKey.value()});
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{role: 'user', content: prompt}],
-    });
-    return completion.choices[0]?.message?.content ?? errorMessage;
-  } catch (_error) {
-    return errorMessage;
+interface ThemedWords {
+  theme: string;
+  words: string[];
+}
+
+// `aiWordlistTheme` is free text typed by any player and interpolated into the
+// prompt, and board words end up in the (large, per-doc) game document. Cap the
+// theme before interpolation and bound the response so a crafted theme can't
+// make the model emit arbitrarily long or numerous strings.
+const MAX_THEME_LENGTH = 200;
+const MAX_WORD_LENGTH = 30;
+const MIN_WORD_COUNT = 25;
+const MAX_WORD_COUNT = 200;
+
+// JSON Schema for the structured-output hint. JSON Schema CANNOT express
+// minItems/minLength, so the count/quality requirement lives in the validator.
+const THEMED_WORDS_SCHEMA: Record<string, unknown> = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['theme', 'words'],
+  properties: {
+    theme: {type: 'string'},
+    words: {type: 'array', items: {type: 'string'}},
+  },
+};
+
+// Trim, drop empties, and dedupe the raw word list. Dedup is casefolded so
+// visual duplicates (`Bat`/`bat`) collapse to one tile; the first-seen original
+// casing is kept for display.
+function cleanWords(words: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of words) {
+    const word = raw.trim();
+    if (word.length === 0) continue;
+    const key = word.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(word);
   }
+  return out;
+}
+
+// The contract the router enforces: a well-shaped object with at least 25
+// unique, non-empty, trimmed words. A short or duplicate-heavy list returns
+// false → provider failure → fall through to the next provider.
+function isThemedWords(v: unknown): v is ThemedWords {
+  if (typeof v !== 'object' || v === null) return false;
+  const obj = v as Record<string, unknown>;
+  if (typeof obj.theme !== 'string') return false;
+  if (!Array.isArray(obj.words)) return false;
+  if (!obj.words.every(w => typeof w === 'string')) return false;
+  const cleaned = cleanWords(obj.words as string[]);
+  // Enough unique words, not an absurd number, and no oversized word — an
+  // oversized or oversized-count response is treated as a provider failure.
+  if (cleaned.length < MIN_WORD_COUNT || cleaned.length > MAX_WORD_COUNT) {
+    return false;
+  }
+  if (cleaned.some(w => w.length > MAX_WORD_LENGTH)) return false;
+  return true;
 }
 
 export async function getThemedWords(theme: string): Promise<string[]> {
+  // Cap the untrusted, player-supplied theme before interpolating it into the
+  // prompt so a huge theme string can't blow up the request.
+  const safeTheme = theme.slice(0, MAX_THEME_LENGTH);
   const prompt = `
     Your task is to generate a list of words to be used for a game of codenames. Each word will be one of the tiles in the board for this round. The user has provided a word to be used as a theme or a spark of inspiration for the words generated. This word will be provided below between triple single-quotes. Please generate as many words as you can for this theme. Minimum 30 words, maximum 100 words.
     Please only respond with a JSON structure. No explanations, no greeting, no additional words. Keep it as concise as possible, by just returning the JSON. Please return a JSON structure with the following keys where theme is the user-provided word and words is a string array of the words for the board: theme, words
-    Theme: '''${theme}'''
+    Theme: '''${safeTheme}'''
   `;
 
-  try {
-    const response = await promptChatGpt(prompt, '');
-    const {words = []} = JSON.parse(response) as {words?: string[]};
-    return shuffle(words).slice(0, 25);
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
+  // Propagates AllProvidersFailedError on total failure rather than returning
+  // []; the caller (generateNewGameTiles) catches and falls back.
+  // A themed word-association list doesn't need a frontier model — use the
+  // cheap one. Haiku 4.5 rejects output_config.effort, so effort is omitted
+  // (it supports structured outputs, so the JSON contract still holds).
+  const result = await complete(
+      {prompt, schema: THEMED_WORDS_SCHEMA, model: 'claude-haiku-4-5'},
+      isThemedWords,
+      ['anthropic', 'openai'],
+  );
+
+  return shuffle(cleanWords(result.words)).slice(0, 25);
 }

@@ -1,8 +1,8 @@
-import axios from 'axios';
 import * as admin from 'firebase-admin';
-import {onCall} from 'firebase-functions/v2/https';
+import {HttpsError, onCall} from 'firebase-functions/v2/https';
 
-import {Game} from '../types';
+import {CodenamesClueResponse, Game} from '../types';
+import {AllProvidersFailedError, anthropicApiKey, complete} from '../util/llm';
 import {sendSpymasterMessage} from '../util/message';
 
 try {
@@ -13,21 +13,103 @@ try {
 
 const db = admin.firestore();
 
-export const askChatGpt = onCall(async (req) => {
+// Minimum time between clue requests for a given game + team. The clue call now
+// spends the project's own Anthropic key (claude-opus-4-8, high effort), so a
+// per-(gameId, team) cooldown stops an authenticated spymaster from looping it.
+const CLUE_COOLDOWN_MS = 20_000;
+
+const CLUE_SCHEMA: Record<string, unknown> = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['hint', 'number', 'reason'],
+  properties: {
+    hint: {type: 'string'},
+    number: {type: 'integer'},
+    reason: {type: 'string'},
+  },
+};
+
+function isClueResponse(v: unknown): v is CodenamesClueResponse {
+  if (typeof v !== 'object' || v === null) return false;
+  const obj = v as Record<string, unknown>;
+  // number must be an integer count — the Anthropic json_schema `integer` backs
+  // this today, but the router's contract is that the validator is the contract.
+  return typeof obj.hint === 'string' && Number.isInteger(obj.number) &&
+      typeof obj.reason === 'string';
+}
+
+export const askChatGpt = onCall({secrets: [anthropicApiKey]}, async (req) => {
+  // Authorization runs BEFORE any board partitioning or model call, so an
+  // unauthorized caller never reads tile roles nor triggers a paid API call.
+  if (!req.auth) {
+    throw new HttpsError(
+        'unauthenticated', 'You must be signed in to request a clue.');
+  }
+
   const gameAndTeam = req.data as string;
   const [gameId, team] = gameAndTeam.split('_');
-  return getClue(gameId, team);
+
+  // Validate the client-supplied team up front. Anything other than an exact
+  // 'RED'/'BLUE' (lowercase, empty, or a missing '_' separator making team
+  // undefined) is rejected here, before any board read, model call, or the
+  // later `team.toLowerCase()`.
+  if (!gameId || (team !== 'RED' && team !== 'BLUE')) {
+    throw new HttpsError(
+        'invalid-argument',
+        'Request must be of the form "<gameId>_RED" or "<gameId>_BLUE".');
+  }
+
+  const gameSnapshot = await db.collection('games').doc(gameId).get();
+  const game = gameSnapshot.data() as Game | undefined;
+  if (!game) {
+    throw new HttpsError('not-found', 'Game not found.');
+  }
+
+  // SPYMASTER-ONLY: team membership is NOT sufficient. `spymaster` is an
+  // optional string holding a Firebase Auth uid (same identifier space as
+  // req.auth.uid); when it's undefined the strict equality denies.
+  const requestedTeam = team === 'RED' ? game.redTeam : game.blueTeam;
+  if (!requestedTeam || req.auth.uid !== requestedTeam.spymaster) {
+    throw new HttpsError(
+        'permission-denied',
+        'Only the spymaster for this team may request a clue.');
+  }
+
+  // Rate-limit a newly-billed model call: reject a second clue request for the
+  // same game + team inside the cooldown window. A real Firestore transaction so
+  // two concurrent calls can't both pass — the loser's callback re-reads the
+  // just-written timestamp and is rejected.
+  const cooldownRef =
+      db.collection('games').doc(gameId).collection('clue-requests').doc(team);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(cooldownRef);
+    const now = Date.now();
+    const lastRequestedAt =
+        snap.exists ? snap.data()?.lastRequestedAt : undefined;
+    if (typeof lastRequestedAt === 'number' &&
+        now - lastRequestedAt < CLUE_COOLDOWN_MS) {
+      throw new HttpsError(
+          'resource-exhausted',
+          'A clue was just requested for this team. Please wait a few seconds.');
+    }
+    tx.set(cooldownRef, {lastRequestedAt: now});
+  });
+
+  return getClue(gameSnapshot, game, gameId, team);
 });
 
-async function getClue(gameId: string, team: string) {
-  const gameSnapshot = await db.collection('games').doc(gameId).get();
+async function getClue(
+    gameSnapshot: FirebaseFirestore.DocumentSnapshot,
+    game: Game,
+    gameId: string,
+    team: string,
+    ): Promise<CodenamesClueResponse> {
   const cluesSnapshot = await gameSnapshot.ref.collection('clues').get();
   const previousClues = cluesSnapshot.docs.map(doc => doc.data())
                             .filter(clue => clue.team === team)
-                            .map(clue => clue.word) ??
-      [];
+                            .map(clue => clue.word);
 
-  const {tiles = []} = gameSnapshot.data() as Game;
+  const {tiles = []} = game;
   const playerWords: string[] = [];
   const opponentWords: string[] = [];
   const neutralWords: string[] = [];
@@ -48,31 +130,84 @@ async function getClue(gameId: string, team: string) {
     }
   }
 
-  const postData = JSON.stringify({
-    playerWords,
-    opponentWords,
-    neutralWords,
-    previousClues,
-    bombWord,
-  });
-  console.log(postData);
+  const prompt = buildCluePrompt(
+      playerWords, opponentWords, neutralWords, bombWord, previousClues);
 
-  const options = {
-    url: 'https://codenames-with-gpt.netlify.app/api/clue',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData).toString()
-    },
-    data: postData,
-  };
+  let clue: CodenamesClueResponse;
+  try {
+    clue = await complete(
+        {
+          prompt,
+          effort: 'high',
+          thinking: {type: 'adaptive'},
+          schema: CLUE_SCHEMA,
+        },
+        isClueResponse,
+        ['anthropic'],
+    );
+  } catch (e) {
+    if (e instanceof AllProvidersFailedError) {
+      // Surface a clean error so the frontend stops spinning.
+      throw new HttpsError(
+          'unavailable',
+          'The clue generator is temporarily unavailable. Please try again.');
+    }
+    throw e;
+  }
 
-  const {data} = await axios(options);
-
+  // NOTE: `spymaster-chat` is world-readable via the `games/{document=**}`
+  // Firestore read rule, so the model's free-text `reason` (which can reference
+  // the assassin/opponent words) must NOT be persisted here. The reasoning is
+  // still returned to the requesting spymaster's client via the callable
+  // response below; the chat message only announces the hint and number.
   await sendSpymasterMessage(
       db, gameId,
-      `ChatGPT generated the hint "${data.hint} ${data.number}" for the ${
-          team.toLowerCase()} spymaster. Reasoning: \n${data.reason}`);
+      `The AI generated the hint "${clue.hint} ${clue.number}" for the ${
+          team.toLowerCase()} spymaster.`);
 
-  return data;
+  return clue;
+}
+
+function buildCluePrompt(
+    playerWords: string[],
+    opponentWords: string[],
+    neutralWords: string[],
+    bombWord: string,
+    previousClues: string[],
+    ): string {
+  const previous = previousClues.length ?
+      previousClues.join(', ') :
+      '(none yet)';
+  return `
+You are an expert spymaster in the word game Codenames. Your job is to give a
+one-word hint that connects as many of YOUR team's words as possible while
+steering your teammates away from every other word on the board.
+
+Board state (each list is a set of single words already on the board):
+- YOUR team's words (you want your teammates to guess these): ${playerWords.join(', ')}
+- Opponent's words (never lead your team here): ${opponentWords.join(', ')}
+- Neutral bystander words (avoid these; a wrong guess ends your turn): ${neutralWords.join(', ')}
+- The ASSASSIN word (if your team guesses this, you INSTANTLY LOSE — avoid it at all costs): ${bombWord}
+- Hints already given to your team this game (do not reuse them): ${previous}
+
+Rules for your hint:
+1. The hint MUST be a single English word. It must NOT be any word appearing on
+   the board (in any list above), nor a direct form, plural, or substring of one.
+2. The number is how many of YOUR team's words your hint points to. Pick a hint
+   that safely connects as many of your words as you confidently can, but never
+   at the risk of pointing toward the assassin, an opponent word, or a neutral.
+3. Favor a strong, unambiguous connection to your own words over a risky clue
+   that touches more words. A clean 2 beats a dangerous 4.
+4. Absolutely avoid any semantic path that could lead your team to the assassin
+   word "${bombWord}".
+
+Think it through, then respond with a JSON object with exactly these keys:
+- "hint": your single-word clue (string)
+- "number": the count of your team's words it points to (integer, at least 1)
+- "reason": a short explanation of which of YOUR team's words the hint targets
+  and why it points only to them (string). Do NOT mention, quote, or spell out
+  the assassin word or any other word on the board in this explanation — refer
+  to your own target words only.
+Respond with only the JSON object and nothing else.
+`;
 }
