@@ -4,7 +4,6 @@ import {tap} from 'rxjs/operators';
 import {ChatGptService} from 'src/app/services/chat-gpt.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
-import {originalWordList} from 'src/app/services/word-lists/original-word-list';
 
 import {Game, GameStatus, ProposedClue, TeamType, Tile} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
@@ -37,7 +36,6 @@ export class GiveClueComponent implements OnInit, OnDestroy {
   clue: string;
   clueCount: number;
 
-  canUseChatGPT = false;
   askingChatGpt = false;
 
   constructor(
@@ -66,9 +64,6 @@ export class GiveClueComponent implements OnInit, OnDestroy {
                 this.soundService.play(Sound.PROPOSED_CLUE);
               }
             }));
-
-    this.canUseChatGPT =
-        this.game.tiles.every(tile => originalWordList.includes(tile.word));
   }
 
   get currentTeam(): TeamType {
@@ -224,8 +219,10 @@ export class GiveClueComponent implements OnInit, OnDestroy {
       this.clueCount = clue.number;
       this.utilService.alert(
           `${clue.hint} ${clue.number}`, clue.reason, 'Got it');
-    } catch (e) {
-      console.log(e);
+    } catch (_e) {
+      this.utilService.showToast(
+          'Couldn\'t generate a clue, try again.', TOAST_DURATION,
+          TOAST_OPTIONS);
     }
     this.askingChatGpt = false;
   }
