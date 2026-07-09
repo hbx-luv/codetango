@@ -78,6 +78,15 @@ export interface ProposedClue extends Clue {
   status: ClueStatus;
 }
 
+// The shape of a spymaster clue returned by the LLM clue generator. Mirrors the
+// root `types.ts` definition so a shape drift between the callable and the
+// frontend's chat-gpt.service.ts is a compile error.
+export interface CodenamesClueResponse {
+  hint: string;
+  number: number;
+  reason: string;
+}
+
 export interface Room {
   name: string;
   status: RoomStatus;
