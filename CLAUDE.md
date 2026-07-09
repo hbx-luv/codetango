@@ -13,53 +13,53 @@ Originally a hackathon project, still actively developed.
 - Shared types: `types.ts` at repo root (imported as bare `'types'` via
   tsconfig path mapping)
 
-## Vetted-package registry — read this before any `npm install`
+## Dependencies
 
-The org installs packages from a vetted-package mirror, not public npm:
+Both package trees install from **public npm**. There are two `.npmrc`
+files and neither sets a custom registry:
 
 ```
-# .npmrc
-registry=https://greenflagged.dev/npm
-legacy-peer-deps=true
+# .npmrc                 # functions/.npmrc
+legacy-peer-deps=true    registry=https://registry.npmjs.com
 ```
 
-Two things follow from this:
+`legacy-peer-deps` is load-bearing at the root — Angular and Ionic
+disagree about peer ranges and a strict install fails.
 
-1. **The `overrides` block is small and principled — keep it that way.**
-   `package.json` carries 1 scoped + 9 flat overrides. Each one is there
-   for an explicit reason: a global CVE forward-pin
-   (`path-to-regexp: 6.3.0`), a scoped emulator unblock
-   (`express@4 → path-to-regexp: 0.1.13`), a peer-mismatch pin
-   (`babel-loader: 9.2.1` — Angular wants 10, mirror tops at 9), or a
-   transitive whose desired version was rejected/needs_review by the
-   mirror (`debug`, `flat-cache`, `pac-resolver`, `jsesc`, `spdy`,
-   `fresh`). **Don't add a new override without first trying
-   `mcp__greenflagged__request_package`** — most clean transitive
-   versions auto-vet within seconds, and growing the mirror's vetted set
-   is preferred over papering over with a pin. **Don't delete an
-   existing override without first confirming `npm install`,
-   `npm run build`, `npm run lint`, and `npm run emulators` all still
-   pass** — some overrides exist for runtime compat that doesn't show up
-   as an install error.
+Historically the root `.npmrc` pointed at a private vetted-package mirror
+(`greenflagged.dev`). It no longer does, and the `mcp__greenflagged__*`
+tools are irrelevant to this repo. If you find a doc, comment, or memory
+that says otherwise, it is stale.
 
-2. **`npm install` from scratch may fail** if the mirror's vetted set
-   doesn't match `package.json`'s declared versions. The remedy depends on
-   what's missing:
+**The `overrides` block is small — keep it that way.** `package.json`
+carries 1 scoped + 9 flat overrides:
 
-   - **ETARGET** (version not in range): the requested version isn't
-     vetted. Call `mcp__greenflagged__request_package` with the exact
-     version from the error message, then
-     `mcp__greenflagged__check_package` to confirm it lands. Most clean
-     packages auto-vet in seconds. If the mirror returns
-     `needs_review` / `pending` / `rejected`, pin the version to whatever
-     the mirror has (highest vetted) via an override and document it.
-   - **E404** (package not in mirror): same path —
-     `mcp__greenflagged__request_package`. The mirror's auto-prioritize
-     handles both E404 and ETARGET.
-   - **Runtime TypeError** (`X is not a function`, `Cannot find module
-     '...../package.json' is not defined by exports`): the override picked
-     an ESM-only version of a CJS-consumed package. Find the older
-     CJS-friendly version and pin to that instead.
+- `path-to-regexp: 6.3.0` — global CVE forward-pin.
+- `express@4 → path-to-regexp: 0.1.13` — scoped, unblocks the emulator
+  (see "Local emulators" below). Don't merge it into the flat pin.
+- `babel-loader: 9.2.1` — peer-mismatch pin; Angular wants 10.
+- `debug`, `flat-cache`, `pac-resolver`, `jsesc`, `spdy`, `fresh` —
+  transitive pins inherited from the mirror era, when the mirror refused
+  the version npm would otherwise have chosen.
+
+That last group may no longer be necessary now that installs come from
+public npm. **Don't delete any override without first confirming
+`npm install`, `npm run build`, `npm run lint`, and `npm run emulators`
+all still pass** — some exist for runtime compat that never surfaces as
+an install error. A `Cannot find module '.../package.json' is not
+defined by exports` or `X is not a function` at runtime usually means an
+override picked an ESM-only version of a CJS-consumed package; pin to
+the older CJS-friendly version rather than removing the override.
+
+**Keep `package-lock.json` internally consistent.** `npm ci` reconstructs
+the ideal tree from `package.json` and errors if *any* platform-specific
+optional dependency it expects is absent from the lock — including
+architectures you don't build on. A stale hoisted entry (e.g. a rollup
+platform binary left behind from an older resolution) will pass locally
+and fail CI with `Missing: <pkg>@<version> from lock file`. `npm install
+--package-lock-only` will **not** prune such an orphan; only deleting the
+lock and regenerating does, and that re-resolves every semver range, so
+verify with lint + `build:prod` afterwards.
 
 ## Local dev — the env story
 
@@ -94,15 +94,14 @@ auth 9099, firestore 8090, functions 5001.
 This used to crash with `TypeError: pathRegexp is not a function`
 because firebase-tools' emulator code (and its bundled express 4) needs
 the callable `path-to-regexp@~0.1.x` API, and the global override pins
-`6.3.0` (class-based) to satisfy the mirror's CVE policy. Fix is a
+`6.3.0` (class-based) as a CVE forward-pin. Fix is a
 **scoped npm override**:
 
 ```json
 "express@4": { "path-to-regexp": "0.1.13" }
 ```
 
-`0.1.13` is patched for the relevant ReDoS CVE and was vetted into the
-mirror specifically to unblock this. The flat `path-to-regexp@6.3.0`
+`0.1.13` is patched for the relevant ReDoS CVE. The flat `path-to-regexp@6.3.0`
 override stays for every other consumer in the tree (router, superstatic,
 etc.). Don't merge the two — express genuinely needs the 0.1.x callable
 shape *and* the 0.1.x route syntax (`:name(*)` custom-pattern form),
@@ -145,8 +144,8 @@ cd functions && npm install && npm run build
 
 ## Known modernization next steps
 
-1. **Angular 20 → 21.** The registry has Angular 21 vetted but
-   `@angular/fire` tops out at 20.0.1 (peers `@angular/core@^20.0.0`).
+1. **Angular 20 → 21.** Blocked on `@angular/fire`, which tops out at
+   20.0.1 (peers `@angular/core@^20.0.0`).
    When `@angular/fire@21` lands, bump all `@angular/*` to 21 plus the
    toolchain (`@angular-devkit/build-angular`, `@angular/cli`,
    `angular-eslint` to 21.x). Note that angular-eslint@21 also peers
@@ -160,6 +159,25 @@ cd functions && npm install && npm run build
 
 ## Things that already exist — don't reinvent
 
-- `greenflagged-feedback.md` (gitignored) — feedback memo with specific
-  asks of the greenflagged mirror itself, written from this session's
-  experience. Reference if working on related tooling.
+- **`functions/src/util/llm/`** — the LLM provider router. Don't call a
+  model SDK directly from a function. Call `complete(req, validate,
+  chain)` and pass a type guard; the *router* owns `JSON.parse` and
+  validation, so a malformed response is treated exactly like a network
+  error and falls through to the next provider in `chain`. An exhausted
+  chain throws `AllProvidersFailedError`. Chains are per-call-site:
+  themed words use `['anthropic', 'openai']`, clue generation uses
+  `['anthropic']` alone so a degraded clue can't silently lose a game.
+  Providers return raw text and must never swallow an error into a
+  sentinel value — that bug once produced empty game boards.
+
+- **Two AI call sites**, both behind the router: themed word-list
+  generation (`util/chatgpt.ts`, triggered from `games/onCreate.ts`) and
+  spymaster clue generation (`callable/chat-gpt.ts`). The latter is
+  authenticated and restricted to the requesting team's spymaster.
+
+- **Known open issue:** `firestore.rules` grants `allow read: if true` on
+  `games/{document=**}`, and tile roles live in the game document — so
+  the assassin's location is publicly readable straight from Firestore,
+  independent of any Cloud Function. Closing that means not shipping
+  roles to clients at all. Don't claim a change "fixes the assassin leak"
+  while this rule stands.

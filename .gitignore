@@ -42,8 +42,6 @@ npm-debug.log*
 
 # Local scratchpads (not part of project source)
 /404s.txt
-/greenflagged-*.md
-/greenflagged-*.txt
 
 # Empty project-local MCP config — don't commit
 /.mcp.json
