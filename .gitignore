@@ -45,3 +45,6 @@ npm-debug.log*
 
 # Empty project-local MCP config — don't commit
 /.mcp.json
+
+# Local emulator secrets (ANTHROPIC_API_KEY etc.) — never commit
+functions/.secret.local
