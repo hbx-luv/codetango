@@ -86,8 +86,11 @@ export async function getThemedWords(theme: string): Promise<string[]> {
 
   // Propagates AllProvidersFailedError on total failure rather than returning
   // []; the caller (generateNewGameTiles) catches and falls back.
+  // A themed word-association list doesn't need a frontier model — use the
+  // cheap one. Haiku 4.5 rejects output_config.effort, so effort is omitted
+  // (it supports structured outputs, so the JSON contract still holds).
   const result = await complete(
-      {prompt, effort: 'low', schema: THEMED_WORDS_SCHEMA},
+      {prompt, schema: THEMED_WORDS_SCHEMA, model: 'claude-haiku-4-5'},
       isThemedWords,
       ['anthropic', 'openai'],
   );

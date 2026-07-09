@@ -8,9 +8,14 @@ export type Effort = 'low'|'medium'|'high'|'xhigh'|'max';
 // to the router is the actual contract. Omit `thinking` for no thinking.
 export interface LlmRequest {
   prompt: string;
-  effort: Effort;
   schema: Record<string, unknown>;
+  // Effort is optional because it is model-dependent: Haiku 4.5 rejects
+  // output_config.effort with a 400. Omit it for models/tasks that don't use it.
+  effort?: Effort;
   thinking?: {type: 'adaptive'};
+  // Anthropic model id. Optional; the Anthropic provider defaults to a capable
+  // model when unset. The OpenAI provider ignores this (it uses its own model).
+  model?: string;
 }
 
 export interface LlmProvider {
