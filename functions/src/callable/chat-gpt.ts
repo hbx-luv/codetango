@@ -13,6 +13,11 @@ try {
 
 const db = admin.firestore();
 
+// Minimum time between clue requests for a given game + team. The clue call now
+// spends the project's own Anthropic key (claude-opus-4-8, high effort), so a
+// per-(gameId, team) cooldown stops an authenticated spymaster from looping it.
+const CLUE_COOLDOWN_MS = 20_000;
+
 const CLUE_SCHEMA: Record<string, unknown> = {
   type: 'object',
   additionalProperties: false,
@@ -27,7 +32,9 @@ const CLUE_SCHEMA: Record<string, unknown> = {
 function isClueResponse(v: unknown): v is CodenamesClueResponse {
   if (typeof v !== 'object' || v === null) return false;
   const obj = v as Record<string, unknown>;
-  return typeof obj.hint === 'string' && typeof obj.number === 'number' &&
+  // number must be an integer count — the Anthropic json_schema `integer` backs
+  // this today, but the router's contract is that the validator is the contract.
+  return typeof obj.hint === 'string' && Number.isInteger(obj.number) &&
       typeof obj.reason === 'string';
 }
 
@@ -41,6 +48,16 @@ export const askChatGpt = onCall({secrets: [anthropicApiKey]}, async (req) => {
 
   const gameAndTeam = req.data as string;
   const [gameId, team] = gameAndTeam.split('_');
+
+  // Validate the client-supplied team up front. Anything other than an exact
+  // 'RED'/'BLUE' (lowercase, empty, or a missing '_' separator making team
+  // undefined) is rejected here, before any board read, model call, or the
+  // later `team.toLowerCase()`.
+  if (!gameId || (team !== 'RED' && team !== 'BLUE')) {
+    throw new HttpsError(
+        'invalid-argument',
+        'Request must be of the form "<gameId>_RED" or "<gameId>_BLUE".');
+  }
 
   const gameSnapshot = await db.collection('games').doc(gameId).get();
   const game = gameSnapshot.data() as Game | undefined;
@@ -57,6 +74,26 @@ export const askChatGpt = onCall({secrets: [anthropicApiKey]}, async (req) => {
         'permission-denied',
         'Only the spymaster for this team may request a clue.');
   }
+
+  // Rate-limit a newly-billed model call: reject a second clue request for the
+  // same game + team inside the cooldown window. A real Firestore transaction so
+  // two concurrent calls can't both pass — the loser's callback re-reads the
+  // just-written timestamp and is rejected.
+  const cooldownRef =
+      db.collection('games').doc(gameId).collection('clue-requests').doc(team);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(cooldownRef);
+    const now = Date.now();
+    const lastRequestedAt =
+        snap.exists ? snap.data()?.lastRequestedAt : undefined;
+    if (typeof lastRequestedAt === 'number' &&
+        now - lastRequestedAt < CLUE_COOLDOWN_MS) {
+      throw new HttpsError(
+          'resource-exhausted',
+          'A clue was just requested for this team. Please wait a few seconds.');
+    }
+    tx.set(cooldownRef, {lastRequestedAt: now});
+  });
 
   return getClue(gameSnapshot, game, gameId, team);
 });
@@ -118,10 +155,15 @@ async function getClue(
     throw e;
   }
 
+  // NOTE: `spymaster-chat` is world-readable via the `games/{document=**}`
+  // Firestore read rule, so the model's free-text `reason` (which can reference
+  // the assassin/opponent words) must NOT be persisted here. The reasoning is
+  // still returned to the requesting spymaster's client via the callable
+  // response below; the chat message only announces the hint and number.
   await sendSpymasterMessage(
       db, gameId,
       `The AI generated the hint "${clue.hint} ${clue.number}" for the ${
-          team.toLowerCase()} spymaster. Reasoning: \n${clue.reason}`);
+          team.toLowerCase()} spymaster.`);
 
   return clue;
 }
@@ -162,8 +204,10 @@ Rules for your hint:
 Think it through, then respond with a JSON object with exactly these keys:
 - "hint": your single-word clue (string)
 - "number": the count of your team's words it points to (integer, at least 1)
-- "reason": a short explanation of which of your words the hint targets and why
-  it is safe (string)
+- "reason": a short explanation of which of YOUR team's words the hint targets
+  and why it points only to them (string). Do NOT mention, quote, or spell out
+  the assassin word or any other word on the board in this explanation — refer
+  to your own target words only.
 Respond with only the JSON object and nothing else.
 `;
 }

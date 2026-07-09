@@ -17,6 +17,11 @@ export class AnthropicProvider implements LlmProvider {
     try {
       const response = await client.messages.create({
         model: 'claude-opus-4-8',
+        // 16000 is the safe non-streaming ceiling. With adaptive thinking +
+        // effort 'high' (the clue request), thinking tokens count against
+        // max_tokens, so a very hard board can in principle truncate the JSON.
+        // The router then treats the unparseable output as a provider failure
+        // rather than returning a bad clue — an accepted trade-off, not a bug.
         max_tokens: 16000,
         messages: [{role: 'user', content: req.prompt}],
         // Structured output is a hint to the model; the router's validator is
