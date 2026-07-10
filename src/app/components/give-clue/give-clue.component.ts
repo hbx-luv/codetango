@@ -76,6 +76,17 @@ export class GiveClueComponent implements OnInit, OnDestroy {
     return this.currentTeam === TeamType.BLUE ? TeamType.RED : TeamType.BLUE;
   }
 
+  // The AI clue generator only makes sense on real-word boards. Picture boards
+  // carry asset filenames in `tile.word` and emoji boards carry Unicode
+  // codepoint tokens, so sending those to the model produces gibberish (and
+  // still bills a real call). Gate on the board flags, NOT on the original
+  // word-list deck check — themed/AI, christmas, tech, and every other
+  // real-word deck must keep the button. Undefined flags (word boards) fall
+  // through to true.
+  get canUseAiClue(): boolean {
+    return !this.game.hasPictures && !this.game.hasEmojis;
+  }
+
   /**
    * Submit the clue as a spymaster. If askFirst is true, double check with the
    * opposing spymaster so they can approve the clue before it is shown to your

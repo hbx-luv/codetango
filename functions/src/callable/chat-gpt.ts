@@ -29,15 +29,21 @@ const CLUE_SCHEMA: Record<string, unknown> = {
   },
 };
 
-// STRICT server-side legality guard for a generated hint. Deliberately has NO
-// small-word / short-substring escape hatches (unlike the bot harness): a hint
-// must be a single letters-only English word that neither contains nor is
-// contained by any board word (case-insensitive).
+// Server-side legality guard for a generated hint (case-insensitive). A hint is
+// illegal only if it EQUALS a board word or shares a word-root at the START
+// boundary — i.e. one word is a PREFIX of the other. English inflections are
+// suffixes on a root, so the root is a prefix: `ICE` is a prefix of
+// `ICES`/`ICED`/`ICING` (correctly rejected) but NOT of `PRICE` (correctly
+// allowed); `CAR` and `SCARE` are prefixes of neither (both allowed). This is
+// deliberately looser than a two-directional substring check: a suffix-compound
+// like `FOOTBALL` vs board `BALL` will pass — an accepted tradeoff, since
+// catching it would also re-reject legal hints like `PRICE`, and the prompt
+// still discourages compounds.
 function overlapsBoard(boardWords: string[], hint: string): boolean {
   const h = hint.toLowerCase();
   return boardWords.some(w => {
     const b = w.toLowerCase();
-    return b.includes(h) || h.includes(b);
+    return h.startsWith(b) || b.startsWith(h);
   });
 }
 
@@ -188,7 +194,10 @@ async function getClue(
       throw e;
     }
     if (isLegalHint(candidate.hint, boardWords)) {
-      clue = candidate;
+      // `isLegalHint` validates the trimmed hint, so announce/return the
+      // trimmed form too — otherwise stray whitespace survives to the chat
+      // message and the callable response. `number`/`reason` are unchanged.
+      clue = {...candidate, hint: candidate.hint.trim()};
       break;
     }
     console.warn(`illegal AI clue "${candidate.hint}" (attempt ${attempt + 1})`);
