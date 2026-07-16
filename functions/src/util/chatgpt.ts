@@ -79,8 +79,19 @@ export async function getThemedWords(theme: string): Promise<string[]> {
   // prompt so a huge theme string can't blow up the request.
   const safeTheme = theme.slice(0, MAX_THEME_LENGTH);
   const prompt = `
-    Your task is to generate a list of words to be used for a game of codenames. Each word will be one of the tiles in the board for this round. The user has provided a word to be used as a theme or a spark of inspiration for the words generated. This word will be provided below between triple single-quotes. Please generate as many words as you can for this theme. Minimum 30 words, maximum 100 words.
-    Please only respond with a JSON structure. No explanations, no greeting, no additional words. Keep it as concise as possible, by just returning the JSON. Please return a JSON structure with the following keys where theme is the user-provided word and words is a string array of the words for the board: theme, words
+    You are generating word tiles for a game of Codenames. In Codenames, a spymaster gives a one-word clue that links several of their team's words, so the fun of the board depends entirely on the words chosen. Generate a set of candidate words inspired by a theme the user provides (given below between triple single-quotes).
+
+    Rules for every word:
+    - A single, common English word. No spaces, no hyphens, no phrases, no proper nouns (unless the theme is inherently about a specific person, place, or brand).
+    - Concrete and evocative — something a casual player instantly recognizes and can picture. Prefer nouns, with a few strong verbs or adjectives mixed in.
+    - Favor words with multiple distinct meanings or rich associations (e.g. BOND, SPRING, BUG, PALM, NIGHT). Words that can be read more than one way make for the most interesting clues.
+
+    Rules for the set as a whole:
+    - Every word must be distinct. No two words that are plurals of each other, share an obvious root, or are near-synonyms (avoid pairs like SEA/OCEAN or DOG/PUPPY).
+    - Let the theme loosely inspire the words rather than tightly define them. Mix words that are clearly on-theme with words the theme merely brings to mind, so the board can't be swept with a single obvious clue. Aim for variety of meaning across the set.
+    - Provide between 40 and 60 words.
+
+    Respond with only a JSON object — no explanation, no greeting, no markdown fences. Use exactly these keys: "theme" (the user-provided word) and "words" (an array of uppercase strings).
     Theme: '''${safeTheme}'''
   `;
 
