@@ -3,15 +3,6 @@ import {complete} from './llm';
 // Re-exported for callers that historically imported the secret from here.
 export {chatgptApiKey} from './llm';
 
-function shuffle<T>(arr: T[]): T[] {
-  const out = [...arr];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
 interface ThemedWords {
   theme: string;
   words: string[];
@@ -74,7 +65,12 @@ function isThemedWords(v: unknown): v is ThemedWords {
   return true;
 }
 
-export async function getThemedWords(theme: string): Promise<string[]> {
+// Generate a themed word pool via the LLM router. Returns the FULL deduped,
+// validated pool (>= 25 words) so callers can persist it and re-sample fresh
+// boards without another AI call. Propagates AllProvidersFailedError when the
+// whole provider chain fails — the caller (generateNewGameTiles) catches it and
+// falls back to a standard word list.
+export async function generateThemedWordPool(theme: string): Promise<string[]> {
   // Cap the untrusted, player-supplied theme before interpolating it into the
   // prompt so a huge theme string can't blow up the request.
   const safeTheme = theme.slice(0, MAX_THEME_LENGTH);
@@ -106,5 +102,7 @@ export async function getThemedWords(theme: string): Promise<string[]> {
       ['anthropic', 'openai'],
   );
 
-  return shuffle(cleanWords(result.words)).slice(0, 25);
+  // Return the entire deduped pool; sampling to a 25-tile board happens at the
+  // call site so a saved pool can produce a different board on each reuse.
+  return cleanWords(result.words);
 }

@@ -80,5 +80,18 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // AI-generated themed word pools, saved for reuse. Created and deleted
+    // (auto-cleanup) only server-side by the onCreateGame Cloud Function via
+    // the admin SDK, which bypasses this rule. The pregame picker reads them,
+    // and any authenticated user may toggle ONLY the `pinned` flag to protect
+    // a list from auto-cleanup — no other field may be changed from the client.
+    match /themedWordlists/{document=**} {
+      allow read: if true;
+      allow update: if request.auth != null
+                    && request.resource.data.diff(resource.data)
+                        .affectedKeys().hasOnly(['pinned']);
+      allow create, delete: if false;
+    }
   }
 }

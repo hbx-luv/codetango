@@ -4,7 +4,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, GameType, Room, RoomStatus, Team, TeamType, User} from '../../../../types';
+import {Game, GameType, Room, RoomStatus, Team, TeamType, ThemedWordlist, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
 import {WordListsService} from '../../services/word-lists.service';
@@ -23,6 +23,11 @@ export class PregameComponent implements OnChanges {
   teams: Team[];
   constructedGame: Partial<Game>;
   debounce = 500;
+
+  // previously-generated AI themes, offered for one-click reuse (no AI call)
+  themedWordlists$: Observable<ThemedWordlist[]>;
+  themeFilter = '';
+  themeSort: 'newest'|'oldest'|'alpha' = 'newest';
 
   lastSettings: Partial<Room>;
 
@@ -55,7 +60,9 @@ export class PregameComponent implements OnChanges {
       private readonly utilService: UtilService,
       private readonly userService: UserService,
       private readonly wordListsService: WordListsService,
-  ) {}
+  ) {
+    this.themedWordlists$ = this.wordListsService.getThemedWordlists();
+  }
 
   ngOnChanges() {
     const {redReady = false, blueReady = false} = this.room || {};
@@ -95,6 +102,54 @@ export class PregameComponent implements OnChanges {
 
   get hasCustomTheme(): boolean {
     return !!this.room?.aiWordlistTheme;
+  }
+
+  // The saved word pool for the room's current theme, if that theme has one
+  // (i.e. it was previously generated). Returns undefined for a freshly-typed
+  // theme that hasn't been generated/saved yet. Matching is on the normalized
+  // themeKey, mirroring how the backend keys the saved pool.
+  getSavedWords(themes: ThemedWordlist[], theme?: string): string[]|undefined {
+    if (!theme) return undefined;
+    const themeKey = theme.trim().toLowerCase();
+    return themes.find(t => t.themeKey === themeKey)?.words;
+  }
+
+  // Apply the current filter text and sort order to the saved themes, always
+  // floating pinned lists to the top. Array.sort is stable, so the chosen sort
+  // is preserved within the pinned and unpinned groups.
+  displayedThemes(themes: ThemedWordlist[]): ThemedWordlist[] {
+    const query = this.themeFilter.trim().toLowerCase();
+    const list = query ?
+        themes.filter(t => t.theme.toLowerCase().includes(query)) :
+        [...themes];
+
+    switch (this.themeSort) {
+      case 'oldest':
+        list.sort((a, b) => a.createdAt - b.createdAt);
+        break;
+      case 'alpha':
+        list.sort((a, b) => a.theme.localeCompare(b.theme));
+        break;
+      default:  // newest
+        list.sort((a, b) => b.createdAt - a.createdAt);
+    }
+    list.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    return list;
+  }
+
+  // Toggle a saved theme's pinned flag. Requires auth (Firestore rules gate the
+  // write); pinned lists are exempt from the backend's 50-list auto-cleanup.
+  async togglePin(theme: ThemedWordlist, event: Event) {
+    event.stopPropagation();  // don't also select the theme
+    if (!this.authService.authenticated) {
+      this.utilService.showToast('Sign in to pin themes');
+      return;
+    }
+    try {
+      await this.wordListsService.setThemePinned(theme.id!, !theme.pinned);
+    } catch (_e) {
+      this.utilService.showToast('Could not update pin');
+    }
   }
 
   selectWordList(wordList: string) {
@@ -296,20 +351,27 @@ export class PregameComponent implements OnChanges {
     );
 
     if (theme) {
-      // If we're in ASSIGNING_ROLES phase and there's an existing game,
-      // we need to delete the current game and create a new one to regenerate the board
-      if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
-        await this.regenerateGame({
-          aiWordlistTheme: theme,
-          wordList: '',
-        });
-      } else {
-        // In PREGAME phase, just update the theme
-        await this.roomService.updateRoom(this.room.id, {
-          aiWordlistTheme: theme,
-          wordList: '',
-        });
-      }
+      await this.applyTheme(theme);
+    }
+  }
+
+  // Set the room's AI theme (used by both the free-text prompt and the
+  // saved-theme picker). When a saved theme is selected, the onCreateGame
+  // trigger finds its persisted word pool and skips the AI call.
+  async applyTheme(theme: string) {
+    // If we're in ASSIGNING_ROLES phase and there's an existing game,
+    // we need to delete the current game and create a new one to regenerate the board
+    if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
+      await this.regenerateGame({
+        aiWordlistTheme: theme,
+        wordList: '',
+      });
+    } else {
+      // In PREGAME phase, just update the theme
+      await this.roomService.updateRoom(this.room.id, {
+        aiWordlistTheme: theme,
+        wordList: '',
+      });
     }
   }
 

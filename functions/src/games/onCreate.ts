@@ -1,9 +1,12 @@
+import {createHash} from 'crypto';
 import * as admin from 'firebase-admin';
 import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 
-import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
-import {getThemedWords} from '../util/chatgpt';
+import {Game, GameStatus, GameType, Room, ThemedWordlist, Tile, TileRole, WordList} from '../types';
+import {generateThemedWordPool} from '../util/chatgpt';
 import {anthropicApiKey, chatgptApiKey} from '../util/llm';
+
+const md5 = (s: string) => createHash('md5').update(s).digest('hex');
 
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
@@ -123,7 +126,7 @@ async function generateNewGameTiles(
   let words: string[];
   if (aiWordlistTheme) {
     try {
-      words = await getThemedWords(aiWordlistTheme);
+      words = await getThemedWordsForGame(aiWordlistTheme);
     } catch (_e) {
       console.error(
           'themed word generation failed; falling back to original list');
@@ -155,6 +158,75 @@ async function generateNewGameTiles(
   }
 
   return shuffle(tiles);
+}
+
+// Resolve the 25 words for a themed board. Reuses a previously-generated pool
+// for this theme when one exists (no AI call); otherwise generates a fresh full
+// pool, persists it keyed by the normalized theme, and samples from it. Every
+// reuse re-samples, so the same theme yields a different board each game.
+// Propagates AllProvidersFailedError only when there's no saved pool AND
+// generation fails — generateNewGameTiles catches it and falls back.
+async function getThemedWordsForGame(theme: string): Promise<string[]> {
+  const themeKey = theme.trim().toLowerCase();
+  // Deterministic doc ID => idempotent writes: two concurrent first-time
+  // generations for the same theme converge on one doc instead of duplicating.
+  // (Raw theme text can't be a doc ID — it may contain '/', be empty, or exceed
+  // Firestore's 1500-byte key limit.)
+  const ref = db.collection('themedWordlists').doc(md5(themeKey));
+
+  const snap = await ref.get();
+  let pool = snap.exists ? (snap.data() as ThemedWordlist).words ?? [] : [];
+
+  // No usable saved pool — generate a fresh one and persist it for next time.
+  if (pool.length < 25) {
+    pool = await generateThemedWordPool(theme);  // >= 25 words, or throws
+    if (pool.length >= 25) {
+      await ref.set(
+          {theme, themeKey, words: pool, createdAt: new Date().getTime()});
+      // The collection just grew — trim it back to the cap.
+      await enforceThemeCap();
+    }
+  }
+
+  return sampleWords(pool, 25);
+}
+
+// Keep the saved-theme collection from growing without bound: once it exceeds
+// SAVED_THEME_CAP, delete the oldest *unpinned* lists until it's back at the
+// cap. Pinned lists are never auto-deleted, so a heavily-pinned collection can
+// legitimately sit above the cap. Runs only after a new list is saved.
+const SAVED_THEME_CAP = 50;
+async function enforceThemeCap(): Promise<void> {
+  const col = db.collection('themedWordlists');
+  const all = (await col.orderBy('createdAt', 'asc').get()).docs;
+  const overflow = all.length - SAVED_THEME_CAP;
+  if (overflow <= 0) return;
+
+  const batch = db.batch();
+  let removed = 0;
+  for (const doc of all) {  // oldest first
+    if (removed >= overflow) break;
+    if (doc.get('pinned')) continue;  // protected
+    batch.delete(doc.ref);
+    removed++;
+  }
+  if (removed > 0) await batch.commit();
+}
+
+// Sample up to `count` unique, non-empty words from a pool without mutating it.
+// Mirrors getWords' copy-splice dedupe loop and is bounded by pool length so a
+// short pool terminates instead of spinning.
+function sampleWords(pool: string[], count: number): string[] {
+  const available = [...pool];
+  const picked = [] as string[];
+  while (picked.length < count && available.length > 0) {
+    const randomIndex = Math.floor(Math.random() * available.length);
+    const word = available.splice(randomIndex, 1)[0];
+    if (word !== undefined && word !== '' && !picked.includes(word)) {
+      picked.push(word);
+    }
+  }
+  return picked;
 }
 
 async function getWords(wordList: string): Promise<string[]> {

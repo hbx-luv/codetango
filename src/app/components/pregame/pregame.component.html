@@ -82,6 +82,21 @@
           Clear
         </ion-button>
       </h5>
+      <ng-container *ngIf="(themedWordlists$ | async) as themes">
+        <div
+          class="theme-words"
+          *ngIf="getSavedWords(themes, room.aiWordlistTheme) as words"
+        >
+          <p class="theme-words-label">
+            Saved words for this theme ({{ words.length }}) — a random 25 are used each game:
+          </p>
+          <div class="theme-words-list">
+            <ion-chip *ngFor="let word of words" outline="true">
+              <ion-label>{{ word }}</ion-label>
+            </ion-chip>
+          </div>
+        </div>
+      </ng-container>
     </div>
     <div class="word-lists" *ngIf="!hasCustomTheme">
       <ion-card
@@ -94,6 +109,55 @@
         <ion-img [src]="list.url" *ngIf="!list.warning"></ion-img>
         <span *ngIf="list.comingSoon">COMING SOON</span>
       </ion-card>
+    </div>
+    <div
+      class="saved-themes"
+      *ngIf="!hasCustomTheme && (themedWordlists$ | async) as themes"
+    >
+      <div *ngIf="themes.length">
+        <h4>Saved Themes</h4>
+        <p class="saved-themes-hint">
+          Reuse a previously generated theme — no wait, no new AI call. Tap the
+          star to pin a favorite so it's never auto-removed.
+        </p>
+        <div class="saved-themes-controls">
+          <ion-searchbar
+            class="theme-search"
+            mode="ios"
+            placeholder="Filter themes"
+            [debounce]="150"
+            [(ngModel)]="themeFilter"
+          ></ion-searchbar>
+          <ion-select
+            interface="popover"
+            aria-label="Sort themes"
+            [(ngModel)]="themeSort"
+          >
+            <ion-select-option value="newest">Newest</ion-select-option>
+            <ion-select-option value="oldest">Oldest</ion-select-option>
+            <ion-select-option value="alpha">A–Z</ion-select-option>
+          </ion-select>
+        </div>
+        <ng-container *ngIf="displayedThemes(themes) as shown">
+          <div class="saved-themes-list">
+            <ion-chip
+              *ngFor="let theme of shown"
+              [class.pinned]="theme.pinned"
+              (click)="applyTheme(theme.theme)"
+            >
+              <ion-icon
+                [name]="theme.pinned ? 'star' : 'star-outline'"
+                [color]="theme.pinned ? 'warning' : 'medium'"
+                (click)="togglePin(theme, $event)"
+              ></ion-icon>
+              <ion-label>{{ theme.theme }}</ion-label>
+            </ion-chip>
+          </div>
+          <p class="no-matches" *ngIf="!shown.length">
+            No themes match “{{ themeFilter }}”.
+          </p>
+        </ng-container>
+      </div>
     </div>
     <h3>Timer Settings</h3>
     <div class="timer-settings">
