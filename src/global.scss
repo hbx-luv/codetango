@@ -39,6 +39,9 @@
 
 .space-between {
   display: flex;
+  // ion-card-header's shadow :host styles set flex-direction: column
+  // (column-reverse on iOS), so the direction must be pinned here
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
