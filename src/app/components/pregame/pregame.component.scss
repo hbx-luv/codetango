@@ -42,6 +42,27 @@
           margin-left: 16px;
         }
       }
+
+      .theme-words {
+        margin-top: 8px;
+
+        .theme-words-label {
+          margin: 0 0 6px;
+          font-size: 0.8rem;
+          color: #7f7f7f;
+        }
+
+        .theme-words-list {
+          display: flex;
+          flex-wrap: wrap;
+          max-height: 180px;
+          overflow-y: auto;
+
+          ion-chip {
+            margin: 3px;
+          }
+        }
+      }
     }
 
     .word-lists {
@@ -85,6 +106,65 @@
             padding: 10px;
             font-weight: bold;
           }
+        }
+      }
+    }
+
+    .saved-themes {
+      margin: 8px 0 24px;
+
+      h4 {
+        margin: 0 0 4px;
+      }
+
+      .saved-themes-hint {
+        margin: 0 0 8px;
+        font-size: 0.8rem;
+        color: #7f7f7f;
+      }
+
+      .saved-themes-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+
+        .theme-search {
+          flex: 1;
+          padding: 0;
+          --box-shadow: none;
+          --background: var(--ion-color-light);
+        }
+
+        ion-select {
+          flex-shrink: 0;
+          max-width: 120px;
+        }
+      }
+
+      .saved-themes-list {
+        display: flex;
+        flex-wrap: wrap;
+        max-height: 220px;
+        overflow-y: auto;
+      }
+
+      .no-matches {
+        font-size: 0.8rem;
+        color: #7f7f7f;
+        margin: 4px 0 0;
+      }
+
+      ion-chip {
+        cursor: pointer;
+
+        ion-icon {
+          margin-right: 4px;
+          font-size: 1rem;
+        }
+
+        &.pinned {
+          border: 1px solid var(--ion-color-warning);
         }
       }
     }

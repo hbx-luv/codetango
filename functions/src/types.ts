@@ -185,6 +185,23 @@ export interface WordList {
   words: string[];
 }
 
+// /themedWordlists — AI-generated themed word pools, saved for reuse so the
+// same theme can be replayed without another AI call. Written server-side by
+// the onCreateGame trigger; doc ID is md5(themeKey).
+export interface ThemedWordlist {
+  theme: string;      // theme as entered (for display)
+  themeKey: string;   // normalized theme (trim + lowercase); md5 of this = doc ID
+  words: string[];    // full AI-returned pool, deduped (not sliced to 25)
+  createdAt: number;
+
+  // when true, this list is protected from the auto-cleanup that caps the
+  // collection — a user "pinned" it. Toggled client-side by authed users.
+  pinned?: boolean;
+
+  // client field
+  id?: string;
+}
+
 export interface UserStats {
   elo: number;
   gamesPlayed: number;

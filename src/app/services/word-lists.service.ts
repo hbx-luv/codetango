@@ -6,11 +6,13 @@ import {
   doc,
   DocumentReference,
   Firestore,
+  orderBy,
+  query,
   setDoc,
   updateDoc,
 } from '@angular/fire/firestore';
 import {Observable} from 'rxjs';
-import {GameType, WordList} from 'types';
+import {GameType, ThemedWordlist, WordList} from 'types';
 
 import {christmasWordList} from './word-lists/christmas-word-list';
 import {deepUndercoverWordList} from './word-lists/deep-undercover-word-list';
@@ -49,6 +51,23 @@ export class WordListsService {
   getWordLists(): Observable<WordList[]> {
     return collectionData(collection(this.firestore, 'wordlists')) as
         Observable<WordList[]>;
+  }
+
+  // Previously-generated AI themes, newest first. Selecting one reuses its
+  // saved word pool (no AI call) — the onCreateGame trigger looks the theme up
+  // by name when a game is created.
+  getThemedWordlists(): Observable<ThemedWordlist[]> {
+    return collectionData(
+               query(
+                   collection(this.firestore, 'themedWordlists'),
+                   orderBy('createdAt', 'desc')),
+               {idField: 'id'}) as Observable<ThemedWordlist[]>;
+  }
+
+  // Pin/unpin a saved theme to protect it from (or expose it to) the backend's
+  // auto-cleanup. Firestore rules only permit the `pinned` field to change here.
+  setThemePinned(id: string, pinned: boolean): Promise<void> {
+    return updateDoc(doc(this.firestore, 'themedWordlists', id), {pinned});
   }
 
   createWordList(name: string, words: string[]): Promise<DocumentReference> {
