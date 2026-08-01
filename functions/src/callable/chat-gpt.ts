@@ -29,6 +29,31 @@ const CLUE_SCHEMA: Record<string, unknown> = {
   },
 };
 
+// Server-side legality guard for a generated hint (case-insensitive). A hint is
+// illegal only if it EQUALS a board word or shares a word-root at the START
+// boundary — i.e. one word is a PREFIX of the other. English inflections are
+// suffixes on a root, so the root is a prefix: `ICE` is a prefix of
+// `ICES`/`ICED`/`ICING` (correctly rejected) but NOT of `PRICE` (correctly
+// allowed); `CAR` and `SCARE` are prefixes of neither (both allowed). This is
+// deliberately looser than a two-directional substring check: a suffix-compound
+// like `FOOTBALL` vs board `BALL` will pass — an accepted tradeoff, since
+// catching it would also re-reject legal hints like `PRICE`, and the prompt
+// still discourages compounds.
+function overlapsBoard(boardWords: string[], hint: string): boolean {
+  const h = hint.toLowerCase();
+  return boardWords.some(w => {
+    const b = w.toLowerCase();
+    return h.startsWith(b) || b.startsWith(h);
+  });
+}
+
+function isLegalHint(hint: string, boardWords: string[]): boolean {
+  const h = hint.trim();
+  // `^[a-zA-Z]+$` enforces single-word (no spaces) + letters-only; it also
+  // subsumes the empty/numeric/hyphenated rejections.
+  return /^[a-zA-Z]+$/.test(h) && !overlapsBoard(boardWords, h);
+}
+
 function isClueResponse(v: unknown): v is CodenamesClueResponse {
   if (typeof v !== 'object' || v === null) return false;
   const obj = v as Record<string, unknown>;
@@ -130,29 +155,56 @@ async function getClue(
     }
   }
 
-  const prompt = buildCluePrompt(
+  const boardWords =
+      [...playerWords, ...opponentWords, ...neutralWords, bombWord].filter(
+          w => w.length > 0);
+  const basePrompt = buildCluePrompt(
       playerWords, opponentWords, neutralWords, bombWord, previousClues);
+  const RETRY_NOTE =
+      '\n\nYour previous hint was ILLEGAL: it was a word on the board, a ' +
+      'substring of one, or not a single English word. Choose a DIFFERENT ' +
+      'single word that does not appear on and shares no substring with any ' +
+      'board word.';
 
-  let clue: CodenamesClueResponse;
-  try {
-    clue = await complete(
-        {
-          prompt,
-          effort: 'high',
-          thinking: {type: 'adaptive'},
-          schema: CLUE_SCHEMA,
-        },
-        isClueResponse,
-        ['anthropic'],
-    );
-  } catch (e) {
-    if (e instanceof AllProvidersFailedError) {
-      // Surface a clean error so the frontend stops spinning.
-      throw new HttpsError(
-          'unavailable',
-          'The clue generator is temporarily unavailable. Please try again.');
+  // Worst case = 2 Opus-high calls: a provider failure short-circuits without
+  // spending the retry; the retry is spent ONLY on a generated-but-illegal
+  // hint. No rejected hint is ever persisted.
+  let clue: CodenamesClueResponse | undefined;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const prompt = attempt === 0 ? basePrompt : basePrompt + RETRY_NOTE;
+    let candidate: CodenamesClueResponse;
+    try {
+      candidate = await complete(
+          {
+            prompt,
+            effort: 'high',
+            thinking: {type: 'adaptive'},
+            schema: CLUE_SCHEMA,
+          },
+          isClueResponse,
+          ['anthropic'],
+      );
+    } catch (e) {
+      if (e instanceof AllProvidersFailedError) {
+        // Surface a clean error so the frontend stops spinning.
+        throw new HttpsError(
+            'unavailable',
+            'The clue generator is temporarily unavailable. Please try again.');
+      }
+      throw e;
     }
-    throw e;
+    if (isLegalHint(candidate.hint, boardWords)) {
+      // `isLegalHint` validates the trimmed hint, so announce/return the
+      // trimmed form too — otherwise stray whitespace survives to the chat
+      // message and the callable response. `number`/`reason` are unchanged.
+      clue = {...candidate, hint: candidate.hint.trim()};
+      break;
+    }
+    console.warn(`illegal AI clue "${candidate.hint}" (attempt ${attempt + 1})`);
+  }
+  if (!clue) {
+    throw new HttpsError(
+        'failed-precondition', 'Couldn\'t generate a clue, try again.');
   }
 
   // NOTE: `spymaster-chat` is world-readable via the `games/{document=**}`

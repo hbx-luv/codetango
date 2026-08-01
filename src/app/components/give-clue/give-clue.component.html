@@ -27,8 +27,8 @@
 
 <ng-template #giveClue>
   <div
-    *ngIf="canUseChatGPT"
     class="gpt-icon"
+    *ngIf="canUseAiClue"
     [class.rotate]="askingChatGpt"
     (click)="askChatGpt()"
   >

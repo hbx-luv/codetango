@@ -4,7 +4,6 @@ import {tap} from 'rxjs/operators';
 import {ChatGptService} from 'src/app/services/chat-gpt.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
-import {originalWordList} from 'src/app/services/word-lists/original-word-list';
 
 import {Game, GameStatus, ProposedClue, TeamType, Tile} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
@@ -37,7 +36,6 @@ export class GiveClueComponent implements OnInit, OnDestroy {
   clue: string;
   clueCount: number;
 
-  canUseChatGPT = false;
   askingChatGpt = false;
 
   constructor(
@@ -66,9 +64,6 @@ export class GiveClueComponent implements OnInit, OnDestroy {
                 this.soundService.play(Sound.PROPOSED_CLUE);
               }
             }));
-
-    this.canUseChatGPT =
-        this.game.tiles.every(tile => originalWordList.includes(tile.word));
   }
 
   get currentTeam(): TeamType {
@@ -79,6 +74,17 @@ export class GiveClueComponent implements OnInit, OnDestroy {
   get myTeam(): TeamType {
     if (this.isMyTurn) return this.currentTeam;
     return this.currentTeam === TeamType.BLUE ? TeamType.RED : TeamType.BLUE;
+  }
+
+  // The AI clue generator only makes sense on real-word boards. Picture boards
+  // carry asset filenames in `tile.word` and emoji boards carry Unicode
+  // codepoint tokens, so sending those to the model produces gibberish (and
+  // still bills a real call). Gate on the board flags, NOT on the original
+  // word-list deck check — themed/AI, christmas, tech, and every other
+  // real-word deck must keep the button. Undefined flags (word boards) fall
+  // through to true.
+  get canUseAiClue(): boolean {
+    return !this.game.hasPictures && !this.game.hasEmojis;
   }
 
   /**
@@ -224,8 +230,10 @@ export class GiveClueComponent implements OnInit, OnDestroy {
       this.clueCount = clue.number;
       this.utilService.alert(
           `${clue.hint} ${clue.number}`, clue.reason, 'Got it');
-    } catch (e) {
-      console.log(e);
+    } catch (_e) {
+      this.utilService.showToast(
+          'Couldn\'t generate a clue, try again.', TOAST_DURATION,
+          TOAST_OPTIONS);
     }
     this.askingChatGpt = false;
   }
