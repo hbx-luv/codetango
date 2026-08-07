@@ -1,3 +1,19 @@
+:host {
+  display: block;
+  transition: transform 450ms cubic-bezier(0.22, 0.9, 0.26, 1);
+}
+
+// lifted over the board by the clueFly directive while the clue is live
+:host(.clue-flying) {
+  position: relative;
+  z-index: 50;
+  will-change: transform;
+
+  .clue {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+}
+
 .clue {
   border-radius: 4px;
   margin: 8px 8px;

@@ -4,8 +4,9 @@
   </h3>
   <div *ngIf="clues$ | async as clues; else loading">
     <app-clue
-      *ngFor="let clue of clues"
+      *ngFor="let clue of clues; let first = first; trackBy: trackByClue"
       [clue]="clue"
+      [clueFly]="first && isLive(clue)"
       [assetUrlPattern]="game.assetUrlPattern"
       >
     </app-clue>
