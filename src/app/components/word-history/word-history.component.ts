@@ -50,8 +50,16 @@ export class WordHistoryComponent implements OnInit {
   }
 
   /**
-   * Reuse clue elements across Firestore snapshots — without this, every
-   * guess would recreate the live card and restart its flight animation
+   * The clues to render in the stack — everything except the live clue,
+   * which is shown in the banner above the board until its turn ends
+   */
+  visibleClues(clues: Clue[]): Clue[] {
+    return clues.filter(clue => !this.isLive(clue));
+  }
+
+  /**
+   * Reuse clue elements across Firestore snapshots so cards don't re-render
+   * (and replay their entry animation) on every guess
    */
   trackByClue(index: number, clue: Clue): number {
     return clue.createdAt;
@@ -59,8 +67,7 @@ export class WordHistoryComponent implements OnInit {
 
   /**
    * True when the given clue is the one being actively guessed on — the game
-   * is still going and the clue belongs to the team whose turn it is. The
-   * live clue card is lifted above the board by the clueFly directive.
+   * is still going and the clue belongs to the team whose turn it is
    */
   isLive(clue: Clue): boolean {
     if (this.game?.completedAt) {

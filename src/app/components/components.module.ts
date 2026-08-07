@@ -7,7 +7,6 @@ import {ActionsPopoverPageComponent} from './actions-popover/actions-popover-pag
 import {ActionsPopoverComponent} from './actions-popover/actions-popover.component';
 import {ChatBoxComponent} from './chat-box/chat-box.component';
 
-import {ClueFlyDirective} from './clue/clue-fly.directive';
 import {ClueComponent} from './clue/clue.component';
 import {EloChangeComponent} from './elo-change/elo-change.component';
 import {EloChartComponent} from './elo-chart/elo-chart';
@@ -39,7 +38,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     EloChangeComponent,      SameTeamComponent,
     VersusComponent,         WinRecordComponent,
     ActionsPopoverComponent, ActionsPopoverPageComponent,
-    GameStatsComponent,      ClueFlyDirective,
+    GameStatsComponent,
   ],
   imports: [
     IonicModule,

@@ -48,30 +48,24 @@
     <!-- persistent current clue banner -->
     <div
       class="clue-banner {{ turnColorClass }}"
-      [class.live]="clueIsLive"
       *ngIf="room && !game.completedAt && game.tiles">
       <ng-container *ngIf="clueIsLive; else thinking">
-        <!-- desktop: the live clue card from the history flies onto this slot -->
-        <div class="clue-slot"></div>
-        <!-- mobile keeps the inline banner (the history is below the fold) -->
-        <div class="mobile-clue">
-          <span class="clue-word">{{ currentClue.word }}</span>
-          <span class="clue-count">{{ currentClue.guessCount }}</span>
+        <span class="clue-word">{{ currentClue.word }}</span>
+        <span class="clue-count">{{ currentClue.guessCount }}</span>
+        <span
+          class="pips"
+          tooltip="Guesses used — the last one is the bonus guess"
+          *ngIf="!unlimitedGuesses">
           <span
-            class="pips"
-            tooltip="Guesses used — the last one is the bonus guess"
-            *ngIf="!unlimitedGuesses">
-            <span
-              class="pip"
-              [class.filled]="filled"
-              [class.bonus]="i === cluePips.length - 1"
-              *ngFor="let filled of cluePips; let i = index">
-            </span>
+            class="pip"
+            [class.filled]="filled"
+            [class.bonus]="i === cluePips.length - 1"
+            *ngFor="let filled of cluePips; let i = index">
           </span>
-          <span class="pips-text" *ngIf="unlimitedGuesses">
-            {{ guessesUsed }} guess{{ guessesUsed === 1 ? "" : "es" }} made · unlimited
-          </span>
-        </div>
+        </span>
+        <span class="pips-text" *ngIf="unlimitedGuesses">
+          {{ guessesUsed }} guess{{ guessesUsed === 1 ? "" : "es" }} made · unlimited
+        </span>
       </ng-container>
       <ng-template #thinking>
         <span class="thinking">

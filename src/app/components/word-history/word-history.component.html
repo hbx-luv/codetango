@@ -3,14 +3,15 @@
     Clues
   </h3>
   <div *ngIf="clues$ | async as clues; else loading">
+    <!-- the live clue renders in the banner above the board instead; it
+         joins this stack once its turn is over -->
     <app-clue
-      *ngFor="let clue of clues; let first = first; trackBy: trackByClue"
+      *ngFor="let clue of visibleClues(clues); trackBy: trackByClue"
       [clue]="clue"
-      [clueFly]="first && isLive(clue)"
       [assetUrlPattern]="game.assetUrlPattern"
       >
     </app-clue>
-    <ion-item *ngIf="clues.length === 0">
+    <ion-item *ngIf="visibleClues(clues).length === 0">
       No clues given yet!
     </ion-item>
   </div>
