@@ -75,6 +75,35 @@
     background: var(--ion-color-danger);
   }
 
+  // while a clue is live on desktop, the banner is just the landing pad the
+  // floating clue card sits on — no chrome of its own
+  &.live {
+    @media (min-width: 1041px) {
+      background: transparent;
+      padding: 0;
+    }
+  }
+
+  .clue-slot {
+    height: 60px;
+
+    @media (max-width: 1040px) {
+      display: none;
+    }
+  }
+
+  .mobile-clue {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    @media (min-width: 1041px) {
+      display: none;
+    }
+  }
+
   .clue-word {
     text-transform: uppercase;
     letter-spacing: 1px;

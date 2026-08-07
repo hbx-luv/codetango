@@ -4,7 +4,7 @@ import {tap} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Clue, Game, TeamType} from '../../../../types';
+import {Clue, Game, GameStatus, TeamType} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
 
 @Component({
@@ -47,6 +47,29 @@ export class WordHistoryComponent implements OnInit {
         this.latestClue = clues[0];
       }
     }));
+  }
+
+  /**
+   * Reuse clue elements across Firestore snapshots — without this, every
+   * guess would recreate the live card and restart its flight animation
+   */
+  trackByClue(index: number, clue: Clue): number {
+    return clue.createdAt;
+  }
+
+  /**
+   * True when the given clue is the one being actively guessed on — the game
+   * is still going and the clue belongs to the team whose turn it is. The
+   * live clue card is lifted above the board by the clueFly directive.
+   */
+  isLive(clue: Clue): boolean {
+    if (this.game?.completedAt) {
+      return false;
+    }
+    const turnTeam = this.game?.status === GameStatus.REDS_TURN ?
+        TeamType.RED :
+        this.game?.status === GameStatus.BLUES_TURN ? TeamType.BLUE : null;
+    return !!turnTeam && clue.team === turnTeam;
   }
 
   isRefreshingMidGame(clues: Clue[], latestClue: Clue): boolean {
