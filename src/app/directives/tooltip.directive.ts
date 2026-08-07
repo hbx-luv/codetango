@@ -1,10 +1,10 @@
-import { Directive, Input, ElementRef, HostListener, Renderer2 } from '@angular/core';
+import { Directive, Input, ElementRef, HostListener, OnDestroy, Renderer2 } from '@angular/core';
 
 @Directive({
   standalone: false,
   selector: '[tooltip]'
 })
-export class TooltipDirective {
+export class TooltipDirective implements OnDestroy {
   @Input() tooltip: string;
   @Input() placement: string = 'bottom';
   @Input() delay: number = 0;
@@ -33,10 +33,21 @@ export class TooltipDirective {
 
   hide() {
     this.renderer.removeClass(this.tooltipElement, 'ng-tooltip-show');
-    window.setTimeout(() => {
+    window.setTimeout(() => this.remove(), this.delay);
+  }
+
+  // the host can leave the DOM while the tooltip is showing (e.g. clicking a
+  // button that removes its own row) — mouseleave never fires in that case,
+  // so clean up the body-attached tooltip here too
+  ngOnDestroy() {
+    this.remove();
+  }
+
+  private remove() {
+    if (this.tooltipElement) {
       this.renderer.removeChild(document.body, this.tooltipElement);
       this.tooltipElement = null;
-    }, this.delay);
+    }
   }
 
   create() {
