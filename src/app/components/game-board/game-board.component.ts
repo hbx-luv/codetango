@@ -8,6 +8,9 @@ import { getSrc } from '../game/tile-util';
 
 const REVEAL_ANIMATION_MS = 600;
 
+// how long a tap holds a revealed tile flipped back over on touch devices
+const PEEK_MS = 3000;
+
 @Component({
   standalone: false,
   selector: 'app-game-board',
@@ -39,6 +42,13 @@ export class GameBoardComponent implements OnChanges {
   private seenSelected: Set<string>;
   private lastStatus: GameStatus;
   private lastCompleted = false;
+
+  // revealed tiles the user is peeking under (hover on desktop, tap on touch)
+  private peeking = new Set<string>();
+  private peekTimers = new Map<string, number>();
+  private readonly canHover =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(hover: hover)').matches;
 
   constructor(
       private readonly authService: AuthService,
@@ -121,6 +131,61 @@ export class GameBoardComponent implements OnChanges {
 
   isRevealing(tile: Tile): boolean {
     return this.recentlyRevealed.has(this.tileKey(tile));
+  }
+
+  isFlipped(tile: Tile): boolean {
+    return !!tile.selected && !this.peeking.has(this.tileKey(tile));
+  }
+
+  startPeek(tile: Tile) {
+    if (!this.canHover || !tile.selected || this.isRevealing(tile)) {
+      return;
+    }
+    this.peeking.add(this.tileKey(tile));
+  }
+
+  endPeek(tile: Tile) {
+    if (this.canHover) {
+      this.peeking.delete(this.tileKey(tile));
+    }
+  }
+
+  // isRevealing guards the tap that just flipped the tile — its click also
+  // bubbles here, and shouldn't immediately peek back under the new card
+  tapPeek(tile: Tile) {
+    if (this.canHover || !tile.selected || this.isRevealing(tile)) {
+      return;
+    }
+    const key = this.tileKey(tile);
+    this.peeking.add(key);
+    clearTimeout(this.peekTimers.get(key));
+    this.peekTimers.set(key, window.setTimeout(() => {
+      this.peeking.delete(key);
+      this.peekTimers.delete(key);
+    }, PEEK_MS));
+  }
+
+  getCharacterSrc(tile: Tile): string {
+    switch (tile.role) {
+      case TileRole.ASSASSIN:
+        return 'assets/characters/char-assasin.png';
+      case TileRole.RED:
+        return `assets/characters/char-red-team-${this.variant(tile)}.png`;
+      case TileRole.BLUE:
+        return `assets/characters/char-blue-team-${this.variant(tile)}.png`;
+      default:
+        return `assets/characters/char-neutral-${this.variant(tile)}.png`;
+    }
+  }
+
+  // deterministic 1 or 2 per tile so the character doesn't change on rerender
+  private variant(tile: Tile): number {
+    const key = this.tileKey(tile);
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = (hash * 31 + key.charCodeAt(i)) | 0;
+    }
+    return (Math.abs(hash) % 2) + 1;
   }
 
   get type(): GameType {

@@ -19,11 +19,70 @@
     position: relative;
     margin: 0 2px;
 
-    ion-button.word {
-      max-height: 90px;
+    .flip-card {
       height: 18vw;
+      max-height: 90px;
+      perspective: 800px;
+
+      &.pictures {
+        height: 16vw;
+        max-height: 130px;
+      }
+
+      .flip-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 600ms ease-out;
+      }
+
+      &.flipped .flip-inner {
+        transform: rotateY(180deg);
+      }
+
+      .flip-front,
+      .flip-back {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+
+      .flip-back {
+        transform: rotateY(180deg);
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        background: var(--ion-color-medium);
+
+        &.RED {
+          background: var(--ion-color-danger);
+        }
+        &.BLUE {
+          background: var(--ion-color-primary);
+        }
+        &.CIVILIAN {
+          background: #bbb29f;
+        }
+        &.ASSASSIN {
+          background: #000;
+        }
+
+        .character {
+          height: 94%;
+          pointer-events: none;
+        }
+      }
+    }
+
+    ion-button.word {
+      height: 100%;
       border-radius: 4px;
       width: 100%;
+      margin: 0;
       white-space: normal;
 
       // better warning color
@@ -41,10 +100,6 @@
       &.spymaster,
       &.readonly {
         pointer-events: none;
-      }
-
-      &.just-revealed {
-        animation: tile-flip 600ms ease-out;
       }
 
       // the role of the tile will be revealed to the spymaster
@@ -69,11 +124,6 @@
         }
       }
 
-      &.memes,
-      &.pictures {
-        max-height: 130px;
-        height: 16vw;
-      }
       &.emojis {
         ion-img {
           max-width: 85px;
@@ -127,18 +177,6 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-}
-
-@keyframes tile-flip {
-  0% {
-    transform: perspective(600px) rotateY(90deg) scale(1.05);
-  }
-  60% {
-    transform: perspective(600px) rotateY(-12deg) scale(1.02);
-  }
-  100% {
-    transform: perspective(600px) rotateY(0) scale(1);
-  }
 }
 
 @keyframes board-shake {

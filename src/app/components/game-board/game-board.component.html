@@ -1,28 +1,43 @@
 <div>
   <ion-grid class="grid-container" [class.greyscale]="shouldGreyscale" [class.shake]="shaking">
     <div class="tile-container" *ngFor="let tile of tiles">
-      <ion-button
-        [class.spymaster]="spymaster"
-        [class.selected]="tile.selected"
-        [class.just-revealed]="isRevealing(tile)"
-        [class.readonly]="readonly"
-        [class.pictures]="game.hasPictures"
-        [class.emojis]="game.hasEmojis"
-        [class.meme-picture]="game.gameType === GameType.MEMES"
-        [color]="getColor(tile)"
-        class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
-        (click)="selectTile(tile)"
+      <div
+        class="flip-card"
+        [class.flipped]="isFlipped(tile)"
+        [class.pictures]="game.hasPictures || game.gameType === GameType.MEMES"
+        (mouseenter)="startPeek(tile)"
+        (mouseleave)="endPeek(tile)"
+        (click)="tapPeek(tile)"
       >
-        <ng-container [ngSwitch]="type">
-          <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
-          <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
-            {{ tile.word }}
-          </span>
-          <span *ngSwitchDefault>
-            <ion-img [src]="getPictureSrc(tile.word)"></ion-img>
-          </span>
-        </ng-container>
-      </ion-button>
+        <div class="flip-inner">
+          <div class="flip-front">
+            <ion-button
+              [class.spymaster]="spymaster"
+              [class.selected]="tile.selected"
+              [class.readonly]="readonly"
+              [class.pictures]="game.hasPictures"
+              [class.emojis]="game.hasEmojis"
+              [class.meme-picture]="game.gameType === GameType.MEMES"
+              [color]="getColor(tile)"
+              class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
+              (click)="selectTile(tile)"
+            >
+              <ng-container [ngSwitch]="type">
+                <span *ngSwitchCase="GameType.WORDS">{{ tile.word }}</span>
+                <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
+                  {{ tile.word }}
+                </span>
+                <span *ngSwitchDefault>
+                  <ion-img [src]="getPictureSrc(tile.word)"></ion-img>
+                </span>
+              </ng-container>
+            </ion-button>
+          </div>
+          <div class="flip-back {{ tile.role }}">
+            <img class="character" [src]="getCharacterSrc(tile)" alt="" />
+          </div>
+        </div>
+      </div>
 
       <img class="dart" src="../../../assets/{{ tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="tile.dartedBy">
     </div>
