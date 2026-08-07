@@ -41,6 +41,18 @@
         transform: rotateY(180deg);
       }
 
+      // a freshly guessed tile pops out and holds so everyone can see which
+      // tile was picked, settles back, then flips to reveal the role.
+      // duration must match REVEAL_ANIMATION_MS in the component
+      &.revealing {
+        position: relative;
+        z-index: 5;  // the enlarged tile overlaps its neighbors
+
+        .flip-inner {
+          animation: tile-reveal 1300ms ease-in-out both;
+        }
+      }
+
       .flip-front,
       .flip-back {
         position: absolute;
@@ -169,6 +181,31 @@
       bottom: calc(50% + 12px);
       width: 100px;
     }
+  }
+}
+
+@keyframes tile-reveal {
+  0% {
+    transform: scale(1) rotateY(0);
+  }
+  // pop out with a little overshoot...
+  14% {
+    transform: scale(1.22) rotateY(0);
+  }
+  22% {
+    transform: scale(1.16) rotateY(0);
+  }
+  // ...hold enlarged so the pick registers...
+  48% {
+    transform: scale(1.16) rotateY(0);
+  }
+  // ...settle back to size...
+  62% {
+    transform: scale(1) rotateY(0);
+  }
+  // ...then flip to reveal
+  100% {
+    transform: scale(1) rotateY(180deg);
   }
 }
 

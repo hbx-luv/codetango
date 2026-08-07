@@ -4,6 +4,7 @@
       <div
         class="flip-card"
         [class.flipped]="isFlipped(tile)"
+        [class.revealing]="isRevealing(tile)"
         [class.pictures]="game.hasPictures || game.gameType === GameType.MEMES"
         (mouseenter)="startPeek(tile)"
         (mouseleave)="endPeek(tile)"

@@ -6,7 +6,9 @@ import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '
 import {Sound, SoundService} from '../../services/sound.service';
 import { getSrc } from '../game/tile-util';
 
-const REVEAL_ANIMATION_MS = 600;
+// pop out + hold + settle + flip; keep in sync with the tile-reveal
+// keyframes in the component scss
+const REVEAL_ANIMATION_MS = 1300;
 
 // how long a tap holds a revealed tile flipped back over on touch devices
 const PEEK_MS = 3000;
