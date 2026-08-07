@@ -11,7 +11,21 @@
       *ngIf="showJoinButton('blueTeam')">
       Join
     </ion-button>
+    <ion-button
+      fill="outline"
+      color="primary"
+      size="small"
+      (click)="addBot('blueTeam')"
+      *ngIf="canAddBot">
+      🤖 Add bot
+    </ion-button>
   </h3>
+  <div class="bot-pending" *ngFor="let invite of pendingInvitesFor('blueTeam')">
+    <ion-chip color="primary" outline="true">
+      <ion-spinner name="dots"></ion-spinner>
+      <ion-label>Bot invited, joining soon…</ion-label>
+    </ion-chip>
+  </div>
   <div class="team-member" *ngFor="let member of game.blueTeam.userIds">
     <div class="spy">
       <span *ngIf="game.blueTeam.spymaster === member">🕵</span>
@@ -39,7 +53,21 @@
       *ngIf="showJoinButton('redTeam')">
       Join
     </ion-button>
+    <ion-button
+      fill="outline"
+      color="danger"
+      size="small"
+      (click)="addBot('redTeam')"
+      *ngIf="canAddBot">
+      🤖 Add bot
+    </ion-button>
   </h3>
+  <div class="bot-pending" *ngFor="let invite of pendingInvitesFor('redTeam')">
+    <ion-chip color="danger" outline="true">
+      <ion-spinner name="dots"></ion-spinner>
+      <ion-label>Bot invited, joining soon…</ion-label>
+    </ion-chip>
+  </div>
   <div class="team-member" *ngFor="let member of game.redTeam.userIds">
     <div class="spy">
       <span *ngIf="game.redTeam.spymaster === member">🕵</span>

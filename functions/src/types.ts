@@ -146,6 +146,10 @@ export interface Game {
   // set by the server for querying
   userIds?: string[];
 
+  // touched by the bot Cloud Function to re-trigger itself when its drain
+  // loop hits the deadline with actions still pending
+  botPing?: number;
+
   // client fields
   id?: string;
   exists?: boolean;
@@ -173,6 +177,10 @@ export interface User {
 
   // set by the stats recalc function
   stats?: UserStats;
+
+  // true for synthetic bot players. Bots have no auth account; their moves are
+  // performed server-side by the bot Cloud Functions via the admin SDK.
+  isBot?: boolean;
 
   // set by the client
   id?: string;

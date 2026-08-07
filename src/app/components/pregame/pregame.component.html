@@ -23,19 +23,34 @@
         <app-user *ngFor="let userId of activeSpectatorIds" [userId]="userId"></app-user>
       </div>
     </div>
-    <ion-button
-      *ngIf="userInRoom"
-      [disabled]="activePlayerIds.length < 2"
-      (click)="assignUsersToRandomTeams()">
-      <ion-icon slot="start" name="shuffle"></ion-icon>
-      Assign Teams
-    </ion-button>
-    <ion-button
-      *ngIf="!userInRoom"
-      (click)="joinRoom()">
-      <ion-icon slot="start" name="game-controller"></ion-icon>
-      Join
-    </ion-button>
+    <div class="lobby-actions">
+      <ion-button
+        *ngIf="userInRoom"
+        fill="outline"
+        (click)="addBot()">
+        <ion-icon slot="start" name="hardware-chip-outline"></ion-icon>
+        🤖 Add bot
+      </ion-button>
+      <div class="bot-pending" *ngIf="pendingBots">
+        <ion-chip outline="true">
+          <ion-spinner name="dots"></ion-spinner>
+          <ion-label>Adding {{ pendingBots }} bot{{ pendingBots === 1 ? '' : 's' }}…</ion-label>
+        </ion-chip>
+      </div>
+      <ion-button
+        *ngIf="userInRoom"
+        [disabled]="activePlayerIds.length < 2"
+        (click)="assignUsersToRandomTeams()">
+        <ion-icon slot="start" name="shuffle"></ion-icon>
+        Assign Teams
+      </ion-button>
+      <ion-button
+        *ngIf="!userInRoom"
+        (click)="joinRoom()">
+        <ion-icon slot="start" name="game-controller"></ion-icon>
+        Join
+      </ion-button>
+    </div>
   </div>
 
 
@@ -53,11 +68,11 @@
         <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
         Go Back
       </ion-button>
-      <ion-button color="danger" (click)="toggleRedReady()" [disabled]="!redSpymaster">
+      <ion-button color="danger" (click)="toggleRedReady()" [disabled]="!canReadyRed">
         Red Ready
         <ion-icon class="margin-left" [name]="room.redReady ? 'checkmark' : 'close'"></ion-icon>
       </ion-button>
-      <ion-button color="primary" (click)="toggleBlueReady()" [disabled]="!blueSpymaster">
+      <ion-button color="primary" (click)="toggleBlueReady()" [disabled]="!canReadyBlue">
         Blue Ready
         <ion-icon class="margin-left" [name]="room.blueReady ? 'checkmark' : 'close'"></ion-icon>
       </ion-button>

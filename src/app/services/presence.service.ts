@@ -71,6 +71,11 @@ export class PresenceService {
     if (!user) {
       return false;
     }
+    // Bots have no heartbeat but should always count as present so they show in
+    // the lobby and get included when teams are assigned.
+    if (user.isBot) {
+      return true;
+    }
     if (user.id === this.uid) {
       return true;
     }

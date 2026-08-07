@@ -1,6 +1,7 @@
 import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
+import {BotInvite, BotService} from 'src/app/services/bot.service';
 import {GameService} from 'src/app/services/game.service';
 import {PresenceService} from 'src/app/services/presence.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -22,11 +23,16 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
 
   // active room members who aren't on either team
   spectatorIds: string[] = [];
+  // pending bot invites (bots that have been invited but not yet seated)
+  pendingInvites: BotInvite[] = [];
   private presenceKey = '';
   private presenceSub?: Subscription;
+  private invitesGameId = '';
+  private invitesSub?: Subscription;
 
   constructor(
       private readonly authService: AuthService,
+      private readonly botService: BotService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly utilService: UtilService,
@@ -36,13 +42,36 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
   ngOnChanges() {
     const candidates = this.spectatorCandidates();
     const key = candidates.join(',');
-    if (key === this.presenceKey) {
-      return;
+    if (key !== this.presenceKey) {
+      this.presenceKey = key;
+      this.presenceSub?.unsubscribe();
+      this.presenceSub = this.presenceService.activeUserIds(candidates)
+                             .subscribe(ids => this.spectatorIds = ids);
     }
-    this.presenceKey = key;
-    this.presenceSub?.unsubscribe();
-    this.presenceSub = this.presenceService.activeUserIds(candidates)
-                           .subscribe(ids => this.spectatorIds = ids);
+
+    if (this.game?.id && this.game.id !== this.invitesGameId) {
+      this.invitesGameId = this.game.id;
+      this.invitesSub?.unsubscribe();
+      this.invitesSub = this.botService.getPendingInvites(this.game.id)
+                            .subscribe(invites => this.pendingInvites = invites);
+    }
+  }
+
+  /** Whether the "Add bot" button should show for a team. */
+  get canAddBot(): boolean {
+    return this.game && !this.game.completedAt &&
+        this.room?.status === RoomStatus.ASSIGNING_ROLES &&
+        this.loggedInAndInRoom;
+  }
+
+  pendingInvitesFor(team: 'redTeam'|'blueTeam'): BotInvite[] {
+    const color = team === 'redTeam' ? 'RED' : 'BLUE';
+    return this.pendingInvites.filter(i => i.team === color);
+  }
+
+  addBot(team: 'redTeam'|'blueTeam') {
+    const color = team === 'redTeam' ? 'RED' : 'BLUE';
+    this.botService.inviteBot(this.game.id, color);
   }
 
   /**
@@ -67,6 +96,7 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.presenceSub?.unsubscribe();
+    this.invitesSub?.unsubscribe();
   }
 
   get loggedInAndInRoom(): boolean {

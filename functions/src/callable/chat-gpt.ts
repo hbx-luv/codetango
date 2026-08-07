@@ -1,7 +1,8 @@
 import * as admin from 'firebase-admin';
 import {HttpsError, onCall} from 'firebase-functions/v2/https';
 
-import {CodenamesClueResponse, Game} from '../types';
+import {CodenamesClueResponse, Game, TeamType} from '../types';
+import {buildCluePrompt, CLUE_SCHEMA, isClueResponse, partitionBoard} from '../util/bots';
 import {AllProvidersFailedError, anthropicApiKey, complete} from '../util/llm';
 import {sendSpymasterMessage} from '../util/message';
 
@@ -17,26 +18,6 @@ const db = admin.firestore();
 // spends the project's own Anthropic key (claude-opus-4-8, high effort), so a
 // per-(gameId, team) cooldown stops an authenticated spymaster from looping it.
 const CLUE_COOLDOWN_MS = 20_000;
-
-const CLUE_SCHEMA: Record<string, unknown> = {
-  type: 'object',
-  additionalProperties: false,
-  required: ['hint', 'number', 'reason'],
-  properties: {
-    hint: {type: 'string'},
-    number: {type: 'integer'},
-    reason: {type: 'string'},
-  },
-};
-
-function isClueResponse(v: unknown): v is CodenamesClueResponse {
-  if (typeof v !== 'object' || v === null) return false;
-  const obj = v as Record<string, unknown>;
-  // number must be an integer count — the Anthropic json_schema `integer` backs
-  // this today, but the router's contract is that the validator is the contract.
-  return typeof obj.hint === 'string' && Number.isInteger(obj.number) &&
-      typeof obj.reason === 'string';
-}
 
 export const askChatGpt = onCall({secrets: [anthropicApiKey]}, async (req) => {
   // Authorization runs BEFORE any board partitioning or model call, so an
@@ -109,26 +90,8 @@ async function getClue(
                             .filter(clue => clue.team === team)
                             .map(clue => clue.word);
 
-  const {tiles = []} = game;
-  const playerWords: string[] = [];
-  const opponentWords: string[] = [];
-  const neutralWords: string[] = [];
-  let bombWord = '';
-  for (const tile of tiles) {
-    // selected words are disregarded
-    if (tile.selected) continue;
-
-    const {word = '', role} = tile;
-    if (role === 'ASSASSIN') {
-      bombWord = word;
-    } else if (role === 'CIVILIAN') {
-      neutralWords.push(word);
-    } else if (role === team) {
-      playerWords.push(word);
-    } else {
-      opponentWords.push(word);
-    }
-  }
+  const {playerWords, opponentWords, neutralWords, bombWord} =
+      partitionBoard(game, team as TeamType);
 
   const prompt = buildCluePrompt(
       playerWords, opponentWords, neutralWords, bombWord, previousClues);
@@ -168,46 +131,3 @@ async function getClue(
   return clue;
 }
 
-function buildCluePrompt(
-    playerWords: string[],
-    opponentWords: string[],
-    neutralWords: string[],
-    bombWord: string,
-    previousClues: string[],
-    ): string {
-  const previous = previousClues.length ?
-      previousClues.join(', ') :
-      '(none yet)';
-  return `
-You are an expert spymaster in the word game Codenames. Your job is to give a
-one-word hint that connects as many of YOUR team's words as possible while
-steering your teammates away from every other word on the board.
-
-Board state (each list is a set of single words already on the board):
-- YOUR team's words (you want your teammates to guess these): ${playerWords.join(', ')}
-- Opponent's words (never lead your team here): ${opponentWords.join(', ')}
-- Neutral bystander words (avoid these; a wrong guess ends your turn): ${neutralWords.join(', ')}
-- The ASSASSIN word (if your team guesses this, you INSTANTLY LOSE — avoid it at all costs): ${bombWord}
-- Hints already given to your team this game (do not reuse them): ${previous}
-
-Rules for your hint:
-1. The hint MUST be a single English word. It must NOT be any word appearing on
-   the board (in any list above), nor a direct form, plural, or substring of one.
-2. The number is how many of YOUR team's words your hint points to. Pick a hint
-   that safely connects as many of your words as you confidently can, but never
-   at the risk of pointing toward the assassin, an opponent word, or a neutral.
-3. Favor a strong, unambiguous connection to your own words over a risky clue
-   that touches more words. A clean 2 beats a dangerous 4.
-4. Absolutely avoid any semantic path that could lead your team to the assassin
-   word "${bombWord}".
-
-Think it through, then respond with a JSON object with exactly these keys:
-- "hint": your single-word clue (string)
-- "number": the count of your team's words it points to (integer, at least 1)
-- "reason": a short explanation of which of YOUR team's words the hint targets
-  and why it points only to them (string). Do NOT mention, quote, or spell out
-  the assassin word or any other word on the board in this explanation — refer
-  to your own target words only.
-Respond with only the JSON object and nothing else.
-`;
-}

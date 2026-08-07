@@ -1,6 +1,7 @@
 import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
 import {firstValueFrom, Observable, Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
+import {BotService} from 'src/app/services/bot.service';
 import {PresenceService} from 'src/app/services/presence.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -28,9 +29,13 @@ export class PregameComponent implements OnChanges, OnDestroy {
   // room members filtered down to the recently active
   activePlayerIds: string[] = [];
   activeSpectatorIds: string[] = [];
+  // count of bots invited to the room but not yet seated (for a pending pill)
+  pendingBots = 0;
   private presenceKey = '';
   private playersSub?: Subscription;
   private spectatorsSub?: Subscription;
+  private botInvitesRoomId = '';
+  private botInvitesSub?: Subscription;
 
   lastSettings: Partial<Room>;
 
@@ -64,7 +69,15 @@ export class PregameComponent implements OnChanges, OnDestroy {
       private readonly userService: UserService,
       private readonly wordListsService: WordListsService,
       private readonly presenceService: PresenceService,
+      private readonly botService: BotService,
   ) {}
+
+  /** Invite a bot into the room's player pool (lobby / PREGAME). */
+  addBot() {
+    if (this.room?.id) {
+      this.botService.inviteRoomBot(this.room.id);
+    }
+  }
 
   ngOnChanges() {
     const {redReady = false, blueReady = false} = this.room || {};
@@ -81,6 +94,14 @@ export class PregameComponent implements OnChanges, OnDestroy {
     }
 
     this.watchPresence();
+
+    if (this.room?.id && this.room.id !== this.botInvitesRoomId) {
+      this.botInvitesRoomId = this.room.id;
+      this.botInvitesSub?.unsubscribe();
+      this.botInvitesSub = this.botService.getRoomPendingInvites(this.room.id)
+                               .subscribe(invites => this.pendingBots =
+                                              invites.length);
+    }
   }
 
   /** (Re)subscribe to active-user lists when room membership changes */
@@ -105,6 +126,7 @@ export class PregameComponent implements OnChanges, OnDestroy {
   ngOnDestroy() {
     this.playersSub?.unsubscribe();
     this.spectatorsSub?.unsubscribe();
+    this.botInvitesSub?.unsubscribe();
   }
 
   get userInRoom(): boolean {
@@ -126,6 +148,22 @@ export class PregameComponent implements OnChanges, OnDestroy {
   get blueSpymaster(): boolean {
     return this.userInRoom &&
         this.game?.blueTeam.spymaster === this.authService.currentUserId;
+  }
+
+  // A team is ready-able by the current user if they are its spymaster, OR the
+  // spymaster seat is held by a bot (no human can toggle it otherwise, which
+  // would deadlock a bot-spymaster team).
+  private spymasterIsBot(team: 'redTeam'|'blueTeam'): boolean {
+    return !!this.game?.[team]?.spymaster?.startsWith('bot_');
+  }
+
+  get canReadyRed(): boolean {
+    return this.userInRoom && (this.redSpymaster || this.spymasterIsBot('redTeam'));
+  }
+
+  get canReadyBlue(): boolean {
+    return this.userInRoom &&
+        (this.blueSpymaster || this.spymasterIsBot('blueTeam'));
   }
 
   get hasCustomTheme(): boolean {
