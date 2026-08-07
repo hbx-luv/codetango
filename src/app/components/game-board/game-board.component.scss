@@ -50,6 +50,11 @@
 
         .flip-inner {
           animation: tile-reveal 1300ms ease-in-out both;
+          // While the animation owns transform, the .flipped transition must
+          // not run underneath it: Safari suspends an in-flight transition
+          // during an animation and REPLAYS it when the animation class is
+          // removed, producing a second phantom flip after the reveal.
+          transition: none;
         }
       }
 

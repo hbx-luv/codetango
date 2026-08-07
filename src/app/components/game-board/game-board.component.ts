@@ -323,6 +323,9 @@ export class GameBoardComponent implements OnChanges {
     if (this.readonly) {
       return;  // Prevents any type of click trigger (ie, tab and enter)
     }
+    if (tile.selected) {
+      return;  // already revealed — ignore ghost/double clicks (iOS, #68)
+    }
     tile.selected = true;
     tile.selectedBy = this.authService.currentUserId;
 
