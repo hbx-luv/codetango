@@ -30,3 +30,19 @@
     font-size: 28px;
   }
 }
+
+// quieter than the team lists — they're just watching
+.spectators {
+  opacity: 0.55;
+
+  .spectator-title {
+    font-size: 15px;
+    height: 28px;
+    margin-bottom: 0;
+  }
+
+  .spectator {
+    transform: scale(0.9);
+    transform-origin: left center;
+  }
+}

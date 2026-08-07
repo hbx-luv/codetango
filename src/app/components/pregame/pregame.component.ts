@@ -1,6 +1,7 @@
-import {Component, Input, OnChanges} from '@angular/core';
-import {firstValueFrom, Observable} from 'rxjs';
+import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
+import {firstValueFrom, Observable, Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
+import {PresenceService} from 'src/app/services/presence.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
@@ -15,7 +16,7 @@ import {WordListsService} from '../../services/word-lists.service';
   templateUrl: './pregame.component.html',
   styleUrls: ['./pregame.component.scss'],
 })
-export class PregameComponent implements OnChanges {
+export class PregameComponent implements OnChanges, OnDestroy {
   @Input() room: Room;
   @Input() game: Game;
 
@@ -23,6 +24,13 @@ export class PregameComponent implements OnChanges {
   teams: Team[];
   constructedGame: Partial<Game>;
   debounce = 500;
+
+  // room members filtered down to the recently active
+  activePlayerIds: string[] = [];
+  activeSpectatorIds: string[] = [];
+  private presenceKey = '';
+  private playersSub?: Subscription;
+  private spectatorsSub?: Subscription;
 
   lastSettings: Partial<Room>;
 
@@ -55,6 +63,7 @@ export class PregameComponent implements OnChanges {
       private readonly utilService: UtilService,
       private readonly userService: UserService,
       private readonly wordListsService: WordListsService,
+      private readonly presenceService: PresenceService,
   ) {}
 
   ngOnChanges() {
@@ -70,6 +79,32 @@ export class PregameComponent implements OnChanges {
         });
       });
     }
+
+    this.watchPresence();
+  }
+
+  /** (Re)subscribe to active-user lists when room membership changes */
+  private watchPresence() {
+    const playerIds = this.room?.userIds ?? [];
+    const spectatorIds = this.room?.spectatorIds ?? [];
+    const key = `${playerIds.join(',')}|${spectatorIds.join(',')}`;
+    if (key === this.presenceKey) {
+      return;
+    }
+    this.presenceKey = key;
+
+    this.playersSub?.unsubscribe();
+    this.playersSub = this.presenceService.activeUserIds(playerIds)
+                          .subscribe(ids => this.activePlayerIds = ids);
+
+    this.spectatorsSub?.unsubscribe();
+    this.spectatorsSub = this.presenceService.activeUserIds(spectatorIds)
+                             .subscribe(ids => this.activeSpectatorIds = ids);
+  }
+
+  ngOnDestroy() {
+    this.playersSub?.unsubscribe();
+    this.spectatorsSub?.unsubscribe();
   }
 
   get userInRoom(): boolean {
@@ -177,8 +212,8 @@ export class PregameComponent implements OnChanges {
     this.lastSettings = {...this.room};
   }
 
-  removeUser(userId: string) {
-    this.roomService.removeUserFromRoom(this.room.id, userId);
+  moveToSpectators(userId: string) {
+    this.roomService.makeSpectator(this.room.id, userId);
   }
 
   goBackToLobby(game: Game) {
@@ -191,9 +226,10 @@ export class PregameComponent implements OnChanges {
   }
 
   async assignUsersToRandomTeams() {
-    const roomSize = this.room.userIds.length;
+    // only deal in the players who are actually here
+    const roomSize = this.activePlayerIds.length;
     const halfway = Math.ceil(roomSize / 2);
-    const randomizedUsers = [...this.room.userIds]
+    const randomizedUsers = [...this.activePlayerIds]
         .sort(() => Math.random() - 0.5);
     const blueTeamUsers = randomizedUsers.slice(0, halfway);
     const redTeamUsers = randomizedUsers.slice(halfway);

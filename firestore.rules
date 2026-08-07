@@ -62,7 +62,8 @@ service cloud.firestore {
       // On create, the new doc may only contain whitelisted fields.
       allow create: if isOwner()
                     && request.resource.data.keys().hasOnly(
-                        ['name', 'email', 'rooms', 'nickname', 'photoURL']);
+                        ['name', 'email', 'rooms', 'nickname', 'photoURL',
+                         'lastActive']);
 
       // On update, only whitelisted fields may change. This is what blocks
       // a user from self-promoting to role: 'Admin'. Server-side writes
@@ -71,7 +72,8 @@ service cloud.firestore {
       allow update: if isOwner()
                     && request.resource.data.diff(resource.data)
                         .affectedKeys()
-                        .hasOnly(['name', 'email', 'rooms', 'nickname', 'photoURL']);
+                        .hasOnly(['name', 'email', 'rooms', 'nickname',
+                                  'photoURL', 'lastActive']);
     }
 
     // Word lists are public game content; only admins can edit.

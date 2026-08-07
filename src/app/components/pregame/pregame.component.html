@@ -3,21 +3,29 @@
   <div class="users-list" *ngIf="room && room.status === 'PREGAME'">
     <h3>Players</h3>
     <ion-list>
-      <ion-item *ngFor="let userId of room.userIds">
+      <ion-item *ngFor="let userId of activePlayerIds">
         <app-user [userId]="userId"></app-user>
         <ion-button
           *ngIf="userInRoom"
-          color="danger"
+          color="medium"
+          fill="outline"
           size="small"
           slot="end"
-          (click)="removeUser(userId)">
-          <ion-icon name="trash"></ion-icon>
+          tooltip="Move to spectators"
+          (click)="moveToSpectators(userId)">
+          <ion-icon name="eye"></ion-icon>
         </ion-button>
       </ion-item>
     </ion-list>
+    <div class="spectators" *ngIf="activeSpectatorIds.length">
+      <h5>Spectators</h5>
+      <div class="spectator-chips">
+        <app-user *ngFor="let userId of activeSpectatorIds" [userId]="userId"></app-user>
+      </div>
+    </div>
     <ion-button
       *ngIf="userInRoom"
-      [disabled]="room.userIds.length < 2"
+      [disabled]="activePlayerIds.length < 2"
       (click)="assignUsersToRandomTeams()">
       <ion-icon slot="start" name="shuffle"></ion-icon>
       Assign Teams

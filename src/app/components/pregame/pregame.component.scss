@@ -16,6 +16,22 @@
       left: 50%;
       transform: translateX(-50%);
     }
+
+    // subtle list of folks watching but not playing
+    .spectators {
+      opacity: 0.6;
+      margin: 4px 16px;
+
+      h5 {
+        font-size: 14px;
+        margin: 8px 0 0;
+      }
+
+      .spectator-chips {
+        display: flex;
+        flex-wrap: wrap;
+      }
+    }
   }
   .room-settings {
     width: 550px;
@@ -92,6 +108,12 @@
     .timer-settings {
       .help {
         margin: 2px 12px 0 0;
+      }
+      // let the label size to its content so it doesn't wrap; the
+      // input flexes into whatever space remains
+      ion-label {
+        flex: 0 0 auto;
+        white-space: nowrap;
       }
       ion-input {
         text-align: right;

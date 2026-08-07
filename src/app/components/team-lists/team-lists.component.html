@@ -55,4 +55,11 @@
     >
     </app-user>
   </div>
+  <div class="spectators" *ngIf="spectatorIds.length">
+    <h3 class="team-title spectator-title">Spectators</h3>
+    <div class="team-member spectator" *ngFor="let userId of spectatorIds">
+      <div class="spy"></div>
+      <app-user [userId]="userId"></app-user>
+    </div>
+  </div>
 </div>

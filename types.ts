@@ -83,6 +83,10 @@ export interface Room {
   status: RoomStatus;
   userIds: string[];  // users currently in the room
 
+  // users watching the room without playing; shown (when recently active)
+  // in a subtle list below the teams
+  spectatorIds?: string[];
+
   redReady: boolean;
   blueReady: boolean;
 
@@ -161,6 +165,10 @@ export interface User {
   role?: UserRole;
 
   nickname?: string;
+
+  // heartbeat written by the client while the user is interacting with the
+  // page; drives the lobby active-player filter and spectator lists
+  lastActive?: number;
 
   // set by some auth providers
   photoURL?: string;

@@ -33,7 +33,9 @@ export class UsersComponent implements OnChanges, OnDestroy {
 
   actions: PopoverAction[] = [
     {
-      label: 'Remove from Team',
+      // removing a player from a team keeps them in the room, so they land
+      // in the spectators list while they're still active
+      label: 'Move to Spectators',
       onClick: () => this.remove.emit(),
     },
     {

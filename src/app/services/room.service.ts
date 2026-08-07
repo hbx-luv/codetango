@@ -87,6 +87,7 @@ export class RoomService {
       const {currentUserId} = this.authService;
       await updateDoc(doc(this.firestore, 'rooms', roomId), {
         userIds: arrayUnion(currentUserId),
+        spectatorIds: arrayRemove(currentUserId),
       });
     }
   }
@@ -94,6 +95,15 @@ export class RoomService {
   removeUserFromRoom(roomId: string, userId: string) {
     return updateDoc(doc(this.firestore, 'rooms', roomId), {
       userIds: arrayRemove(userId),
+      spectatorIds: arrayRemove(userId),
+    });
+  }
+
+  /** Move a user from the player list to the spectator list */
+  makeSpectator(roomId: string, userId: string) {
+    return updateDoc(doc(this.firestore, 'rooms', roomId), {
+      userIds: arrayRemove(userId),
+      spectatorIds: arrayUnion(userId),
     });
   }
 

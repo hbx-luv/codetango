@@ -1,6 +1,8 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
+import {Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
+import {PresenceService} from 'src/app/services/presence.service';
 import {UtilService} from 'src/app/services/util.service';
 
 import {Game, Room, RoomStatus} from '../../../../types';
@@ -12,18 +14,60 @@ import {RoomService} from '../../services/room.service';
   templateUrl: './team-lists.component.html',
   styleUrls: ['./team-lists.component.scss'],
 })
-export class TeamListsComponent {
+export class TeamListsComponent implements OnChanges, OnDestroy {
   @Input() room: Room;
   @Input() game: Game;
   @Input() setSpymaster: boolean;
   @Input() showScore = false;
+
+  // active room members who aren't on either team
+  spectatorIds: string[] = [];
+  private presenceKey = '';
+  private presenceSub?: Subscription;
 
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly utilService: UtilService,
+      private readonly presenceService: PresenceService,
   ) {}
+
+  ngOnChanges() {
+    const candidates = this.spectatorCandidates();
+    const key = candidates.join(',');
+    if (key === this.presenceKey) {
+      return;
+    }
+    this.presenceKey = key;
+    this.presenceSub?.unsubscribe();
+    this.presenceSub = this.presenceService.activeUserIds(candidates)
+                           .subscribe(ids => this.spectatorIds = ids);
+  }
+
+  /**
+   * Everyone attached to the room (players and marked spectators) who isn't
+   * on a team — e.g. someone removed from a team mid-game stays in the room
+   * and lands here while they're still active
+   */
+  private spectatorCandidates(): string[] {
+    if (!this.room || !this.game) {
+      return [];
+    }
+    const onATeam = new Set([
+      ...this.game.blueTeam.userIds,
+      ...this.game.redTeam.userIds,
+    ]);
+    const everyone = new Set([
+      ...(this.room.userIds ?? []),
+      ...(this.room.spectatorIds ?? []),
+    ]);
+    return [...everyone].filter(id => !onATeam.has(id));
+  }
+
+  ngOnDestroy() {
+    this.presenceSub?.unsubscribe();
+  }
 
   get loggedInAndInRoom(): boolean {
     return this.isLoggedIn && this.room && this.isInRoom;
