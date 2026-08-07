@@ -3,7 +3,10 @@ import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
+import {Sound, SoundService} from '../../services/sound.service';
 import { getSrc } from '../game/tile-util';
+
+const REVEAL_ANIMATION_MS = 600;
 
 @Component({
   standalone: false,
@@ -27,11 +30,21 @@ export class GameBoardComponent implements OnChanges {
 
   tiles: Tile[];
   advice: string;
+  shaking = false;
+
+  // tiles that were just revealed, keyed by word/image, for the flip animation
+  private recentlyRevealed = new Set<string>();
+  // selections we've already seen, so remote updates only animate new ones;
+  // undefined until the first snapshot so loading a game stays silent
+  private seenSelected: Set<string>;
+  private lastStatus: GameStatus;
+  private lastCompleted = false;
 
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly clueService: ClueService,
+      private readonly soundService: SoundService,
   ) {}
 
   ngOnChanges() {
@@ -46,7 +59,68 @@ export class GameBoardComponent implements OnChanges {
       } else {
         this.tiles = this.game.tiles;
       }
+      this.trackReveals();
     }
+  }
+
+  /**
+   * Detect tiles revealed by other players so everyone gets the flip
+   * animation and guess sound (local clicks register in selectTile)
+   */
+  private trackReveals() {
+    const selected = this.tiles.filter(t => t.selected);
+    if (this.seenSelected) {
+      for (const tile of selected) {
+        const key = this.tileKey(tile);
+        if (!this.seenSelected.has(key)) {
+          this.seenSelected.add(key);
+          // lastCompleted (not the current value) so the game-ending
+          // reveal still animates, but completed-game views stay silent
+          if (!this.lastCompleted) {
+            this.revealTile(tile, this.lastStatus);
+          }
+        }
+      }
+    } else {
+      this.seenSelected = new Set(selected.map(t => this.tileKey(t)));
+    }
+    this.lastStatus = this.game.status;
+    this.lastCompleted = !!this.game.completedAt;
+  }
+
+  private tileKey(tile: Tile): string {
+    return tile.word ?? tile.image ?? '';
+  }
+
+  /**
+   * Animate a newly revealed tile and play a sound for the guess outcome.
+   * turnStatus is the game status when the guess was made, which tells us
+   * whose guess it was
+   */
+  private revealTile(tile: Tile, turnStatus: GameStatus) {
+    const key = this.tileKey(tile);
+    this.recentlyRevealed.add(key);
+    setTimeout(
+        () => this.recentlyRevealed.delete(key), REVEAL_ANIMATION_MS);
+
+    if (tile.role === TileRole.ASSASSIN) {
+      this.shaking = true;
+      setTimeout(() => this.shaking = false, REVEAL_ANIMATION_MS);
+      this.soundService.play(Sound.ASSASSIN);
+    } else if (tile.role === TileRole.CIVILIAN) {
+      this.soundService.play(Sound.WRONG_GUESS);
+    } else {
+      const guessingTeam = turnStatus === GameStatus.REDS_TURN ?
+          TileRole.RED :
+          TileRole.BLUE;
+      this.soundService.play(
+          tile.role === guessingTeam ? Sound.CORRECT_GUESS :
+                                       Sound.WRONG_GUESS);
+    }
+  }
+
+  isRevealing(tile: Tile): boolean {
+    return this.recentlyRevealed.has(this.tileKey(tile));
   }
 
   get type(): GameType {
@@ -126,6 +200,11 @@ export class GameBoardComponent implements OnChanges {
     }
     tile.selected = true;
     tile.selectedBy = this.authService.currentUserId;
+
+    // animate and play the sound immediately for the clicker; marking the
+    // tile as seen keeps the Firestore echo from replaying it
+    this.seenSelected?.add(this.tileKey(tile));
+    this.revealTile(tile, this.game.status);
 
     if (this.throwingDart) {
       tile.dartedBy = `${this.myTeam}` as TileRole;

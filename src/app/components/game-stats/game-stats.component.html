@@ -24,11 +24,11 @@
         </ion-chip>
         <ion-chip [outline]="true">
           <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
-          <ion-label>{{ clues.length }} clues</ion-label>
+          <ion-label>{{ clues.length }} clue{{ clues.length === 1 ? "" : "s" }}</ion-label>
         </ion-chip>
         <ion-chip [outline]="true">
           <ion-icon name="hand-left-outline"></ion-icon>
-          <ion-label>{{ totalGuesses }} guesses</ion-label>
+          <ion-label>{{ totalGuesses }} guess{{ totalGuesses === 1 ? "" : "es" }}</ion-label>
         </ion-chip>
         <ion-chip [outline]="true" color="dark" *ngIf="endedByAssassin">
           <ion-icon name="skull"></ion-icon>

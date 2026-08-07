@@ -1,8 +1,10 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {ModalController} from '@ionic/angular';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopoverAction} from 'src/app/components/actions-popover/actions-popover.component';
+import {GameStatsComponent} from 'src/app/components/game-stats/game-stats.component';
 import {confetti} from 'src/app/confetti.js';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
@@ -31,6 +33,7 @@ export class RoomPage implements OnDestroy {
 
   lastGame: string;
   lastGameStatus: GameStatus;
+  private statsTimeoutId: ReturnType<typeof setTimeout>;
 
   actions: PopoverAction[] = [];
 
@@ -44,6 +47,7 @@ export class RoomPage implements OnDestroy {
       private readonly utilService: UtilService,
       private readonly soundService: SoundService,
       private readonly userService: UserService,
+      private readonly modalCtrl: ModalController,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
   }
@@ -77,9 +81,10 @@ export class RoomPage implements OnDestroy {
             }
             // detect game over
             const {status} = currentGame;
-            if (this.userIsInRoom && this.lastGameStatus &&
+            const gameJustEnded = this.lastGameStatus &&
                 this.lastGameStatus !== status &&
-                [GameStatus.BLUE_WON, GameStatus.RED_WON].includes(status)) {
+                [GameStatus.BLUE_WON, GameStatus.RED_WON].includes(status);
+            if (gameJustEnded && this.userIsInRoom) {
               const blueWonIWon = status === GameStatus.BLUE_WON &&
                   currentGame.blueTeam.userIds.includes(
                       this.authService.currentUserId);
@@ -100,6 +105,16 @@ export class RoomPage implements OnDestroy {
               // confetti)
               confetti.start();
               setTimeout(confetti.stop, 5000);
+            }
+            if (gameJustEnded) {
+              // once the confetti settles, show everyone the game stats
+              clearTimeout(this.statsTimeoutId);
+              this.statsTimeoutId = setTimeout(() => {
+                if (this.game?.id === currentGame.id &&
+                    this.game.completedAt) {
+                  this.openStats();
+                }
+              }, 3000);
             }
             this.lastGameStatus = currentGame.status;
           }
@@ -344,7 +359,17 @@ export class RoomPage implements OnDestroy {
     }
   }
 
+  async openStats() {
+    const modal = await this.modalCtrl.create({
+      component: GameStatsComponent,
+      componentProps: {game: this.game},
+      cssClass: 'game-stats-modal',
+    });
+    await modal.present();
+  }
+
   ngOnDestroy() {
+    clearTimeout(this.statsTimeoutId);
     this.destroyed.next();
   }
 }

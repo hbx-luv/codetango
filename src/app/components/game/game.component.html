@@ -1,6 +1,10 @@
 <!-- score and end turn -->
 <div class="score-bar">
   <app-timer [game]="game" [room]="room"></app-timer>
+  <div class="score-chips" tooltip="Agents remaining to find">
+    <span class="score-chip blue">{{ game.blueAgents }}</span>
+    <span class="score-chip red">{{ game.redAgents }}</span>
+  </div>
   <div>
     <ion-button
       fill="outline"
@@ -41,6 +45,35 @@
   </app-team-lists>
   <!-- board in the middle -->
   <div class="game-board">
+    <!-- persistent current clue banner -->
+    <div
+      class="clue-banner {{ turnColorClass }}"
+      *ngIf="room && !game.completedAt && game.tiles">
+      <ng-container *ngIf="clueIsLive; else thinking">
+        <span class="clue-word">{{ currentClue.word }}</span>
+        <span class="clue-count">{{ currentClue.guessCount }}</span>
+        <span
+          class="pips"
+          tooltip="Guesses used — the last one is the bonus guess"
+          *ngIf="!unlimitedGuesses">
+          <span
+            class="pip"
+            [class.filled]="filled"
+            [class.bonus]="i === cluePips.length - 1"
+            *ngFor="let filled of cluePips; let i = index">
+          </span>
+        </span>
+        <span class="pips-text" *ngIf="unlimitedGuesses">
+          {{ guessesUsed }} guess{{ guessesUsed === 1 ? "" : "es" }} made · unlimited
+        </span>
+      </ng-container>
+      <ng-template #thinking>
+        <span class="thinking">
+          {{ turnTeam === "RED" ? "Red" : "Blue" }}'s spymaster is thinking<span class="dots">...</span>
+        </span>
+      </ng-template>
+    </div>
+
     <app-game-board
       [room]="room"
       [game]="game"

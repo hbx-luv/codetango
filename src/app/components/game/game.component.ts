@@ -58,6 +58,46 @@ export class GameComponent implements OnInit, OnDestroy {
     return false;
   }
 
+  // the team whose turn it is, or null once the game is decided
+  get turnTeam(): TeamType|null {
+    switch (this.game?.status) {
+      case GameStatus.REDS_TURN:
+        return TeamType.RED;
+      case GameStatus.BLUES_TURN:
+        return TeamType.BLUE;
+      default:
+        return null;
+    }
+  }
+
+  get turnColorClass(): string {
+    return this.turnTeam === TeamType.RED ? 'red' : 'blue';
+  }
+
+  // true when the current clue belongs to the team whose turn it is,
+  // i.e. the team is actively guessing on it
+  get clueIsLive(): boolean {
+    return !!this.currentClue && !this.game?.completedAt &&
+        this.currentClue.team === this.turnTeam;
+  }
+
+  get guessesUsed(): number {
+    return this.currentClue?.guessesMade?.length ?? 0;
+  }
+
+  // clues given for 0 get maxGuesses of 999, meaning unlimited
+  get unlimitedGuesses(): boolean {
+    return (this.currentClue?.maxGuesses ?? 0) > 10;
+  }
+
+  // one entry per allowed guess (the last one is the +1 bonus guess),
+  // true when that guess has been used
+  get cluePips(): boolean[] {
+    const max = this.currentClue?.maxGuesses ?? 0;
+    const used = this.guessesUsed;
+    return Array.from({length: max}, (_, i) => i < used);
+  }
+
   get myTeam(): TeamType {
     const {currentUserId} = this.authService;
     if (this.game?.redTeam?.userIds?.includes(currentUserId)) {
