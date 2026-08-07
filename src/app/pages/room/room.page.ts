@@ -188,13 +188,22 @@ export class RoomPage implements OnDestroy {
         this.game?.blueTeam?.spymaster === currentUserId;
   }
 
+  private resettingRoom = false;
+
   determineResetRoom() {
     const inGameStatuses = [RoomStatus.GAME_IN_PROGRESS, RoomStatus.GAME_ENDED];
     const inGame = inGameStatuses.includes(this.room?.status);
 
-    // if there is no current game, reset to pregame
-    if (inGame && this.game === null) {
-      this.roomService.updateRoom(this.roomId, {status: RoomStatus.PREGAME});
+    // A room stuck in an in-game status with no current game is orphaned, so
+    // reset it to PREGAME. This runs from the game/room subscriptions, so guard
+    // it: the write requires auth (without this check a signed-out viewer spams
+    // denied `rooms` writes on every snapshot), and only one attempt is allowed
+    // in flight so it can't loop.
+    if (inGame && this.game === null && this.authService.authenticated &&
+        !this.resettingRoom) {
+      this.resettingRoom = true;
+      this.roomService.updateRoom(this.roomId, {status: RoomStatus.PREGAME})
+          .finally(() => this.resettingRoom = false);
     }
   }
 
