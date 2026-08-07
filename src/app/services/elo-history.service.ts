@@ -52,6 +52,19 @@ export class EloHistoryService {
   }
 
   /**
+   * Returns the stats snapshots written for every player in a given game
+   */
+  async getStatsForGame(gameId: string): Promise<Stats[]> {
+    const q = query(
+        collection(this.firestore, 'eloHistory'),
+        where('gameId', '==', gameId),
+    );
+    return await firstValueFrom(
+               collectionData(q).pipe(take(1)) as any,
+               ) as Stats[];
+  }
+
+  /**
    * Returns either the first record for a player before a given
    * timestamp, or undefined if none are found before the timestamp
    */

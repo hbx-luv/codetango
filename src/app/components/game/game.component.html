@@ -4,10 +4,19 @@
   <div>
     <ion-button
       fill="outline"
+      color="primary"
+      (click)="openStats()"
+      *ngIf="game.completedAt"
+    >
+      <ion-icon slot="start" name="podium-outline"></ion-icon>
+      Stats
+    </ion-button>
+    <ion-button
+      fill="outline"
       [color]="throwingDart ? 'danger' : 'medium'"
       (click)="toggleThrowingDart()"
       [disabled]="disableEndTurn"
-      *ngIf="!spymaster"
+      *ngIf="!spymaster && !game.completedAt"
     >
       {{ throwingDart ? "Cancel" : "Dart 🎯" }}
     </ion-button>

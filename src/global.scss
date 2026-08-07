@@ -37,6 +37,13 @@
   font-size: 20px;
 }
 
+// post-game stats dialog opened from the game component
+ion-modal.game-stats-modal {
+  --width: min(720px, 95vw);
+  --height: min(92vh, 860px);
+  --border-radius: 12px;
+}
+
 .space-between {
   display: flex;
   // ion-card-header's shadow :host styles set flex-direction: column

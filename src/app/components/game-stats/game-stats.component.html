@@ -1,0 +1,169 @@
+<ion-header>
+  <ion-toolbar [color]="blueWon ? 'primary' : 'danger'">
+    <ion-title>Game Stats</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ng-container *ngIf="!loading; else spinner">
+
+    <!-- winner hero -->
+    <div class="hero">
+      <h1 class="winner" [class.blue]="blueWon" [class.red]="!blueWon">
+        {{ blueWon ? "Blue" : "Red" }} Team Wins!
+      </h1>
+      <div class="hero-chips">
+        <ion-chip [outline]="true">
+          <ion-icon name="time-outline"></ion-icon>
+          <ion-label>{{ gameDurationText || "?" }}</ion-label>
+        </ion-chip>
+        <ion-chip [outline]="true">
+          <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+          <ion-label>{{ clues.length }} clues</ion-label>
+        </ion-chip>
+        <ion-chip [outline]="true">
+          <ion-icon name="hand-left-outline"></ion-icon>
+          <ion-label>{{ totalGuesses }} guesses</ion-label>
+        </ion-chip>
+        <ion-chip [outline]="true" color="dark" *ngIf="endedByAssassin">
+          <ion-icon name="skull"></ion-icon>
+          <ion-label>Ended by assassin</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <!-- no clue history recorded (older games) -->
+    <div class="empty-container" *ngIf="clues.length === 0">
+      No clue history was recorded for this game, so detailed stats aren't
+      available.
+    </div>
+
+    <!-- awards -->
+    <ng-container *ngIf="awards.length">
+      <h2>Awards</h2>
+      <div class="awards-grid">
+        <div class="award-card" *ngFor="let award of awards">
+          <div class="award-emoji">{{ award.emoji }}</div>
+          <div class="award-title">{{ award.title }}</div>
+          <app-user [userId]="award.userId" [navToScorecard]="false"></app-user>
+          <div class="award-detail">{{ award.detail }}</div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- team summaries + player tables -->
+    <h2>Teams</h2>
+    <div class="team-section" *ngFor="let team of teamSummaries">
+      <div class="team-header">
+        <span class="team-name {{ team.cssClass }}">{{ team.label }}</span>
+        <span class="team-score" *ngIf="team.total">
+          {{ team.found }}/{{ team.total }} agents found
+        </span>
+      </div>
+      <div class="accuracy-bar" *ngIf="team.guesses" tooltip="Guess accuracy">
+        <div
+          class="fill {{ team.cssClass }}"
+          [style.width.%]="team.accuracyPct">
+        </div>
+        <span class="accuracy-label">
+          {{ team.correct }}/{{ team.guesses }} correct ({{ team.accuracyPct }}%)
+        </span>
+      </div>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th class="player-col">Player</th>
+            <th tooltip="Guesses made">🖱️</th>
+            <th tooltip="Correct guesses">✅</th>
+            <th tooltip="Civilians hit">🙈</th>
+            <th tooltip="Enemy agents revealed">🎁</th>
+            <th tooltip="Assassin!">💀</th>
+            <th tooltip="Darts thrown">🎯</th>
+            <th tooltip="Elo rating change">Elo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of team.players">
+            <td class="player-col">
+              <span class="spy" *ngIf="player.isSpymaster" tooltip="Spymaster">🕵</span>
+              <app-user
+                [userId]="player.userId"
+                [color]="team.cssClass"
+                [navToScorecard]="false">
+              </app-user>
+            </td>
+            <td>{{ player.guesses }}</td>
+            <td>{{ player.correct }}</td>
+            <td>{{ player.civilians }}</td>
+            <td>{{ player.enemy }}</td>
+            <td>{{ player.assassin }}</td>
+            <td>{{ player.darts }}</td>
+            <td>
+              <app-elo-change [change]="player.eloDelta"></app-elo-change>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- spymaster duel -->
+    <ng-container *ngIf="spymasters.length">
+      <h2>Spymaster Duel</h2>
+      <div class="spymaster-grid">
+        <div class="spymaster-card {{ spymaster.cssClass }}" *ngFor="let spymaster of spymasters">
+          <app-user
+            [userId]="spymaster.userId"
+            [color]="spymaster.cssClass"
+            [navToScorecard]="false">
+          </app-user>
+          <div class="spymaster-stat">
+            <span class="value">{{ spymaster.cluesGiven }}</span> clues given
+          </div>
+          <div class="spymaster-stat" *ngIf="spymaster.avgClueSize">
+            <span class="value">{{ spymaster.avgClueSize }}</span> avg words per clue
+          </div>
+          <div class="spymaster-stat" *ngIf="spymaster.accuracyPct !== undefined">
+            <span class="value">{{ spymaster.accuracyPct }}%</span> team guess accuracy
+          </div>
+          <div class="spymaster-stat" *ngIf="spymaster.perfectClues">
+            <span class="value">{{ spymaster.perfectClues }}</span>
+            perfect clue{{ spymaster.perfectClues > 1 ? "s" : "" }} 💯
+          </div>
+          <div class="spymaster-stat" *ngIf="spymaster.bestClue">
+            best clue:
+            <span class="value">{{ spymaster.bestClue.word }}</span>
+            ({{ spymaster.bestClue.correct }} found)
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- round by round -->
+    <ng-container *ngIf="rounds.length">
+      <h2>Round by Round</h2>
+      <div class="round-row" *ngFor="let round of rounds; let i = index">
+        <div class="round-num">{{ i + 1 }}</div>
+        <app-clue
+          class="round-clue"
+          [clue]="round.clue"
+          [assetUrlPattern]="game.assetUrlPattern">
+        </app-clue>
+        <div class="round-duration" *ngIf="round.durationText" tooltip="Round duration">
+          {{ round.durationText }}
+        </div>
+      </div>
+    </ng-container>
+
+  </ng-container>
+</ion-content>
+
+<ng-template #spinner>
+  <div class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>
