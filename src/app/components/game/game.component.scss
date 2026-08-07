@@ -28,6 +28,12 @@
     gap: 8px;
     cursor: default;
 
+    // the team lists already show the score; only show these chips when the
+    // lists are hidden behind the mobile tabs (see the 1040px media query)
+    @media (min-width: 1041px) {
+      display: none;
+    }
+
     .score-chip {
       display: flex;
       justify-content: center;
