@@ -13,6 +13,15 @@ const REVEAL_ANIMATION_MS = 1300;
 // how long a tap holds a revealed tile flipped back over on touch devices
 const PEEK_MS = 3000;
 
+// how many numbered character images exist per role in assets/characters
+// (char-red-team-N.png etc.) — bump when new art is added. A pool at least
+// as large as the tile count for that role means no duplicates on a board.
+const CHARACTER_POOLS: {[role: string]: number} = {
+  [TileRole.RED]: 9,
+  [TileRole.BLUE]: 9,
+  [TileRole.CIVILIAN]: 7,
+};
+
 @Component({
   standalone: false,
   selector: 'app-game-board',
@@ -44,6 +53,9 @@ export class GameBoardComponent implements OnChanges {
   private seenSelected: Set<string>;
   private lastStatus: GameStatus;
   private lastCompleted = false;
+
+  // per-game character assignment; rebuilt when the game id changes
+  private characterVariants?: {gameId: string, byKey: Map<string, number>};
 
   // revealed tiles the user is peeking under (hover on desktop, tap on touch)
   private peeking = new Set<string>();
@@ -180,14 +192,60 @@ export class GameBoardComponent implements OnChanges {
     }
   }
 
-  // deterministic 1 or 2 per tile so the character doesn't change on rerender
+  /**
+   * Deterministic character image number for a tile: each role's pool is
+   * shuffled once per game (seeded by game id) and dealt out in board order,
+   * so no image repeats until the pool is exhausted, and every client and
+   * rerender agrees on the assignment
+   */
   private variant(tile: Tile): number {
-    const key = this.tileKey(tile);
+    if (this.characterVariants?.gameId !== this.game.id) {
+      this.characterVariants = {
+        gameId: this.game.id,
+        byKey: this.dealCharacters(),
+      };
+    }
+    return this.characterVariants.byKey.get(this.tileKey(tile)) ?? 1;
+  }
+
+  private dealCharacters(): Map<string, number> {
+    const byKey = new Map<string, number>();
+    const decks = new Map<string, number[]>();
+    let seed = this.hash(this.game.id ?? '');
+
+    // mulberry32 — a tiny seeded PRNG so the shuffle is stable per game
+    const random = () => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+
+    for (const tile of this.game.tiles ?? []) {
+      const poolSize = CHARACTER_POOLS[tile.role];
+      if (!poolSize) {
+        continue;  // assassin has a single dedicated image
+      }
+      let deck = decks.get(tile.role);
+      if (!deck?.length) {
+        deck = Array.from({length: poolSize}, (_, i) => i + 1);
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        decks.set(tile.role, deck);
+      }
+      byKey.set(this.tileKey(tile), deck.pop());
+    }
+    return byKey;
+  }
+
+  private hash(key: string): number {
     let hash = 0;
     for (let i = 0; i < key.length; i++) {
       hash = (hash * 31 + key.charCodeAt(i)) | 0;
     }
-    return (Math.abs(hash) % 2) + 1;
+    return hash;
   }
 
   get type(): GameType {
