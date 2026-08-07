@@ -42,6 +42,10 @@ ion-modal.game-stats-modal {
   --width: min(720px, 95vw);
   --height: min(92vh, 860px);
   --border-radius: 12px;
+
+  @media (min-width: 1200px) {
+    --width: min(1000px, 90vw);
+  }
 }
 
 .space-between {
