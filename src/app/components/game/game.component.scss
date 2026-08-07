@@ -63,7 +63,12 @@
   gap: 10px;
   border-radius: 8px;
   padding: 10px 16px;
-  margin-bottom: 10px;
+  // match the visible tile edges: the grid is centered at max 800px and the
+  // tiles are inset 7px per side (5px ion-grid padding + 2px tile margin)
+  box-sizing: border-box;
+  width: calc(100% - 14px);
+  max-width: 786px;
+  margin: 0 auto 10px;
   color: #fff;
   font-size: 20px;
   font-weight: bold;
