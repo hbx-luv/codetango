@@ -1,8 +1,11 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ModalController} from '@ionic/angular';
 import {AuthService} from 'src/app/services/auth.service';
 import {GameService} from 'src/app/services/game.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Clue, Game, GameStatus, Room, TeamType} from 'types';
+
+import {GameStatsComponent} from '../game-stats/game-stats.component';
 
 @Component({
   standalone: false,
@@ -22,7 +25,17 @@ export class GameComponent implements OnInit, OnDestroy {
       private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly utilService: UtilService,
+      private readonly modalCtrl: ModalController,
   ) {}
+
+  async openStats() {
+    const modal = await this.modalCtrl.create({
+      component: GameStatsComponent,
+      componentProps: {game: this.game},
+      cssClass: 'game-stats-modal',
+    });
+    await modal.present();
+  }
 
   ngOnInit() {
     document.addEventListener('mousemove', this.handleMouseMove.bind(this));

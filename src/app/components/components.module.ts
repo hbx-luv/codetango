@@ -12,6 +12,7 @@ import {EloChangeComponent} from './elo-change/elo-change.component';
 import {EloChartComponent} from './elo-chart/elo-chart';
 import {GameBoardComponent} from './game-board/game-board.component';
 import {GameCardComponent} from './game-card/game-card.component';
+import {GameStatsComponent} from './game-stats/game-stats.component';
 import {GameComponent} from './game/game.component';
 import {GiveClueComponent} from './give-clue/give-clue.component';
 import {PregameComponent} from './pregame/pregame.component';
@@ -37,6 +38,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     EloChangeComponent,      SameTeamComponent,
     VersusComponent,         WinRecordComponent,
     ActionsPopoverComponent, ActionsPopoverPageComponent,
+    GameStatsComponent,
   ],
   imports: [
     IonicModule,
@@ -55,6 +57,7 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     EloChangeComponent,      SameTeamComponent,
     VersusComponent,         WinRecordComponent,
     ActionsPopoverComponent, ActionsPopoverPageComponent,
+    GameStatsComponent,
   ]
 })
 export class ComponentsModule {
