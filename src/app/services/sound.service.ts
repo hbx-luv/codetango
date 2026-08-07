@@ -8,6 +8,9 @@ export const enum Sound {
   NEW_MESSAGE = 'new-message.mp3',
   WIN = 'win.mp3',
   LOSE = 'lose.mp3',
+  CORRECT_GUESS = 'correct-guess.wav',
+  WRONG_GUESS = 'wrong-guess.wav',
+  ASSASSIN = 'assassin.wav',
 }
 
 @Injectable({providedIn: 'root'})
@@ -20,7 +23,8 @@ export class SoundService {
   play(sound: Sound) {
     if (!this.isMuted) {
       const file = this.getSound(sound);
-      file.play();
+      // browsers reject play() before the user has interacted with the page
+      file.play().catch(_e => {});
     }
   }
 
