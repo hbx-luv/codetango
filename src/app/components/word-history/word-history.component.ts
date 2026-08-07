@@ -51,10 +51,11 @@ export class WordHistoryComponent implements OnInit {
 
   /**
    * The clues to render in the stack — everything except the live clue,
-   * which is shown in the banner above the board until its turn ends
+   * which is shown in the banner above the board until its turn ends. Only
+   * the newest clue can be live; older clues from the same team stay listed.
    */
   visibleClues(clues: Clue[]): Clue[] {
-    return clues.filter(clue => !this.isLive(clue));
+    return clues.length && this.isLive(clues[0]) ? clues.slice(1) : clues;
   }
 
   /**
