@@ -3,6 +3,7 @@ import {firstValueFrom, Observable, Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {BotService} from 'src/app/services/bot.service';
 import {PresenceService} from 'src/app/services/presence.service';
+import {RoomPresenceService} from 'src/app/services/room-presence.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
@@ -28,12 +29,16 @@ export class PregameComponent implements OnChanges, OnDestroy {
 
   // room members filtered down to the recently active
   activePlayerIds: string[] = [];
+  // signed-in page watchers who haven't joined the room as players
   activeSpectatorIds: string[] = [];
+  // signed-out page watchers (aggregate count)
+  anonymousWatchers = 0;
   // count of bots invited to the room but not yet seated (for a pending pill)
   pendingBots = 0;
   private presenceKey = '';
   private playersSub?: Subscription;
-  private spectatorsSub?: Subscription;
+  private watchersRoomId = '';
+  private watchersSub?: Subscription;
   private botInvitesRoomId = '';
   private botInvitesSub?: Subscription;
 
@@ -69,6 +74,7 @@ export class PregameComponent implements OnChanges, OnDestroy {
       private readonly userService: UserService,
       private readonly wordListsService: WordListsService,
       private readonly presenceService: PresenceService,
+      private readonly roomPresence: RoomPresenceService,
       private readonly botService: BotService,
   ) {}
 
@@ -107,25 +113,30 @@ export class PregameComponent implements OnChanges, OnDestroy {
   /** (Re)subscribe to active-user lists when room membership changes */
   private watchPresence() {
     const playerIds = this.room?.userIds ?? [];
-    const spectatorIds = this.room?.spectatorIds ?? [];
-    const key = `${playerIds.join(',')}|${spectatorIds.join(',')}`;
-    if (key === this.presenceKey) {
-      return;
+    const key = playerIds.join(',');
+    if (key !== this.presenceKey) {
+      this.presenceKey = key;
+      this.playersSub?.unsubscribe();
+      this.playersSub = this.presenceService.activeUserIds(playerIds)
+                            .subscribe(ids => this.activePlayerIds = ids);
     }
-    this.presenceKey = key;
 
-    this.playersSub?.unsubscribe();
-    this.playersSub = this.presenceService.activeUserIds(playerIds)
-                          .subscribe(ids => this.activePlayerIds = ids);
-
-    this.spectatorsSub?.unsubscribe();
-    this.spectatorsSub = this.presenceService.activeUserIds(spectatorIds)
-                             .subscribe(ids => this.activeSpectatorIds = ids);
+    // spectators are anyone with the page open who hasn't joined as a player
+    if (this.room?.id && this.room.id !== this.watchersRoomId) {
+      this.watchersRoomId = this.room.id;
+      this.watchersSub?.unsubscribe();
+      this.watchersSub =
+          this.roomPresence.watchers(this.room.id).subscribe(watchers => {
+            this.activeSpectatorIds = watchers.userIds.filter(
+                id => !(this.room?.userIds ?? []).includes(id));
+            this.anonymousWatchers = watchers.anonymous;
+          });
+    }
   }
 
   ngOnDestroy() {
     this.playersSub?.unsubscribe();
-    this.spectatorsSub?.unsubscribe();
+    this.watchersSub?.unsubscribe();
     this.botInvitesSub?.unsubscribe();
   }
 

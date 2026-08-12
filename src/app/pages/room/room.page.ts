@@ -10,6 +10,7 @@ import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {MessageService} from 'src/app/services/message.service';
+import {RoomPresenceService} from 'src/app/services/room-presence.service';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -48,11 +49,15 @@ export class RoomPage implements OnDestroy {
       private readonly soundService: SoundService,
       private readonly userService: UserService,
       private readonly modalCtrl: ModalController,
+      private readonly roomPresence: RoomPresenceService,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
   }
 
   ionViewDidEnter() {
+    // register this tab as a live watcher of the room (drives spectators)
+    this.roomPresence.track(this.roomId);
+
     this.setActions();
 
     // update icons when the user observable fires
@@ -377,7 +382,12 @@ export class RoomPage implements OnDestroy {
     await modal.present();
   }
 
+  ionViewWillLeave() {
+    this.roomPresence.stop();
+  }
+
   ngOnDestroy() {
+    this.roomPresence.stop();
     clearTimeout(this.statsTimeoutId);
     this.destroyed.next();
   }

@@ -17,10 +17,13 @@
         </ion-button>
       </ion-item>
     </ion-list>
-    <div class="spectators" *ngIf="activeSpectatorIds.length">
+    <div class="spectators" *ngIf="activeSpectatorIds.length || anonymousWatchers">
       <h5>Spectators</h5>
       <div class="spectator-chips">
         <app-user *ngFor="let userId of activeSpectatorIds" [userId]="userId"></app-user>
+        <ion-chip outline="true" *ngIf="anonymousWatchers">
+          👀 {{ anonymousWatchers }} watching
+        </ion-chip>
       </div>
     </div>
     <div class="lobby-actions">

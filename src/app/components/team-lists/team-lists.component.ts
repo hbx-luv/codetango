@@ -3,7 +3,7 @@ import {Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {BotInvite, BotService} from 'src/app/services/bot.service';
 import {GameService} from 'src/app/services/game.service';
-import {PresenceService} from 'src/app/services/presence.service';
+import {RoomPresenceService} from 'src/app/services/room-presence.service';
 import {UtilService} from 'src/app/services/util.service';
 
 import {Game, Room, RoomStatus} from '../../../../types';
@@ -21,12 +21,14 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
   @Input() setSpymaster: boolean;
   @Input() showScore = false;
 
-  // active room members who aren't on either team
+  // signed-in viewers of the page who aren't on either team
   spectatorIds: string[] = [];
+  // signed-out viewers of the page (aggregate count)
+  anonymousWatchers = 0;
   // pending bot invites (bots that have been invited but not yet seated)
   pendingInvites: BotInvite[] = [];
-  private presenceKey = '';
-  private presenceSub?: Subscription;
+  private watchersRoomId = '';
+  private watchersSub?: Subscription;
   private invitesGameId = '';
   private invitesSub?: Subscription;
 
@@ -36,17 +38,19 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly utilService: UtilService,
-      private readonly presenceService: PresenceService,
+      private readonly roomPresence: RoomPresenceService,
   ) {}
 
   ngOnChanges() {
-    const candidates = this.spectatorCandidates();
-    const key = candidates.join(',');
-    if (key !== this.presenceKey) {
-      this.presenceKey = key;
-      this.presenceSub?.unsubscribe();
-      this.presenceSub = this.presenceService.activeUserIds(candidates)
-                             .subscribe(ids => this.spectatorIds = ids);
+    if (this.room?.id && this.room.id !== this.watchersRoomId) {
+      this.watchersRoomId = this.room.id;
+      this.watchersSub?.unsubscribe();
+      this.watchersSub = this.roomPresence.watchers(this.room.id)
+                             .subscribe(watchers => {
+                               this.spectatorIds = watchers.userIds.filter(
+                                   id => !this.isOnATeam(id));
+                               this.anonymousWatchers = watchers.anonymous;
+                             });
     }
 
     if (this.game?.id && this.game.id !== this.invitesGameId) {
@@ -74,28 +78,15 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
     this.botService.inviteBot(this.game.id, color);
   }
 
-  /**
-   * Everyone attached to the room (players and marked spectators) who isn't
-   * on a team — e.g. someone removed from a team mid-game stays in the room
-   * and lands here while they're still active
-   */
-  private spectatorCandidates(): string[] {
-    if (!this.room || !this.game) {
-      return [];
-    }
-    const onATeam = new Set([
-      ...this.game.blueTeam.userIds,
-      ...this.game.redTeam.userIds,
-    ]);
-    const everyone = new Set([
-      ...(this.room.userIds ?? []),
-      ...(this.room.spectatorIds ?? []),
-    ]);
-    return [...everyone].filter(id => !onATeam.has(id));
+  /** Whether a user occupies a seat on either team */
+  private isOnATeam(userId: string): boolean {
+    return !!this.game &&
+        (this.game.blueTeam.userIds.includes(userId) ||
+         this.game.redTeam.userIds.includes(userId));
   }
 
   ngOnDestroy() {
-    this.presenceSub?.unsubscribe();
+    this.watchersSub?.unsubscribe();
     this.invitesSub?.unsubscribe();
   }
 
