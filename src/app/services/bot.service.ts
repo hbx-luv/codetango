@@ -77,11 +77,11 @@ export class BotService {
    * Remove a bot from the room's lists — unlike humans, bots don't move to
    * the spectator list. The bot's user doc (and any stats) stays around.
    */
-  removeBotFromRoom(room: Room, botId: string) {
+  async removeBotFromRoom(room: Room, botId: string): Promise<void> {
     if (!botId.startsWith('bot_')) {
       return;
     }
-    return updateDoc(doc(this.firestore, 'rooms', room.id), {
+    await updateDoc(doc(this.firestore, 'rooms', room.id), {
       userIds: arrayRemove(botId),
       spectatorIds: arrayRemove(botId),
     });
