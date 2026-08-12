@@ -21,7 +21,7 @@
           slot="end"
           tooltip="Move to spectators"
           (click)="moveToSpectators(userId)">
-          <ion-icon name="eye"></ion-icon>
+          <ion-icon name="md-eye"></ion-icon>
         </ion-button>
         <ion-button
           *ngIf="userInRoom && isBot(userId)"
@@ -31,7 +31,7 @@
           slot="end"
           tooltip="Remove bot"
           (click)="removeBot(userId)">
-          <ion-icon name="trash"></ion-icon>
+          <ion-icon name="md-trash"></ion-icon>
         </ion-button>
       </ion-item>
     </ion-list>
