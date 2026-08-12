@@ -272,6 +272,15 @@ export class PregameComponent implements OnChanges, OnDestroy {
     this.roomService.makeSpectator(this.room.id, userId);
   }
 
+  isBot(userId: string): boolean {
+    return userId.startsWith('bot_');
+  }
+
+  /** Bots don't spectate — trashing one just removes it from the lobby. */
+  removeBot(userId: string) {
+    this.botService.removeBotFromRoom(this.room, userId);
+  }
+
   goBackToLobby(game: Game) {
     // delete this game when going back, since it (most likely) has not been
     // completed yet (but we still check completedAt)

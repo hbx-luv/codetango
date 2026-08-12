@@ -12,17 +12,24 @@ import {
 import {Game, Room, User} from 'types';
 
 // Fun, obviously-a-bot display names. A new bot takes the first name not
-// already used by a bot in its room/game.
+// already used by a bot in its room/game. No emoji here — the bot look comes
+// from the robot avatar app-user renders for isBot users.
 const BOT_NAMES = [
-  '🤖 Clue-de Bot',
-  '🤖 HAL 9-Clues',
-  '🤖 Botrick Stewart',
-  '🤖 Wordsworth',
-  '🤖 Guessy McGuessface',
-  '🤖 Deep Thought',
-  '🤖 Sir Guess-a-lot',
-  '🤖 The Clue-nicorn',
+  'Clue-de Bot',
+  'HAL 9-Clues',
+  'Botrick Stewart',
+  'Wordsworth',
+  'Guessy McGuessface',
+  'Deep Thought',
+  'Sir Guess-a-lot',
+  'The Clue-nicorn',
 ];
+
+// Bots created before the avatar change have a "🤖 " baked into their name;
+// strip it so name-uniqueness checks treat them as the same name.
+function normalizeBotName(name: string): string {
+  return name.replace(/^🤖\s*/, '');
+}
 
 @Injectable({providedIn: 'root'})
 export class BotService {
@@ -66,6 +73,20 @@ export class BotService {
     return botId;
   }
 
+  /**
+   * Remove a bot from the room's lists — unlike humans, bots don't move to
+   * the spectator list. The bot's user doc (and any stats) stays around.
+   */
+  removeBotFromRoom(room: Room, botId: string) {
+    if (!botId.startsWith('bot_')) {
+      return;
+    }
+    return updateDoc(doc(this.firestore, 'rooms', room.id), {
+      userIds: arrayRemove(botId),
+      spectatorIds: arrayRemove(botId),
+    });
+  }
+
   /** Create the synthetic bot user doc (no auth account) and return its id. */
   private async createBotUser(existingUserIds: string[], roomId?: string):
       Promise<string> {
@@ -91,7 +112,8 @@ export class BotService {
       const snap = await getDoc(doc(this.firestore, 'users', id));
       return (snap.data() as User | undefined)?.name;
     }));
-    const used = new Set(usedNames.filter(Boolean));
+    const used =
+        new Set(usedNames.filter(Boolean).map(name => normalizeBotName(name)));
     const unused = BOT_NAMES.find(name => !used.has(name));
     if (unused) {
       return unused;

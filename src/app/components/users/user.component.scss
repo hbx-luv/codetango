@@ -5,6 +5,19 @@
   ion-chip {
     white-space: nowrap;
 
+    // bots have no photo; fill the avatar circle with a robot emoji
+    .bot-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--ion-color-light);
+      font-size: 18px;
+      line-height: 1;
+    }
+
     ion-label {
       overflow-x: clip;
       overflow-y: visible;

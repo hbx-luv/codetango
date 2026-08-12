@@ -5,24 +5,33 @@
       <h3>Players</h3>
       <ion-button
         *ngIf="userInRoom"
-        fill="outline"
+        fill="clear"
         (click)="addBot()">
-        <ion-icon slot="start" name="hardware-chip-outline"></ion-icon>
-        🤖 Add bot
+        Add bot
       </ion-button>
     </div>
     <ion-list>
       <ion-item *ngFor="let userId of activePlayerIds">
         <app-user [userId]="userId"></app-user>
         <ion-button
-          *ngIf="userInRoom"
+          *ngIf="userInRoom && !isBot(userId)"
           color="medium"
-          fill="outline"
+          fill="clear"
           size="small"
           slot="end"
           tooltip="Move to spectators"
           (click)="moveToSpectators(userId)">
           <ion-icon name="eye"></ion-icon>
+        </ion-button>
+        <ion-button
+          *ngIf="userInRoom && isBot(userId)"
+          color="medium"
+          fill="clear"
+          size="small"
+          slot="end"
+          tooltip="Remove bot"
+          (click)="removeBot(userId)">
+          <ion-icon name="trash"></ion-icon>
         </ion-button>
       </ion-item>
     </ion-list>

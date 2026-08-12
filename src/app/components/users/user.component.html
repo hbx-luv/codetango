@@ -10,12 +10,16 @@
 
       <!-- hovering on the avatar shows their full name in a tooltip -->
       <ion-avatar [tooltip]="name" content-type="template" *ngIf="!showUserName && navToScorecard; else noTooltip">
-        <ion-img [src]="user.photoURL"></ion-img>
+        <span class="bot-avatar" *ngIf="user.isBot; else photoWithTooltip">🤖</span>
+        <ng-template #photoWithTooltip><ion-img [src]="user.photoURL"></ion-img></ng-template>
       </ion-avatar>
 
       <!-- unless show username is on or navToScorecard is off, then no tooltip -->
       <ng-template #noTooltip>
-        <ion-avatar><ion-img [src]="user.photoURL"></ion-img></ion-avatar>
+        <ion-avatar>
+          <span class="bot-avatar" *ngIf="user.isBot; else photo">🤖</span>
+          <ng-template #photo><ion-img [src]="user.photoURL"></ion-img></ng-template>
+        </ion-avatar>
       </ng-template>
 
       <ion-label *ngIf="showUserName">{{ name }}</ion-label>
