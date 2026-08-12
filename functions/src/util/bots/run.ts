@@ -4,6 +4,8 @@ import {FieldValue} from 'firebase-admin/firestore';
 import {Clue, Game, GameStatus, Room, RoomStatus, Team, TeamType, Tile, TileRole} from '../../types';
 import {AllProvidersFailedError, complete} from '../llm';
 
+import {clueChatMessage, sendSpymasterMessage} from '../message';
+
 import {computeGameStatus, currentTeam, guesserView, isGameOver, partitionBoard, teamObj} from './board';
 import {buildCluePrompt, buildGuessPrompt, CLUE_SCHEMA, GUESS_SCHEMA, isClueResponse, isGuessResponse} from './prompts';
 
@@ -175,6 +177,8 @@ async function doClue(
   // an all-bot game from stalling on a rare illegal clue.
   let word = '';
   let number = 1;
+  let reason = '';
+  let targetWords: string[] = [];
   for (let attempt = 0; attempt < 3; attempt++) {
     let clue;
     try {
@@ -195,19 +199,32 @@ async function doClue(
     if (!illegal(candidate)) {
       word = candidate;
       number = Math.max(1, clue.number);
+      reason = clue.reason;
+      targetWords = clue.targetWords ?? [];
       break;
     }
   }
   if (!word) return false;  // gave up after retries
 
+  const guessCount = number > 9 ? '∞' : String(number);
   await db.collection('games').doc(gameId).collection('clues').add({
     word,
-    guessCount: number > 9 ? '∞' : String(number),
+    guessCount,
     maxGuesses: number + 1,
     guessesMade: [],
     createdAt: Date.now(),
     team,
   });
+
+  // Drop the bot's reasoning into the spymaster chat. Both spymasters already
+  // see the whole board, and the chat (like the game doc holding tile roles) is
+  // world-readable, so listing the target words leaks nothing a raw-DB reader
+  // couldn't already get from the board itself.
+  await sendSpymasterMessage(
+      db, gameId,
+      clueChatMessage(
+          `The ${String(team).toLowerCase()} bot`, word, guessCount, reason,
+          targetWords));
   return true;
 }
 

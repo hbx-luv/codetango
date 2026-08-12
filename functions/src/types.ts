@@ -85,6 +85,9 @@ export interface CodenamesClueResponse {
   hint: string;
   number: number;
   reason: string;
+  // The spymaster's own board words it expects operatives to find from this
+  // hint. Optional because the model can omit it and the guard stays lenient.
+  targetWords?: string[];
 }
 
 export interface Room {

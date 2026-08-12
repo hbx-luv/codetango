@@ -22,3 +22,26 @@ export async function sendSpymasterMessage(
     fromServer: true
   });
 }
+
+/**
+ * Build the succinct spymaster-chat announcement for an AI-generated clue,
+ * including the model's reasoning and the words it expects operatives to find.
+ * @param who Who gave the clue, e.g. "The red bot" or "The AI (for the red
+ *     spymaster)"
+ * @param hint The single-word clue
+ * @param count The clue's number (or '∞')
+ * @param reason The model's short reasoning
+ * @param targetWords The board words the clue is aiming its operatives at
+ */
+export function clueChatMessage(
+    who: string,
+    hint: string,
+    count: string,
+    reason: string,
+    targetWords: string[],
+    ): string {
+  const expecting = targetWords.length ?
+      ` Expecting operatives to find: ${targetWords.join(', ')}.` :
+      '';
+  return `${who} gave "${hint} ${count}". ${reason}${expecting}`;
+}

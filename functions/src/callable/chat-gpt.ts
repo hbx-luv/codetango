@@ -4,7 +4,7 @@ import {HttpsError, onCall} from 'firebase-functions/v2/https';
 import {CodenamesClueResponse, Game, TeamType} from '../types';
 import {buildCluePrompt, CLUE_SCHEMA, isClueResponse, partitionBoard} from '../util/bots';
 import {AllProvidersFailedError, anthropicApiKey, complete} from '../util/llm';
-import {sendSpymasterMessage} from '../util/message';
+import {clueChatMessage, sendSpymasterMessage} from '../util/message';
 
 try {
   admin.initializeApp();
@@ -118,15 +118,18 @@ async function getClue(
     throw e;
   }
 
-  // NOTE: `spymaster-chat` is world-readable via the `games/{document=**}`
-  // Firestore read rule, so the model's free-text `reason` (which can reference
-  // the assassin/opponent words) must NOT be persisted here. The reasoning is
-  // still returned to the requesting spymaster's client via the callable
-  // response below; the chat message only announces the hint and number.
+  // The clue's reasoning and target words are dropped into the spymaster chat.
+  // `spymaster-chat` is world-readable via the `games/{document=**}` Firestore
+  // read rule, but so is the game document that already holds every tile's role,
+  // so this reveals nothing a raw-DB reader couldn't already read off the board.
+  // Both spymasters see the whole board too; in-app, operatives never see this
+  // chat. The full response (including `reason`) is also returned to the caller.
+  const count = clue.number > 9 ? '∞' : String(clue.number);
   await sendSpymasterMessage(
       db, gameId,
-      `The AI generated the hint "${clue.hint} ${clue.number}" for the ${
-          team.toLowerCase()} spymaster.`);
+      clueChatMessage(
+          `The AI (for the ${team.toLowerCase()} spymaster)`, clue.hint, count,
+          clue.reason, clue.targetWords ?? []));
 
   return clue;
 }

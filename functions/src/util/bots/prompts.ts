@@ -5,19 +5,28 @@ import {CodenamesClueResponse} from '../../types';
 export const CLUE_SCHEMA: Record<string, unknown> = {
   type: 'object',
   additionalProperties: false,
-  required: ['hint', 'number', 'reason'],
+  required: ['hint', 'number', 'reason', 'targetWords'],
   properties: {
     hint: {type: 'string'},
     number: {type: 'integer'},
     reason: {type: 'string'},
+    targetWords: {type: 'array', items: {type: 'string'}},
   },
 };
 
 export function isClueResponse(v: unknown): v is CodenamesClueResponse {
   if (typeof v !== 'object' || v === null) return false;
   const obj = v as Record<string, unknown>;
+  // targetWords is requested via the schema but validated leniently: structured
+  // output is only a hint (the router's guard is the contract), and rejecting a
+  // clue that omits it would fail the anthropic-only clue chain and stall the
+  // game. When present it must be an array of strings; when absent the message
+  // falls back to the prose `reason`.
+  const targetWordsOk = obj.targetWords === undefined ||
+      (Array.isArray(obj.targetWords) &&
+       obj.targetWords.every(w => typeof w === 'string'));
   return typeof obj.hint === 'string' && Number.isInteger(obj.number) &&
-      typeof obj.reason === 'string';
+      typeof obj.reason === 'string' && targetWordsOk;
 }
 
 export function buildCluePrompt(
@@ -58,6 +67,9 @@ Think it through, then respond with a JSON object with exactly these keys:
   and why it points only to them (string). Do NOT mention, quote, or spell out
   the assassin word or any other word on the board in this explanation - refer
   to your own target words only.
+- "targetWords": the exact list of YOUR team's board words you expect your
+  operatives to find from this hint (array of strings, one entry per word the
+  "number" counts). Use only words from YOUR team's list above.
 Respond with only the JSON object and nothing else.
 `;
 }
