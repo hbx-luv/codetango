@@ -10,7 +10,19 @@
     margin: 0 20px;
     position: relative;
 
-    // stacked, centered lobby action buttons (Add bot / Assign Teams / Join)
+    // "Players" heading with the Add bot button right-aligned on the same row
+    .players-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0 10px;
+
+      h3 {
+        margin: 0;
+      }
+    }
+
+    // stacked, centered lobby action buttons (Assign Teams / Join)
     .lobby-actions {
       display: flex;
       flex-direction: column;

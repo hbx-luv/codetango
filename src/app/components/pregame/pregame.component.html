@@ -1,7 +1,16 @@
 <div class="assign-teams">
   <!-- lobby -->
   <div class="users-list" *ngIf="room && room.status === 'PREGAME'">
-    <h3>Players</h3>
+    <div class="players-header">
+      <h3>Players</h3>
+      <ion-button
+        *ngIf="userInRoom"
+        fill="outline"
+        (click)="addBot()">
+        <ion-icon slot="start" name="hardware-chip-outline"></ion-icon>
+        🤖 Add bot
+      </ion-button>
+    </div>
     <ion-list>
       <ion-item *ngFor="let userId of activePlayerIds">
         <app-user [userId]="userId"></app-user>
@@ -27,13 +36,6 @@
       </div>
     </div>
     <div class="lobby-actions">
-      <ion-button
-        *ngIf="userInRoom"
-        fill="outline"
-        (click)="addBot()">
-        <ion-icon slot="start" name="hardware-chip-outline"></ion-icon>
-        🤖 Add bot
-      </ion-button>
       <ion-button
         *ngIf="userInRoom"
         [disabled]="activePlayerIds.length < 2"

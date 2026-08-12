@@ -3,7 +3,7 @@ import {Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {BotService} from 'src/app/services/bot.service';
 import {GameService} from 'src/app/services/game.service';
-import {RoomPresenceService} from 'src/app/services/room-presence.service';
+import {RoomPresenceService, RoomWatchers} from 'src/app/services/room-presence.service';
 import {UtilService} from 'src/app/services/util.service';
 
 import {Game, Room, RoomStatus} from '../../../../types';
@@ -25,6 +25,9 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
   spectatorIds: string[] = [];
   // signed-out viewers of the page (aggregate count)
   anonymousWatchers = 0;
+  // latest presence snapshot, kept so the spectator list can be refiltered
+  // the instant team membership changes rather than on the next presence tick
+  private watchers: RoomWatchers = {userIds: [], anonymous: 0};
   private watchersRoomId = '';
   private watchersSub?: Subscription;
 
@@ -43,11 +46,21 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
       this.watchersSub?.unsubscribe();
       this.watchersSub = this.roomPresence.watchers(this.room.id)
                              .subscribe(watchers => {
-                               this.spectatorIds = watchers.userIds.filter(
-                                   id => !this.isOnATeam(id));
-                               this.anonymousWatchers = watchers.anonymous;
+                               this.watchers = watchers;
+                               this.updateSpectators();
                              });
     }
+
+    // team changes (a spectator joins / a player is removed) must refilter
+    // the spectator list immediately, not wait for the next presence emission
+    this.updateSpectators();
+  }
+
+  /** Spectators are anyone with the page open who isn't on a team. */
+  private updateSpectators() {
+    this.spectatorIds =
+        this.watchers.userIds.filter(id => !this.isOnATeam(id));
+    this.anonymousWatchers = this.watchers.anonymous;
   }
 
   /** Whether the "Add bot" button should show for a team. */

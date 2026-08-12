@@ -3,7 +3,7 @@ import {firstValueFrom, Observable, Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
 import {BotService} from 'src/app/services/bot.service';
 import {PresenceService} from 'src/app/services/presence.service';
-import {RoomPresenceService} from 'src/app/services/room-presence.service';
+import {RoomPresenceService, RoomWatchers} from 'src/app/services/room-presence.service';
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
@@ -33,6 +33,9 @@ export class PregameComponent implements OnChanges, OnDestroy {
   activeSpectatorIds: string[] = [];
   // signed-out page watchers (aggregate count)
   anonymousWatchers = 0;
+  // latest presence snapshot, kept so the spectator list can be refiltered
+  // the instant room membership changes rather than on the next presence tick
+  private watchers: RoomWatchers = {userIds: [], anonymous: 0};
   private presenceKey = '';
   private playersSub?: Subscription;
   private watchersRoomId = '';
@@ -108,22 +111,35 @@ export class PregameComponent implements OnChanges, OnDestroy {
     const key = playerIds.join(',');
     if (key !== this.presenceKey) {
       this.presenceKey = key;
+      // drop departed members right away; the fresh subscription (which emits
+      // async) fills in any additions
+      this.activePlayerIds =
+          this.activePlayerIds.filter(id => playerIds.includes(id));
       this.playersSub?.unsubscribe();
       this.playersSub = this.presenceService.activeUserIds(playerIds)
                             .subscribe(ids => this.activePlayerIds = ids);
     }
 
-    // spectators are anyone with the page open who hasn't joined as a player
     if (this.room?.id && this.room.id !== this.watchersRoomId) {
       this.watchersRoomId = this.room.id;
       this.watchersSub?.unsubscribe();
       this.watchersSub =
           this.roomPresence.watchers(this.room.id).subscribe(watchers => {
-            this.activeSpectatorIds = watchers.userIds.filter(
-                id => !(this.room?.userIds ?? []).includes(id));
-            this.anonymousWatchers = watchers.anonymous;
+            this.watchers = watchers;
+            this.updateSpectators();
           });
     }
+
+    // membership changes (join / move to spectators) must refilter the
+    // spectator list immediately, not wait for the next presence emission
+    this.updateSpectators();
+  }
+
+  /** Spectators are anyone with the page open who isn't a player. */
+  private updateSpectators() {
+    this.activeSpectatorIds = this.watchers.userIds.filter(
+        id => !(this.room?.userIds ?? []).includes(id));
+    this.anonymousWatchers = this.watchers.anonymous;
   }
 
   ngOnDestroy() {
