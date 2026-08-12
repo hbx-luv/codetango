@@ -81,6 +81,17 @@ service cloud.firestore {
                         ['name', 'email', 'rooms', 'nickname', 'photoURL',
                          'lastActive']);
 
+      // Any signed-in user may mint a synthetic bot player so "Add bot" can
+      // seat it instantly, without a Cloud Function round trip. The `bot_`
+      // namespace can't collide with a real player: auth uids never contain
+      // underscores. isBot must be true so a bot doc can't impersonate a
+      // human, and the whitelist keeps role/stats server-owned.
+      allow create: if request.auth != null
+                    && userId.matches('bot_.+')
+                    && request.resource.data.isBot == true
+                    && request.resource.data.keys().hasOnly(
+                        ['name', 'email', 'rooms', 'isBot']);
+
       // On update, only whitelisted fields may change. This is what blocks
       // a user from self-promoting to role: 'Admin'. Server-side writes
       // (e.g. addRoomToUsers, stats recalc) go through the admin SDK and

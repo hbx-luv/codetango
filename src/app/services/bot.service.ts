@@ -1,62 +1,102 @@
 import {Injectable} from '@angular/core';
 import {
-  addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
-  collectionData,
+  doc,
   Firestore,
-  orderBy,
-  query,
+  getDoc,
+  setDoc,
+  updateDoc,
 } from '@angular/fire/firestore';
-import {Observable} from 'rxjs';
+import {Game, Room, User} from 'types';
 
-export interface BotInvite {
-  team: 'RED'|'BLUE';
-  asSpymaster?: boolean;
-  createdAt?: number;
-  id?: string;
-}
+// Fun, obviously-a-bot display names. A new bot takes the first name not
+// already used by a bot in its room/game.
+const BOT_NAMES = [
+  '🤖 Clue-de Bot',
+  '🤖 HAL 9-Clues',
+  '🤖 Botrick Stewart',
+  '🤖 Wordsworth',
+  '🤖 Guessy McGuessface',
+  '🤖 Deep Thought',
+  '🤖 Sir Guess-a-lot',
+  '🤖 The Clue-nicorn',
+];
 
 @Injectable({providedIn: 'root'})
 export class BotService {
   constructor(private readonly firestore: Firestore) {}
 
   /**
-   * Invite a bot by writing an invite doc. A Cloud Function
-   * (onCreateBotInvite) reacts, creates the bot user, seats it on the team,
-   * and deletes the invite. We react to a write rather than call a callable so
-   * the click is instant; the UI shows a pending pill until the invite clears.
+   * Add a bot straight into the room's player pool (lobby / PREGAME). The bot
+   * user doc is created client-side — Firestore rules allow any signed-in user
+   * to create a `bot_*` user — so the bot appears in the lobby immediately.
+   * Bots don't need any server-side setup until the game is underway; the
+   * onWrite bot triggers pick them up once there are moves to make.
    */
-  inviteBot(gameId: string, team: 'RED'|'BLUE', asSpymaster = false) {
-    return addDoc(collection(this.firestore, 'games', gameId, 'bot-invites'), {
-      team,
-      asSpymaster,
-      createdAt: Date.now(),
+  async addBotToRoom(room: Room): Promise<string> {
+    const botId = await this.createBotUser(room.userIds ?? [], room.id);
+    await updateDoc(doc(this.firestore, 'rooms', room.id), {
+      userIds: arrayUnion(botId),
+      spectatorIds: arrayRemove(botId),
     });
-  }
-
-  /** Pending (not-yet-seated) bot invites for this game. */
-  getPendingInvites(gameId: string): Observable<BotInvite[]> {
-    const q = query(
-        collection(this.firestore, 'games', gameId, 'bot-invites'),
-        orderBy('createdAt', 'asc'));
-    return collectionData(q, {idField: 'id'}) as Observable<BotInvite[]>;
+    return botId;
   }
 
   /**
-   * Lobby variant: invite a bot into the ROOM's player pool (before teams
-   * exist). A Cloud Function (onCreateRoomBotInvite) creates the bot and adds
-   * it to room.userIds; then "Assign Teams" distributes it.
+   * Seat a bot directly on a team of an existing game (ASSIGNING_ROLES or
+   * mid-game backfill).
    */
-  inviteRoomBot(roomId: string) {
-    return addDoc(collection(this.firestore, 'rooms', roomId, 'bot-invites'), {
-      createdAt: Date.now(),
-    });
+  async addBotToTeam(
+      game: Game, team: 'redTeam'|'blueTeam',
+      asSpymaster = false): Promise<string> {
+    const seated = [
+      ...(game.redTeam.userIds ?? []),
+      ...(game.blueTeam.userIds ?? []),
+    ];
+    const botId = await this.createBotUser(seated, game.roomId);
+    const updates: {[field: string]: unknown} = {
+      [`${team}.userIds`]: arrayUnion(botId),
+    };
+    if (asSpymaster) {
+      updates[`${team}.spymaster`] = botId;
+    }
+    await updateDoc(doc(this.firestore, 'games', game.id), updates);
+    return botId;
   }
 
-  getRoomPendingInvites(roomId: string): Observable<BotInvite[]> {
-    const q = query(
-        collection(this.firestore, 'rooms', roomId, 'bot-invites'),
-        orderBy('createdAt', 'asc'));
-    return collectionData(q, {idField: 'id'}) as Observable<BotInvite[]>;
+  /** Create the synthetic bot user doc (no auth account) and return its id. */
+  private async createBotUser(existingUserIds: string[], roomId?: string):
+      Promise<string> {
+    const name = await this.pickName(existingUserIds);
+    const botId = `bot_${doc(collection(this.firestore, 'users')).id}`;
+    const bot: User = {
+      name,
+      email: '',
+      rooms: roomId ? [roomId] : [],
+      isBot: true,
+    };
+    await setDoc(doc(this.firestore, 'users', botId), bot);
+    return botId;
+  }
+
+  /**
+   * First pool name not already used by a bot among the given users; falls
+   * back to a numbered round ("🤖 Wordsworth 2") if all names are taken.
+   */
+  private async pickName(existingUserIds: string[]): Promise<string> {
+    const botIds = existingUserIds.filter(id => id.startsWith('bot_'));
+    const usedNames = await Promise.all(botIds.map(async id => {
+      const snap = await getDoc(doc(this.firestore, 'users', id));
+      return (snap.data() as User | undefined)?.name;
+    }));
+    const used = new Set(usedNames.filter(Boolean));
+    const unused = BOT_NAMES.find(name => !used.has(name));
+    if (unused) {
+      return unused;
+    }
+    const round = Math.floor(botIds.length / BOT_NAMES.length) + 1;
+    return `${BOT_NAMES[botIds.length % BOT_NAMES.length]} ${round}`;
   }
 }

@@ -34,12 +34,6 @@
         <ion-icon slot="start" name="hardware-chip-outline"></ion-icon>
         🤖 Add bot
       </ion-button>
-      <div class="bot-pending" *ngIf="pendingBots">
-        <ion-chip outline="true">
-          <ion-spinner name="dots"></ion-spinner>
-          <ion-label>Adding {{ pendingBots }} bot{{ pendingBots === 1 ? '' : 's' }}…</ion-label>
-        </ion-chip>
-      </div>
       <ion-button
         *ngIf="userInRoom"
         [disabled]="activePlayerIds.length < 2"

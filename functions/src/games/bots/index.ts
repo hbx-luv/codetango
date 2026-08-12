@@ -1,26 +1,12 @@
 import {onDocumentCreated, onDocumentUpdated} from 'firebase-functions/v2/firestore';
 
-import {BotInvite, maybeRunBot, maybeStartGameForBots, seatBotFromInvite, seatRoomBotFromInvite} from '../../util/bots';
+import {maybeRunBot, maybeStartGameForBots} from '../../util/bots';
 import {anthropicApiKey} from '../../util/llm';
 
-// A client "invites" a bot by adding a doc to games/{gameId}/bot-invites. This
-// trigger creates the bot user, seats it on the team, and deletes the invite.
-// Reacting to a write (instead of a callable) keeps the click instant and lets
-// the UI show a "joining soon" pill from the pending invite doc.
-export const onCreateBotInvite = onDocumentCreated(
-    'games/{gameId}/bot-invites/{inviteId}', async (event) => {
-      const data = event.data?.data() as BotInvite | undefined;
-      if (!data) return;
-      await seatBotFromInvite(
-          event.params.gameId, event.params.inviteId, data);
-    });
-
-// Lobby variant: invite a bot into the ROOM's player pool (before teams exist),
-// so a solo host can add bots and then "Assign Teams" to fill the seats.
-export const onCreateRoomBotInvite = onDocumentCreated(
-    'rooms/{roomId}/bot-invites/{inviteId}', async (event) => {
-      await seatRoomBotFromInvite(event.params.roomId, event.params.inviteId);
-    });
+// Bots are ADDED entirely client-side: Firestore rules let any signed-in user
+// create a `bot_*` user doc and seat it in a room/game directly, so the bot
+// appears instantly with no server round trip. Functions only get involved
+// once there are moves to make.
 
 // These triggers run the bot brain in response to the same writes the rest of
 // the app already makes. They bind the Anthropic secret because a bot action

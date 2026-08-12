@@ -33,14 +33,10 @@ export class PregameComponent implements OnChanges, OnDestroy {
   activeSpectatorIds: string[] = [];
   // signed-out page watchers (aggregate count)
   anonymousWatchers = 0;
-  // count of bots invited to the room but not yet seated (for a pending pill)
-  pendingBots = 0;
   private presenceKey = '';
   private playersSub?: Subscription;
   private watchersRoomId = '';
   private watchersSub?: Subscription;
-  private botInvitesRoomId = '';
-  private botInvitesSub?: Subscription;
 
   lastSettings: Partial<Room>;
 
@@ -78,10 +74,14 @@ export class PregameComponent implements OnChanges, OnDestroy {
       private readonly botService: BotService,
   ) {}
 
-  /** Invite a bot into the room's player pool (lobby / PREGAME). */
+  /**
+   * Add a bot to the room's player pool (lobby / PREGAME). This is a direct
+   * client-side write — the bot shows up immediately, and the bot Cloud
+   * Functions only get involved once the game is running.
+   */
   addBot() {
     if (this.room?.id) {
-      this.botService.inviteRoomBot(this.room.id);
+      this.botService.addBotToRoom(this.room);
     }
   }
 
@@ -100,14 +100,6 @@ export class PregameComponent implements OnChanges, OnDestroy {
     }
 
     this.watchPresence();
-
-    if (this.room?.id && this.room.id !== this.botInvitesRoomId) {
-      this.botInvitesRoomId = this.room.id;
-      this.botInvitesSub?.unsubscribe();
-      this.botInvitesSub = this.botService.getRoomPendingInvites(this.room.id)
-                               .subscribe(invites => this.pendingBots =
-                                              invites.length);
-    }
   }
 
   /** (Re)subscribe to active-user lists when room membership changes */
@@ -137,7 +129,6 @@ export class PregameComponent implements OnChanges, OnDestroy {
   ngOnDestroy() {
     this.playersSub?.unsubscribe();
     this.watchersSub?.unsubscribe();
-    this.botInvitesSub?.unsubscribe();
   }
 
   get userInRoom(): boolean {

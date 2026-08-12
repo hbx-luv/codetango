@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges, OnDestroy} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {AuthService} from 'src/app/services/auth.service';
-import {BotInvite, BotService} from 'src/app/services/bot.service';
+import {BotService} from 'src/app/services/bot.service';
 import {GameService} from 'src/app/services/game.service';
 import {RoomPresenceService} from 'src/app/services/room-presence.service';
 import {UtilService} from 'src/app/services/util.service';
@@ -25,12 +25,8 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
   spectatorIds: string[] = [];
   // signed-out viewers of the page (aggregate count)
   anonymousWatchers = 0;
-  // pending bot invites (bots that have been invited but not yet seated)
-  pendingInvites: BotInvite[] = [];
   private watchersRoomId = '';
   private watchersSub?: Subscription;
-  private invitesGameId = '';
-  private invitesSub?: Subscription;
 
   constructor(
       private readonly authService: AuthService,
@@ -52,13 +48,6 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
                                this.anonymousWatchers = watchers.anonymous;
                              });
     }
-
-    if (this.game?.id && this.game.id !== this.invitesGameId) {
-      this.invitesGameId = this.game.id;
-      this.invitesSub?.unsubscribe();
-      this.invitesSub = this.botService.getPendingInvites(this.game.id)
-                            .subscribe(invites => this.pendingInvites = invites);
-    }
   }
 
   /** Whether the "Add bot" button should show for a team. */
@@ -68,14 +57,9 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
         this.loggedInAndInRoom;
   }
 
-  pendingInvitesFor(team: 'redTeam'|'blueTeam'): BotInvite[] {
-    const color = team === 'redTeam' ? 'RED' : 'BLUE';
-    return this.pendingInvites.filter(i => i.team === color);
-  }
-
+  /** Seat a bot on the team immediately (direct client-side write). */
   addBot(team: 'redTeam'|'blueTeam') {
-    const color = team === 'redTeam' ? 'RED' : 'BLUE';
-    this.botService.inviteBot(this.game.id, color);
+    this.botService.addBotToTeam(this.game, team);
   }
 
   /** Whether a user occupies a seat on either team */
@@ -87,7 +71,6 @@ export class TeamListsComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.watchersSub?.unsubscribe();
-    this.invitesSub?.unsubscribe();
   }
 
   get loggedInAndInRoom(): boolean {
