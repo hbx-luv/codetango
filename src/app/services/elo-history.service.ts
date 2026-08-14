@@ -9,7 +9,7 @@ import {
   QueryConstraint,
   where,
 } from '@angular/fire/firestore';
-import {firstValueFrom} from 'rxjs';
+import {firstValueFrom, Observable} from 'rxjs';
 import {DateTime} from 'luxon';
 import {map, take} from 'rxjs/operators';
 import {Stats} from 'types';
@@ -52,16 +52,23 @@ export class EloHistoryService {
   }
 
   /**
-   * Returns the stats snapshots written for every player in a given game
+   * Streams the stats snapshots written for every player in a given game.
+   *
+   * This is a live stream, not a one-shot read, because the records are
+   * written by the recalcElo Cloud Function *after* the game ends — so they
+   * often don't all exist yet when the post-game stats modal opens. Callers
+   * subscribe and let each player's snapshot fill in as recalc commits it.
+   *
+   * The doc id (`idField`) is included so the player can be recovered from the
+   * `${userId}_${gameId}` key even for any record missing a `userId` field.
    */
-  async getStatsForGame(gameId: string): Promise<Stats[]> {
+  getStatsForGame(gameId: string): Observable<Array<Stats&{id: string}>> {
     const q = query(
         collection(this.firestore, 'eloHistory'),
         where('gameId', '==', gameId),
     );
-    return await firstValueFrom(
-               collectionData(q).pipe(take(1)) as any,
-               ) as Stats[];
+    return collectionData(q, {idField: 'id'}) as
+        Observable<Array<Stats&{id: string}>>;
   }
 
   /**

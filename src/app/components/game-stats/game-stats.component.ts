@@ -1,10 +1,10 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ModalController} from '@ionic/angular';
-import {firstValueFrom} from 'rxjs';
+import {firstValueFrom, Subscription} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {ClueService} from 'src/app/services/clue.service';
 import {EloHistoryService} from 'src/app/services/elo-history.service';
-import {Clue, Game, GameStatus, TeamType, TileRole} from 'types';
+import {Clue, Game, GameStatus, Stats, TeamType, TileRole} from 'types';
 
 // mirrors BASE_ELO in functions/src/util/elo.ts
 const BASE_ELO = 1200;
@@ -66,7 +66,7 @@ export interface Award {
   templateUrl: './game-stats.component.html',
   styleUrls: ['./game-stats.component.scss'],
 })
-export class GameStatsComponent implements OnInit {
+export class GameStatsComponent implements OnInit, OnDestroy {
   @Input() game: Game;
 
   loading = true;
@@ -76,6 +76,8 @@ export class GameStatsComponent implements OnInit {
   spymasters: SpymasterStats[] = [];
   awards: Award[] = [];
   totalGuesses = 0;
+
+  private eloSub?: Subscription;
 
   constructor(
       private readonly modalCtrl: ModalController,
@@ -94,6 +96,10 @@ export class GameStatsComponent implements OnInit {
 
     // elo deltas trickle in afterwards, the table updates in place
     this.loadEloChanges();
+  }
+
+  ngOnDestroy() {
+    this.eloSub?.unsubscribe();
   }
 
   get blueWon(): boolean {
@@ -366,21 +372,50 @@ export class GameStatsComponent implements OnInit {
     }
   }
 
-  private async loadEloChanges() {
+  private loadEloChanges() {
+    const suffix = `_${this.game.id}`;
+
+    // pre-game elo per user is stable, so cache it across emissions to avoid
+    // re-querying on every update
+    const beforeCache = new Map<string, number>();
+
+    // recalcElo writes each player's eloHistory record after the game ends, so
+    // when this modal auto-opens they usually don't all exist yet. Subscribe
+    // to the live stream and apply each delta as its record lands, rather than
+    // reading once and leaving latecomers' cells blank.
+    this.eloSub = this.eloHistoryService.getStatsForGame(this.game.id)
+                      .subscribe(stats => {
+                        for (const stat of stats) {
+                          void this.applyEloDelta(stat, suffix, beforeCache);
+                        }
+                      });
+  }
+
+  // Set one player's eloDelta from their post-game snapshot. Each snapshot is
+  // handled independently so one unreadable record can't blank the column.
+  private async applyEloDelta(
+      stat: Stats&{id?: string}, suffix: string,
+      beforeCache: Map<string, number>) {
     try {
-      const stats = await this.eloHistoryService.getStatsForGame(this.game.id);
-      await Promise.all(stats.map(async stat => {
+      // Prefer the `userId` field, but fall back to the doc id
+      // (`${userId}_${gameId}`) so a record missing the field still maps to a
+      // player.
+      const userId = stat.userId ??
+          (stat.id?.endsWith(suffix) ? stat.id.slice(0, -suffix.length) :
+                                       undefined);
+      const player = this.teamSummaries.flatMap(t => t.players)
+                         .find(p => p.userId === userId);
+      if (!player || !userId) {
+        return;
+      }
+      if (!beforeCache.has(userId)) {
         const before =
-            await this.eloHistoryService.getEloAt(stat.timestamp - 1,
-                                                  stat.userId);
-        const player = this.teamSummaries.flatMap(t => t.players)
-                           .find(p => p.userId === stat.userId);
-        if (player) {
-          player.eloDelta = Math.round(stat.elo - (before?.elo ?? BASE_ELO));
-        }
-      }));
+            await this.eloHistoryService.getEloAt(stat.timestamp - 1, userId);
+        beforeCache.set(userId, before?.elo ?? BASE_ELO);
+      }
+      player.eloDelta = Math.round(stat.elo - beforeCache.get(userId));
     } catch (_e) {
-      // elo deltas are a nice-to-have; leave the column blank on failure
+      // elo deltas are a nice-to-have; leave this player's cell blank
     }
   }
 
