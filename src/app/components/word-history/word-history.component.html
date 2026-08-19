@@ -11,8 +11,9 @@
       [assetUrlPattern]="game.assetUrlPattern"
       >
     </app-clue>
+    <!-- the stack can be empty while the first clue is live in the banner -->
     <ion-item *ngIf="visibleClues(clues).length === 0">
-      No clues given yet!
+      {{ clues.length ? 'The current clue is above the board — past clues will stack up here' : 'No clues given yet!' }}
     </ion-item>
   </div>
 </div>
