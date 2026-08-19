@@ -1,0 +1,18 @@
+<ion-list lines="none">
+  <ion-item class="enable-sounds">
+    <ion-toggle
+      [checked]="soundService.enabled()"
+      (ionChange)="setEnabled($event)">
+      Enable Sounds
+    </ion-toggle>
+  </ion-item>
+  <ion-item *ngFor="let option of categoryOptions">
+    <ion-icon [name]="option.icon" slot="start"></ion-icon>
+    <ion-toggle
+      [checked]="soundService.categoryEnabled(option.category)"
+      [disabled]="soundService.muted()"
+      (ionChange)="setCategoryEnabled(option.category, $event)">
+      {{ option.label }}
+    </ion-toggle>
+  </ion-item>
+</ion-list>

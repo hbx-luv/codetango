@@ -12,7 +12,7 @@
       <ion-button
         *ngFor="let action of actions"
         [tooltip]="action.label"
-        (click)="action.onClick()">
+        (click)="action.onClick($event)">
         <ion-icon [name]="action.icon"></ion-icon>
       </ion-button>
     </ion-buttons>

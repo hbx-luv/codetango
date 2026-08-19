@@ -1,10 +1,11 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {ModalController} from '@ionic/angular';
+import {ModalController, PopoverController} from '@ionic/angular';
 import {Observable, ReplaySubject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopoverAction} from 'src/app/components/actions-popover/actions-popover.component';
 import {GameStatsComponent} from 'src/app/components/game-stats/game-stats.component';
+import {SoundSettingsComponent} from 'src/app/components/sound-settings/sound-settings.component';
 import {confetti} from 'src/app/confetti.js';
 import {AuthService} from 'src/app/services/auth.service';
 import {ClueService} from 'src/app/services/clue.service';
@@ -49,6 +50,7 @@ export class RoomPage implements OnDestroy {
       private readonly soundService: SoundService,
       private readonly userService: UserService,
       private readonly modalCtrl: ModalController,
+      private readonly popoverCtrl: PopoverController,
       private readonly roomPresence: RoomPresenceService,
   ) {
     this.roomId = this.route.snapshot.paramMap.get('id');
@@ -219,11 +221,10 @@ export class RoomPage implements OnDestroy {
       if (this.game && this.gameInProgress) {
         actions.push(
             {
-              label: this.soundService.muted() ? 'Unmute Sounds' :
-                                                 'Mute Sounds',
+              label: 'Sound Settings',
               icon: this.soundService.muted() ? 'volume-mute-outline' :
                                                 'volume-high-outline',
-              onClick: this.toggleSound.bind(this),
+              onClick: this.openSoundSettings.bind(this),
             },
             {
               label: 'New Teams',
@@ -287,8 +288,18 @@ export class RoomPage implements OnDestroy {
     this.messageService.toggleChatShown(tab === 'chat-tab');
   }
 
-  toggleSound() {
-    this.soundService.toggleMute();
+  async openSoundSettings(event?: Event) {
+    // anchor to the clicked toolbar icon when available; from the
+    // small-screen overflow menu there's no event, so it centers instead
+    const popover = await this.popoverCtrl.create({
+      component: SoundSettingsComponent,
+      event,
+      translucent: true,
+    });
+    await popover.present();
+
+    // refresh the toolbar icon in case sounds were enabled/disabled
+    await popover.onDidDismiss();
     this.setActions();
   }
 

@@ -5,7 +5,9 @@ import {ActionsPopoverPageComponent} from './actions-popover-page.component';
 export interface PopoverAction {
   label: string;
   icon?: string;
-  onClick(): void;
+  // the click event is provided when the action is clicked directly in the
+  // toolbar, but not when it's chosen from the small-screen overflow popover
+  onClick(event?: Event): void;
 }
 
 @Component({
