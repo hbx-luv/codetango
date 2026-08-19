@@ -34,7 +34,8 @@ export class LeaderboardPage implements OnDestroy {
     this.leaderboardService.getLeaderboard(this.roomId)
         .pipe(takeUntil(this.destroyed$))
         .subscribe(users => {
-          this.hasGames = users.filter(user => user.stats.gamesPlayed > 0);
+          this.hasGames =
+              users.filter(user => !user.isBot && user.stats.gamesPlayed > 0);
 
           const recentTimestamp = Date.now() - (ONE_DAY * RECENT_DAYS);
           this.playedRecently = this.hasGames.filter(
