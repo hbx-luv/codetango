@@ -30,7 +30,7 @@
     "@angular/forms": "~20.3.0",
     "@angular/platform-browser": "~20.3.0",
     "@angular/platform-browser-dynamic": "~20.3.0",
-    "@angular/router": "~20.3.0",
+    "@angular/router": "~20.3.32",
     "@angular/service-worker": "~20.3.0",
     "@ionic/angular": "^8.4.0",
     "chart.js": "^4.4.0",
