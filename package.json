@@ -26,7 +26,7 @@
   "dependencies": {
     "@angular/common": "~20.3.0",
     "@angular/core": "~20.3.0",
-    "@angular/fire": "^20.0.1",
+    "@angular/fire": "^20.1.1",
     "@angular/forms": "~20.3.0",
     "@angular/platform-browser": "~20.3.0",
     "@angular/platform-browser-dynamic": "~20.3.0",
@@ -48,7 +48,7 @@
     "@angular/language-service": "~20.3.0",
     "@ionic/angular-toolkit": "^12.1.0",
     "@types/node": "^20.12.0",
-    "firebase-tools": "~15.13.0",
+    "firebase-tools": "~15.33.0",
     "ts-node": "~10.9.0",
     "typescript": "~5.9.0",
     "eslint": "^9.39.0",
