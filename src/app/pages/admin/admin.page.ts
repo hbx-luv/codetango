@@ -108,7 +108,11 @@ export class AdminPage implements OnDestroy {
       interval(1000).pipe(startWith(0)),
     ])
         .pipe(takeUntil(this.destroyed))
-        .subscribe(([job]) => this.view = job ? this.buildView(job) : undefined);
+        .subscribe(([job]) => {
+          // A status doc without recalcMode was written by the previous
+          // recalc design; nothing about it maps onto this card.
+          this.view = job?.recalcMode ? this.buildView(job) : undefined;
+        });
   }
 
   ngOnDestroy() {
