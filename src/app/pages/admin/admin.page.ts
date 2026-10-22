@@ -309,6 +309,18 @@ export class AdminPage implements OnDestroy {
     return user.nickname || user.name || user.email || user.id || 'Unknown';
   }
 
+  // "412 games · last played Mar 3, 2024", so look-alike accounts can be
+  // told apart in the pickers. Stats come from the last recalc.
+  userMeta(user: User): string {
+    const played = user.stats?.gamesPlayed ?? 0;
+    if (!played) return 'No games played';
+    const games = `${played.toLocaleString()} game${played === 1 ? '' : 's'}`;
+    const last = user.stats?.lastPlayed;
+    return typeof last === 'number' ?
+        `${games} · last played ${this.formatDate(last)}` :
+        games;
+  }
+
   // -- Private --------------------------------------------------------------
 
   private emptyRow(): PairRow {

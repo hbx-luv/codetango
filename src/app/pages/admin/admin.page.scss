@@ -303,8 +303,15 @@
   }
 }
 
+.picker ion-label .meta,
+.picker-results ion-label .meta {
+  font-size: 12px;
+  color: var(--ion-color-primary);
+  margin-top: 2px;
+}
+
 .picker-results {
-  max-height: 260px;
+  max-height: 320px;
   overflow-y: auto;
   border: 1px solid var(--ion-color-step-150, #e0e0e0);
   border-radius: 8px;

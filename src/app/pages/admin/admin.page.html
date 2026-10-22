@@ -92,9 +92,7 @@
                 <ion-label>
                   <h3>{{ displayName(row.old) }}</h3>
                   <p>{{ row.old.email || row.old.id }}</p>
-                  <p *ngIf="row.oldGameCount !== undefined">
-                    {{ row.oldGameCount }} game{{ row.oldGameCount === 1 ? '' : 's' }}
-                  </p>
+                  <p class="meta">{{ userMeta(row.old) }}</p>
                 </ion-label>
                 <ion-button fill="clear" slot="end" (click)="clear(row, 'old')" [disabled]="jobActive">
                   <ion-icon slot="icon-only" name="close-circle"></ion-icon>
@@ -115,6 +113,7 @@
                     <ion-label>
                       <h3>{{ displayName(u) }}</h3>
                       <p>{{ u.email || u.id }}</p>
+                      <p class="meta">{{ userMeta(u) }}</p>
                     </ion-label>
                   </ion-item>
                 </ion-list>
@@ -133,6 +132,7 @@
                 <ion-label>
                   <h3>{{ displayName(row.new) }}</h3>
                   <p>{{ row.new.email || row.new.id }}</p>
+                  <p class="meta">{{ userMeta(row.new) }}</p>
                 </ion-label>
                 <ion-button fill="clear" slot="end" (click)="clear(row, 'new')" [disabled]="jobActive">
                   <ion-icon slot="icon-only" name="close-circle"></ion-icon>
@@ -153,6 +153,7 @@
                     <ion-label>
                       <h3>{{ displayName(u) }}</h3>
                       <p>{{ u.email || u.id }}</p>
+                      <p class="meta">{{ userMeta(u) }}</p>
                     </ion-label>
                   </ion-item>
                 </ion-list>
