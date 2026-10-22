@@ -27,6 +27,12 @@
             Leaderboard
           </ion-item>
         </ion-menu-toggle>
+        <ion-menu-toggle *ngIf="isAdmin">
+          <ion-item button [routerLink]="['/manage/admin']">
+            <ion-icon slot="start" name="construct-outline"></ion-icon>
+            Admin
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
     <ion-footer>
