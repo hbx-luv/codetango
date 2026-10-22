@@ -163,7 +163,25 @@
       ]
     },
     {
-      "collectionGroup": "eloHistoryStaging",
+      "collectionGroup": "eloHistoryGreen",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "provisional",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "eloHistoryGreen",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -177,7 +195,7 @@
       ]
     },
     {
-      "collectionGroup": "userToUserHistoryStaging",
+      "collectionGroup": "userToUserHistoryGreen",
       "queryScope": "COLLECTION",
       "fields": [
         {

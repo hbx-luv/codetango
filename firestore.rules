@@ -31,12 +31,32 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Publicly readable pointer saying which stats set is live. Written only
+    // by the recalc job via the admin SDK.
+    match /system/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Elo / user-to-user history live in one of two blue/green collection
+    // sets (see STATS_COLLECTIONS in types.ts). Both are readable; clients
+    // pick the live one from /system/stats.
     match /eloHistory/{document=**} {
       allow read: if true;
       allow write: if false;
     }
 
+    match /eloHistoryGreen/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /userToUserHistory/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /userToUserHistoryGreen/{document=**} {
       allow read: if true;
       allow write: if false;
     }

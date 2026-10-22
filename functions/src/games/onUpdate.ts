@@ -20,7 +20,7 @@ export const onUpdateGame =
           if (!change) return 'No change data';
 
           await updateRemainingAgents(change.after);
-          await determineGameOver(change.after);
+          await determineGameOver(change.before, change.after);
           await sanitizeBoard(change.before, change.after);
 
           return 'Done';
@@ -82,10 +82,19 @@ async function updateRemainingAgents(snapshot: DocumentSnapshot):
   }
 }
 
-async function determineGameOver(after: DocumentSnapshot) {
+/**
+ * Runs end-of-game bookkeeping exactly once: when completedAt first appears.
+ * Later writes to a finished game (an admin merge rewriting its roster, the
+ * recalc stamping userIds) must not re-trigger a live recalc — that used to
+ * fan a single merge out into hundreds of overlapping recalc chains, which is
+ * what made the leaderboard and charts jump around mid-job.
+ */
+async function determineGameOver(
+    before: DocumentSnapshot, after: DocumentSnapshot) {
+  const preUpdate = before.data() as Game;
   const postGameUpdate = after.data() as Game;
 
-  if (postGameUpdate.completedAt) {
+  if (postGameUpdate.completedAt && !preUpdate.completedAt) {
     // Process Endgame analytics if the game is over
     await recalcElo(db, postGameUpdate.completedAt);
 

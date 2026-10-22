@@ -1,9 +1,11 @@
 .padding {
   padding: 16px 20px 40px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .section {
-  margin-top: 32px;
+  margin-top: 36px;
 
   h1 {
     margin: 0 0 4px;
@@ -14,12 +16,14 @@
     margin: 0 0 12px;
     color: var(--ion-color-medium);
     font-size: 14px;
+    max-width: 640px;
   }
 }
 
 .actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 12px;
 
@@ -29,23 +33,36 @@
   }
 }
 
-// -- Live job status ------------------------------------------------------
+.live-set {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ion-color-medium);
 
-.job-status {
+  strong {
+    color: var(--ion-color-dark);
+    text-transform: capitalize;
+  }
+}
+
+// -- Live job card --------------------------------------------------------
+
+.job-card {
   border: 1px solid var(--ion-color-step-150, #e0e0e0);
   border-radius: 12px;
   padding: 16px;
   background: var(--ion-color-step-50, #fafafa);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 
   .job-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 
     ion-spinner {
       flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
     }
 
     ion-icon {
@@ -55,11 +72,17 @@
 
     .job-title {
       flex: 1 1 auto;
+      min-width: 0;
 
       h2 {
         margin: 0;
         font-size: 16px;
         font-weight: 600;
+
+        .phase {
+          font-weight: 400;
+          color: var(--ion-color-medium);
+        }
       }
 
       p {
@@ -68,45 +91,195 @@
         color: var(--ion-color-medium);
       }
     }
+
+    .job-timing {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+
+      .elapsed {
+        font-weight: 600;
+      }
+
+      .eta {
+        color: var(--ion-color-medium);
+        white-space: nowrap;
+      }
+    }
+  }
+
+  // Phase stepper: a row of dots joined by a line.
+  .steps {
+    display: flex;
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+
+    li {
+      flex: 1 1 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--ion-color-medium);
+      text-align: center;
+
+      // connector to the next step
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: var(--ion-color-step-200, #d0d0d0);
+        z-index: 0;
+      }
+
+      .dot {
+        position: relative;
+        z-index: 1;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid var(--ion-color-step-200, #d0d0d0);
+        background: var(--ion-color-step-50, #fafafa);
+        box-sizing: border-box;
+      }
+
+      &[data-state='done'] {
+        color: var(--ion-color-dark);
+
+        .dot {
+          background: var(--ion-color-success);
+          border-color: var(--ion-color-success);
+        }
+
+        &::after {
+          background: var(--ion-color-success);
+        }
+      }
+
+      &[data-state='active'] {
+        color: var(--ion-color-primary);
+        font-weight: 600;
+
+        .dot {
+          border-color: var(--ion-color-primary);
+          background: var(--ion-color-primary);
+          box-shadow: 0 0 0 4px rgba(var(--ion-color-primary-rgb), 0.2);
+        }
+      }
+
+      &[data-state='skipped'] {
+        text-decoration: line-through;
+        opacity: 0.6;
+      }
+    }
   }
 
   ion-progress-bar {
     border-radius: 4px;
     overflow: hidden;
+    height: 6px;
+  }
+
+  .pairs {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+
+    li::before {
+      content: '•';
+      margin-right: 6px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .note {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--ion-color-medium);
+
+    &.warn {
+      color: var(--ion-color-warning-shade);
+    }
+  }
+
+  .job-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+    justify-content: flex-end;
   }
 
   &[data-phase='error'] {
     border-color: var(--ion-color-danger);
   }
+
+  &[data-phase='done'] {
+    border-color: var(--ion-color-success);
+  }
 }
 
-// -- Merge grid -----------------------------------------------------------
+// -- Merge rows -----------------------------------------------------------
 
-.merge-grid {
+.pair-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pair-row {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto 1fr auto;
   gap: 12px;
   align-items: start;
-  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--ion-color-step-150, #e0e0e0);
+  border-radius: 12px;
 
   .arrow {
-    padding-top: 34px;
-    font-size: 24px;
+    padding-top: 30px;
+    font-size: 22px;
     color: var(--ion-color-medium);
     text-align: center;
   }
 
+  .remove {
+    margin-top: 22px;
+  }
+
   @media (max-width: 640px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr auto;
 
     .arrow {
-      padding-top: 4px;
-      transform: rotate(90deg);
+      display: none;
+    }
+
+    .picker:nth-child(3) {
+      grid-column: 1;
+    }
+
+    .remove {
+      grid-column: 2;
+      grid-row: 1 / span 2;
     }
   }
 }
 
 .picker {
+  min-width: 0;
+
   label {
     display: block;
     font-size: 12px;

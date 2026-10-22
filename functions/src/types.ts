@@ -264,11 +264,56 @@ export enum GameType {
   LEGACY_EMOJIS = 'LEGACY_EMOJIS',
 }
 
-// Phases of an admin-triggered merge/recalc job. Advance strictly forward:
-//   migrating -> recalculating -> committing -> done
-// or from any phase -> error on failure.
+// ---------------------------------------------------------------------------
+// Blue/green stats storage
+// ---------------------------------------------------------------------------
+
+// Elo history and user-to-user history live in one of two interchangeable
+// collection sets. Exactly one set is "live" at a time; /system/stats says
+// which. A recalc job builds the *other* set from scratch, flips the pointer
+// in a single write, then deletes the previous set. Clients never see a
+// half-built history.
+export enum StatsSet {
+  BLUE = 'blue',
+  GREEN = 'green',
+}
+
+export interface StatsCollections {
+  elo: string;
+  u2u: string;
+}
+
+// The blue set keeps the original collection names so existing data stays
+// live with no migration.
+export const STATS_COLLECTIONS: Record<StatsSet, StatsCollections> = {
+  [StatsSet.BLUE]: {elo: 'eloHistory', u2u: 'userToUserHistory'},
+  [StatsSet.GREEN]: {elo: 'eloHistoryGreen', u2u: 'userToUserHistoryGreen'},
+};
+
+export const DEFAULT_STATS_SET = StatsSet.BLUE;
+
+export function otherStatsSet(set: StatsSet): StatsSet {
+  return set === StatsSet.BLUE ? StatsSet.GREEN : StatsSet.BLUE;
+}
+
+// /system/stats — publicly readable pointer to the live set.
+export interface StatsConfig {
+  liveSet: StatsSet;
+  flippedAt?: number;
+  jobId?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Admin recalc / merge jobs
+// ---------------------------------------------------------------------------
+
+// Phases of an admin-triggered merge/recalc job, in order:
+//   clearing -> migrating -> seeding -> recalculating -> committing -> done
+// (migrating and seeding are skipped for a plain recalc), or any -> error.
 export enum RecalcPhase {
+  CLEARING = 'clearing',
   MIGRATING = 'migrating',
+  SEEDING = 'seeding',
   RECALCULATING = 'recalculating',
   COMMITTING = 'committing',
   DONE = 'done',
@@ -280,6 +325,30 @@ export enum RecalcJobType {
   RECALC = 'recalc',
 }
 
+// How the recalculating phase picks games.
+//   FULL — every completed game, in order (plain recalc).
+//   WEB  — a queue seeded with the merged games; each game processed queues
+//          every player's next game, so only games downstream of a change
+//          are visited and the phase ends when the queue runs dry.
+export enum RecalcMode {
+  FULL = 'full',
+  WEB = 'web',
+}
+
+export enum CommitStep {
+  USERS = 'users',
+  NUKE_OLD_SET = 'nuke_old_set',
+  CLEANUP = 'cleanup',
+}
+
+// One account merge: every reference to oldUserId becomes newUserId.
+export interface MergePair {
+  oldUserId: string;
+  newUserId: string;
+  oldUserName?: string;
+  newUserName?: string;
+}
+
 // Live status doc at /adminJobs/current. Written only by the Cloud Function;
 // the admin page reads it via docData() to render progress.
 export interface RecalcJob {
@@ -287,38 +356,67 @@ export interface RecalcJob {
   type: RecalcJobType;
   phase: RecalcPhase;
 
-  // merge-only
-  oldUserId?: string;
-  newUserId?: string;
-  oldUserName?: string;
-  newUserName?: string;
+  // Incremented every time a step is claimed. The admin/continue trigger
+  // carries the seq it expects, so a duplicate delivery can't run a step
+  // twice.
+  seq: number;
 
-  // progress counters
-  totalGames: number;
-  processedGames: number;
+  // merge-only; empty for a plain recalc
+  pairs: MergePair[];
+
+  // Which set was live when the job started, and which set it builds into.
+  liveSet: StatsSet;
+  buildSet: StatsSet;
+
+  recalcMode: RecalcMode;
+
+  // Earliest completedAt touched by the merge (0 for a full recalc). Only
+  // informational for WEB mode: the queue decides what gets rebuilt.
+  recalcFrom: number;
+
+  // False when the job turned out to have nothing to rebuild (merge with no
+  // completed games) — the live set is left as is and nothing is nuked.
+  flip: boolean;
+
+  // clearing
+  clearedDocs: number;
+  totalClearDocs: number;
+
+  // migrating
   migratedGames: number;
+  totalMigrateGames: number;
+  migratePairIndex: number;
+  migrateCursor?: string;  // last game doc id rewritten for the current pair
+
+  // seeding
+  seededDocs: number;
+  totalSeedDocs: number;
+  seedCollectionIndex: number;  // 0 = elo history, 1 = user-to-user
+  seedCursorTimestamp?: number;
+  seedCursorId?: string;
+
+  // recalculating. In WEB mode totalGames is an upper bound (every game
+  // after recalcFrom) and queueSize is the live frontier.
+  processedGames: number;
+  totalGames: number;
+  queueSize: number;
+  cursorTimestamp: number;
+
+  // committing
   committedItems: number;
   totalCommitItems: number;
+  commitStep?: CommitStep;
 
   // timing (ms since epoch)
   startedAt: number;
   updatedAt: number;
+  phaseStartedAt: number;
   finishedAt?: number;
-
-  // chaining cursor for the recalculating phase
-  cursorTimestamp: number;
-
-  // committing-phase state machine
-  commitStep?: CommitStep;
 
   // populated when phase === ERROR
   error?: string;
-}
 
-export enum CommitStep {
-  USERS = 'users',
-  NUKE_OLD_USER = 'nuke_old_user',
-  COPY_ELO_HISTORY = 'copy_elo_history',
-  COPY_USER_TO_USER = 'copy_user_to_user',
-  CLEANUP_STAGING = 'cleanup_staging',
+  // Non-fatal things that happened mid-job and deserve a look, e.g. a game
+  // deleted while the rebuild was running.
+  warnings?: string[];
 }

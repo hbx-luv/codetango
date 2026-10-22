@@ -11,7 +11,7 @@ import {
   where,
 } from '@angular/fire/firestore';
 import {Observable} from 'rxjs';
-import {RecalcJob, User} from 'types';
+import {MergePair, RecalcJob, User} from 'types';
 
 @Injectable({providedIn: 'root'})
 export class AdminService {
@@ -43,27 +43,45 @@ export class AdminService {
     return snap.data().count;
   }
 
-  // Kick off a merge job. Cloud Function reads this doc, initializes the job
-  // status, and drives the migrating -> recalculating -> committing loop.
-  startMerge(
-      oldUserId: string,
-      newUserId: string,
-      oldUserName?: string,
-      newUserName?: string,
-      ): Promise<void> {
+  // Kick off a merge job for one or more account pairs. The Cloud Function
+  // rewrites every game for every pair, then rebuilds history from the
+  // earliest affected game into the inactive stats set and flips to it.
+  startMerge(pairs: MergePair[]): Promise<void> {
     return setDoc(doc(this.firestore, 'admin', 'startMerge'), {
-      oldUserId,
-      newUserId,
-      ...(oldUserName ? {oldUserName} : {}),
-      ...(newUserName ? {newUserName} : {}),
+      pairs: pairs.map(p => ({
+        oldUserId: p.oldUserId,
+        newUserId: p.newUserId,
+        ...(p.oldUserName ? {oldUserName: p.oldUserName} : {}),
+        ...(p.newUserName ? {newUserName: p.newUserName} : {}),
+      })),
+      triggeredAt: Date.now(),
     });
   }
 
-  // Kick off a full staged recalc. Same lifecycle as merge but skips the
-  // migrating phase.
+  // Kick off a full rebuild into the inactive set. Same lifecycle as a
+  // merge, minus the migrate and seed phases.
   startRecalc(): Promise<void> {
     return setDoc(
         doc(this.firestore, 'admin', 'startRecalc'),
+        {triggeredAt: Date.now()},
+    );
+  }
+
+  // Re-fire the continue trigger for a job whose last step never reported
+  // back (e.g. the function instance died). The seq guard means this is a
+  // no-op if the job is actually still moving.
+  resumeJob(seq: number): Promise<void> {
+    return setDoc(
+        doc(this.firestore, 'admin', 'continue'),
+        {seq, triggeredAt: Date.now()},
+    );
+  }
+
+  // Abort the active job. Nothing live has changed before the commit
+  // phase, and the build set is wiped at the start of the next job.
+  cancelJob(): Promise<void> {
+    return setDoc(
+        doc(this.firestore, 'admin', 'cancel'),
         {triggeredAt: Date.now()},
     );
   }

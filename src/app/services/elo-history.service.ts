@@ -11,8 +11,10 @@ import {
 } from '@angular/fire/firestore';
 import {firstValueFrom, Observable} from 'rxjs';
 import {DateTime} from 'luxon';
-import {map, take} from 'rxjs/operators';
+import {map, switchMap, take} from 'rxjs/operators';
 import {Stats} from 'types';
+
+import {StatsSetService} from './stats-set.service';
 
 // set this to true to hide provisional games
 const NO_PROVISIONAL = false;
@@ -21,6 +23,7 @@ const NO_PROVISIONAL = false;
 export class EloHistoryService {
   constructor(
       private readonly firestore: Firestore,
+      private readonly statsSet: StatsSetService,
   ) {}
 
   getEloHistoryForUser(userId: string, limitCount?: number) {
@@ -34,13 +37,10 @@ export class EloHistoryService {
     if (limitCount) {
       constraints.push(limit(limitCount));
     }
-    const q = query(
-        collection(this.firestore, 'eloHistory'),
-        ...constraints,
-    );
-    return collectionData(q, {idField: 'id'}).pipe(map(actions => {
-      return actions.map(this.mapDataPoint.bind(this)).reverse();
-    }));
+    return this.liveQuery(constraints, true)
+        .pipe(map(actions => {
+          return actions.map(this.mapDataPoint.bind(this)).reverse();
+        }));
   }
 
   getHighestElo(userId: string) {
@@ -63,11 +63,7 @@ export class EloHistoryService {
    * `${userId}_${gameId}` key even for any record missing a `userId` field.
    */
   getStatsForGame(gameId: string): Observable<Array<Stats&{id: string}>> {
-    const q = query(
-        collection(this.firestore, 'eloHistory'),
-        where('gameId', '==', gameId),
-    );
-    return collectionData(q, {idField: 'id'}) as
+    return this.liveQuery([where('gameId', '==', gameId)], true) as
         Observable<Array<Stats&{id: string}>>;
   }
 
@@ -77,15 +73,14 @@ export class EloHistoryService {
    */
   async getEloAt(timestamp: number, userId: string):
       Promise<Stats|undefined> {
-    const q = query(
-        collection(this.firestore, 'eloHistory'),
-        where('userId', '==', userId),
-        where('timestamp', '<=', timestamp),
-        orderBy('timestamp', 'desc'),
-        limit(1),
-    );
+    const constraints = [
+      where('userId', '==', userId),
+      where('timestamp', '<=', timestamp),
+      orderBy('timestamp', 'desc'),
+      limit(1),
+    ];
     const elo = await firstValueFrom(
-        collectionData(q).pipe(take(1)) as any,
+        this.liveQuery(constraints).pipe(take(1)) as any,
     ) as Stats[];
     return elo.length ? elo[0] : undefined;
   }
@@ -99,8 +94,7 @@ export class EloHistoryService {
     if (NO_PROVISIONAL) {
       constraints.push(where('provisional', '==', false));
     }
-    const q = query(collection(this.firestore, 'eloHistory'), ...constraints);
-    return collectionData(q);
+    return this.liveQuery(constraints);
   }
 
   mapDataPoint(dataPoint: any) {
@@ -116,5 +110,15 @@ export class EloHistoryService {
 
   getMidnight(daysAgo: number = 0) {
     return DateTime.local().minus({days: daysAgo}).startOf('day').toMillis();
+  }
+
+  // Runs the query against whichever elo history collection is live, and
+  // re-runs it if a recalc flips the live set.
+  private liveQuery(constraints: QueryConstraint[], withId = false):
+      Observable<any[]> {
+    return this.statsSet.collections$.pipe(switchMap(({elo}) => {
+      const q = query(collection(this.firestore, elo), ...constraints);
+      return withId ? collectionData(q, {idField: 'id'}) : collectionData(q);
+    }));
   }
 }

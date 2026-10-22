@@ -175,6 +175,34 @@ cd functions && npm install && npm run build
   spymaster clue generation (`callable/chat-gpt.ts`). The latter is
   authenticated and restricted to the requesting team's spymaster.
 
+- **Blue/green stats storage.** `eloHistory`/`userToUserHistory` (blue)
+  and `eloHistoryGreen`/`userToUserHistoryGreen` (green) are interchangeable
+  sets; `/system/stats.liveSet` says which one clients read (missing doc =
+  blue). `StatsSetService` on the client and `getLiveSet()` in functions
+  resolve it — never hard-code a history collection name. Admin merge /
+  recalc jobs (`admin/onCreate.ts` + `util/recalc-job.ts`) build the
+  *inactive* set (clear → migrate games → copy live history → recalc →
+  write users + flip pointer → delete old set), so live stats never move
+  mid-job. A merge recalcs in "web" mode: a queue (`adminJobs/current/queue`)
+  seeded with the migrated games, always popping the earliest, and queuing
+  each player's next game — only games downstream of the change are
+  visited, on top of the copied history; final `users.stats` come from each
+  touched user's latest doc in the build set. A plain recalc walks every
+  game.
+  Only one job runs at a time; progress lives in `adminJobs/current`. The
+  green composite indexes in `firestore.indexes.json` must be deployed
+  before the first flip.
+
+- **Game triggers must not re-run end-of-game work on every write.**
+  `onUpdateGame` only recalcs when `completedAt` first appears. The live
+  recalc chain (`admin/recalc`) deletes its command doc *before* running,
+  ignores a doc without a numeric `timestamp`, and refuses a chained page
+  whose `timestamp` isn't strictly after its `chainedFrom` — a mangled
+  create event used to fall back to timestamp 0 and loop a full live recalc
+  forever, which is what made the leaderboard and charts jump around. There
+  is deliberately no cap on chain length: it's monotonic over a finite set
+  of games, so it terminates on its own at any size.
+
 - **Known open issue:** `firestore.rules` grants `allow read: if true` on
   `games/{document=**}`, and tile roles live in the game document — so
   the assassin's location is publicly readable straight from Firestore,

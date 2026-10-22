@@ -1,26 +1,23 @@
 import {firestore} from 'firebase-admin';
 
-import {Game, GameStatus, Stats, Team, UserStats, UserToUserStats} from '../types';
+import {
+  Game,
+  GameStatus,
+  Stats,
+  StatsSet,
+  Team,
+  UserStats,
+  UserToUserStats,
+} from '../types';
 
 import {BigBatch} from './big-batch';
 import {getChange} from './elo-math';
+import {collectionsFor, getLiveSet, USER_STATS_STAGING} from './stats-sets';
 
 // elo variables
 const BASE_ELO = 1200;
 // removed this for now (set to 0), not sure I like the results - MT
 const PROVISIONAL_GAMES = 0;
-
-// Live collection names.
-export const ELO_HISTORY = 'eloHistory';
-export const USER_TO_USER_HISTORY = 'userToUserHistory';
-
-// Staging collections written during a staged recalc; only the commit phase
-// copies them onto the live collections above.
-export const ELO_HISTORY_STAGING = 'eloHistoryStaging';
-export const USER_TO_USER_HISTORY_STAGING = 'userToUserHistoryStaging';
-// Per-user final UserStats snapshot for a staged recalc; the commit phase
-// copies these into users/{userId}.stats.
-export const USER_STATS_STAGING = 'userStatsStaging';
 
 // Max completed games to process in a single recalcElo invocation. Chosen so
 // the Cloud Function stays well under its execution timeout.
@@ -40,14 +37,22 @@ interface UserToUserMap {
 }
 
 export interface RecalcOptions {
-  // When true, the recalc reads prior state from and writes new state into
-  // the *Staging collections and userStatsStaging. Live users.stats and
-  // history remain untouched, and the function does NOT auto-chain via
-  // admin/recalc — the caller drives chaining.
+  // When true, the recalc is part of an admin job building the inactive
+  // history set: final per-user stats go to userStatsStaging instead of
+  // users/{id}.stats, and the function does NOT auto-chain via admin/recalc —
+  // the job runner drives chaining.
   staged?: boolean;
+
+  // Which history set to read prior state from and write new state into.
+  // Defaults to whichever set /system/stats says is live.
+  set?: StatsSet;
 
   // Overrides the default per-invocation game limit.
   gamesLimit?: number;
+
+  // Live chain only: how many pages the chain has processed so far. Purely
+  // for logs — there is no cap.
+  hops?: number;
 }
 
 export interface RecalcResult {
@@ -57,114 +62,124 @@ export interface RecalcResult {
   lastTimestamp: number;
 }
 
-export async function recalcElo(
-    db: any,  // RIP, tried to import firestore.Firestore
-    timestamp: number,
-    deletedGame?: Game,
-    options: RecalcOptions = {},
-    ): Promise<RecalcResult> {
-  const staged = options.staged ?? false;
-  const gamesLimit = options.gamesLimit ?? RECALC_GAMES_PER_BATCH;
-  const historyCollection = staged ? ELO_HISTORY_STAGING : ELO_HISTORY;
-  const u2uHistoryCollection =
-      staged ? USER_TO_USER_HISTORY_STAGING : USER_TO_USER_HISTORY;
+/**
+ * Everything one recalc pass carries between games: the stats maps that
+ * roll forward from game to game, the batch the history docs land in, and
+ * which history set they're read from and written to.
+ *
+ * Games fed to `processGame` must arrive in completedAt order, and for any
+ * user already in `userMap` every game they played in between must have
+ * gone through this same context — the maps are only re-read from the
+ * history set on first sight of a user.
+ */
+export interface RecalcContext {
+  db: any;
+  set: StatsSet;
+  historyCollection: string;
+  u2uHistoryCollection: string;
+  userMap: UserMap;
+  userToUserMap: UserToUserMap;
+  batch: BigBatch;
+  // Every user any game in this pass has involved, so the commit phase
+  // knows whose stats to refresh.
+  touched: Set<string>;
+}
 
-  // Update:
-  //      history collection (live or staging)
-  //          -> set one record per user so we can query them later for charts
-  //      In live mode: users collection with stats for each affected user
-  //      In staged mode: userStatsStaging with final UserStats per user
+export function createRecalcContext(db: any, set: StatsSet): RecalcContext {
+  const {elo, u2u} = collectionsFor(set);
+  return {
+    db,
+    set,
+    historyCollection: elo,
+    u2uHistoryCollection: u2u,
+    userMap: {},
+    userToUserMap: {},
+    batch: new BigBatch(db),
+    touched: new Set(),
+  };
+}
 
-  const games = await db.collection('games')
-                    .where('completedAt', '>=', timestamp)
-                    .orderBy('completedAt', 'asc')
-                    .limit(gamesLimit)
-                    .get();
+/**
+ * Fold one completed game into the context: roll every player's stats and
+ * head-to-head records forward and queue their history docs on the batch.
+ */
+export async function processGame(ctx: RecalcContext, game: Game):
+    Promise<void> {
+  const {db, userMap, userToUserMap, batch} = ctx;
+  const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
+  for (const userId of userIds) ctx.touched.add(userId);
 
-  console.log(`${games.size} games got got. starting calc`);
-
-  const userMap: UserMap = {};
-  const userToUserMap: UserToUserMap = {};
-  const batch = new BigBatch(db);
-  let lastTimestamp = timestamp;
-
-  // if the game was deleted, we need to make sure the users in that
-  // deleted game get added to the user map so their records get updated
-  if (deletedGame) {
-    console.log('adding users from deleted game', deletedGame);
-    await populateUserMap(db, userMap, deletedGame, historyCollection);
-    await populateUserToUserMap(
-        db, userToUserMap, userMap, deletedGame, u2uHistoryCollection);
+  // set the userIds for the completed game. Only write when it actually
+  // changed: every game write fires onUpdateGame, and a recalc that touches
+  // every game would otherwise fan out into thousands of no-op triggers.
+  if (!sameArray(userIds, game.userIds)) {
+    batch.update(db.collection('games').doc(game.id!), {userIds});
   }
 
-  for (let i = 0; i < games.size; i++) {
-    const game = games.docs[i].data() as Game;
-    game.id = games.docs[i].id;
+  // ensure all of the users are in the userMap before
+  // passing that off to the elo function
+  await populateUserMap(db, userMap, game, ctx.historyCollection);
 
-    // set the userIds for the completed game
-    const userIds = game.blueTeam.userIds.concat(game.redTeam.userIds);
-    batch.update(games.docs[i].ref, {userIds});
+  // populate the userToUserMap as well, using the userMap to get the record
+  // for current nemesis and ally for each player
+  await populateUserToUserMap(
+      db, userToUserMap, userMap, game, ctx.u2uHistoryCollection);
 
-    // ensure all of the users are in the userMap before
-    // passing that off to the elo function
-    await populateUserMap(db, userMap, game, historyCollection);
+  // the setStats method will update several stats in the userMap and
+  // userToUserMap for each user that played in the game
+  setStats(game, userMap, userToUserMap);
 
-    // populate the userToUserMap as well, using the userMap to get the record
-    // for current nemesis and ally for each player
-    await populateUserToUserMap(
-        db, userToUserMap, userMap, game, u2uHistoryCollection);
+  // update history for all users involved
+  for (const myUserId of userIds) {
+    batch.set(
+        db.collection(ctx.historyCollection).doc(`${myUserId}_${game.id}`),
+        {
+          // clone the object and set gameId and timestamp
+          ...userMap[myUserId],
+          gameId: game.id,
+          timestamp: game.completedAt,
+        },
+    );
 
-    // the setStats method will update several stats in the userMap and
-    // userToUserMap for each user that played in the game
-    setStats(game, userMap, userToUserMap);
-
-    // update history for all users involved
-    for (const myUserId of userIds) {
-      batch.set(
-          db.collection(historyCollection).doc(`${myUserId}_${game.id}`),
-          {
-            // clone the object and set gameId and timestamp
-            ...userMap[myUserId],
-            gameId: game.id,
-            timestamp: game.completedAt,
-          },
-      );
-
-      // save each combination of the users to the userToUserHistoryCollection
-      for (const theirUserId of userIds) {
-        if (myUserId !== theirUserId) {
-          batch.set(
-              db.collection(u2uHistoryCollection)
-                  .doc(`${myUserId}_${theirUserId}_${game.id}`),
-              {
-                // clone the object and set gameId and timestamp
-                ...userToUserMap[myUserId][theirUserId],
-                gameId: game.id,
-                timestamp: game.completedAt,
-              },
-          );
-        }
+    // save each combination of the users to the userToUserHistoryCollection
+    for (const theirUserId of userIds) {
+      if (myUserId !== theirUserId) {
+        batch.set(
+            db.collection(ctx.u2uHistoryCollection)
+                .doc(`${myUserId}_${theirUserId}_${game.id}`),
+            {
+              // clone the object and set gameId and timestamp
+              ...userToUserMap[myUserId][theirUserId],
+              gameId: game.id,
+              timestamp: game.completedAt,
+            },
+        );
       }
     }
-
-    lastTimestamp = game.completedAt!;
   }
+}
 
-  console.log('done with games, iterating through users');
+/**
+ * Write the final per-user stats for everyone the context touched and
+ * commit the batch. Staged runs park the stats in userStatsStaging for the
+ * job's commit phase; live runs write users/{id}.stats directly.
+ */
+export async function commitRecalc(ctx: RecalcContext, staged: boolean):
+    Promise<void> {
+  const {db, userMap, batch} = ctx;
 
   if (staged) {
-    // In staged mode, persist the cumulative UserStats to userStatsStaging.
-    // The commit phase reads this collection to update live users.stats.
-    for (const [userId, data] of Object.entries(userMap)) {
-      const stats = statsToUserStats(userId, data);
+    // Only record *who* was touched. The job's commit phase derives each
+    // user's final stats from their latest doc in the build set, which is
+    // right whether their last game was recomputed or carried over.
+    for (const userId of ctx.touched) {
       batch.set(
           db.collection(USER_STATS_STAGING).doc(userId),
-          {userId, stats, updatedAt: Date.now()},
+          {userId, updatedAt: Date.now()},
           {merge: true},
       );
     }
   } else {
-    // Live mode: write straight to users/{userId}.stats.* as before.
     for (const [userId, data] of Object.entries(userMap)) {
       const updateData: firestore.UpdateData<any> = {
         'stats.elo': data.elo,
@@ -201,13 +216,71 @@ export async function recalcElo(
   // wait for the batches to commit in order
   console.log('committing batches');
   await batch.commit();
+}
+
+/**
+ * Recalculate every completed game from `timestamp` onward, one page at a
+ * time. In live mode the function re-schedules itself through admin/recalc
+ * until it runs out of games.
+ */
+export async function recalcElo(
+    db: any,  // RIP, tried to import firestore.Firestore
+    timestamp: number,
+    deletedGame?: Game,
+    options: RecalcOptions = {},
+    ): Promise<RecalcResult> {
+  const staged = options.staged ?? false;
+  const gamesLimit = options.gamesLimit ?? RECALC_GAMES_PER_BATCH;
+  const set = options.set ?? await getLiveSet(db);
+  const ctx = createRecalcContext(db, set);
+
+  const games = await db.collection('games')
+                    .where('completedAt', '>=', timestamp)
+                    .orderBy('completedAt', 'asc')
+                    .limit(gamesLimit)
+                    .get();
+
+  console.log(`${games.size} games got got. starting calc`);
+
+  let lastTimestamp = timestamp;
+
+  // if the game was deleted, we need to make sure the users in that
+  // deleted game get added to the user map so their records get updated
+  if (deletedGame) {
+    console.log('adding users from deleted game', deletedGame);
+    await populateUserMap(db, ctx.userMap, deletedGame, ctx.historyCollection);
+    await populateUserToUserMap(
+        db, ctx.userToUserMap, ctx.userMap, deletedGame,
+        ctx.u2uHistoryCollection);
+  }
+
+  for (let i = 0; i < games.size; i++) {
+    const game = games.docs[i].data() as Game;
+    game.id = games.docs[i].id;
+    await processGame(ctx, game);
+    lastTimestamp = game.completedAt!;
+  }
+
+  console.log('done with games, iterating through users');
+  await commitRecalc(ctx, staged);
 
   // In live mode, self-schedule the next batch via admin/recalc so
   // onCreateAdmin picks it up. In staged mode, the job runner is in charge.
+  //
+  // The chain is monotonic: every page starts strictly after the page that
+  // scheduled it, and there are finitely many games, so it always ends.
+  // `chainedFrom` lets the handler verify that and refuse anything that
+  // would revisit earlier history — the only way a chain could ever loop.
   if (!staged && lastTimestamp > timestamp) {
-    console.log(`scheduling a new recalc starting from ${lastTimestamp}`);
-    await db.collection('admin').doc('recalc').delete();
-    await db.collection('admin').doc('recalc').set({timestamp: lastTimestamp});
+    const hops = (options.hops ?? 0) + 1;
+    console.log(`scheduling a new recalc starting from ${lastTimestamp} (hop ${
+        hops})`);
+    const ref = db.collection('admin').doc('recalc');
+    // onDocumentCreated needs a create; clear a stale command first, but
+    // never delete a doc that isn't there (the emulator fires a bogus
+    // create event for that, and the handler would loop on it).
+    if ((await ref.get()).exists) await ref.delete();
+    await ref.set({timestamp: lastTimestamp, chainedFrom: timestamp, hops});
   }
 
   return {processed: games.size, lastTimestamp};
@@ -215,7 +288,7 @@ export async function recalcElo(
 
 // Extract the storable UserStats out of a Stats snapshot. Mirrors the
 // dot-path field list used in live mode above.
-function statsToUserStats(userId: string, data: Stats): UserStats {
+export function statsToUserStats(data: Stats): UserStats {
   const stats: UserStats = {
     elo: data.elo,
     gamesPlayed: data.gamesPlayed,
@@ -233,17 +306,6 @@ function statsToUserStats(userId: string, data: Stats): UserStats {
   if (data.ally) stats.ally = data.ally;
   if (data.nemesis) stats.nemesis = data.nemesis;
   return stats;
-}
-
-export async function getHighestElo(db: any, userId: string) {
-  const snapshot = await db.collection(ELO_HISTORY)
-                       .where('id', '==', userId)
-                       .where('provisional', '==', false)
-                       .orderBy('elo', 'desc')
-                       .limit(1)
-                       .get();
-
-  return snapshot.size === 1 ? snapshot.docs[0].data().elo : undefined;
 }
 
 async function populateUserMap(
@@ -265,7 +327,7 @@ export async function getEloHistoryForUser(
     userId: string,
     gameId: string,
     timestamp: number,
-    collectionName: string = ELO_HISTORY,
+    collectionName: string,
     ): Promise<Stats> {
   const snapshot = await db.collection(collectionName)
                        .orderBy('timestamp', 'desc')  // desc is most recent
@@ -337,7 +399,7 @@ export async function getUserToUserHistoryForUser(
     theirUserId: string,
     gameId: string,
     timestamp: number,
-    collectionName: string = USER_TO_USER_HISTORY,
+    collectionName: string,
     ): Promise<UserToUserStats> {
   const snapshot = await db.collection(collectionName)
                        .orderBy('timestamp', 'desc')  // desc is most recent
@@ -516,6 +578,11 @@ export async function nukeHistoryForGame(
   });
 
   return batch.commit();
+}
+
+function sameArray(a: string[], b?: string[]): boolean {
+  if (!b || a.length !== b.length) return false;
+  return a.every((value, i) => value === b[i]);
 }
 
 function getTeamElo(team: Team, userMap: UserMap) {
