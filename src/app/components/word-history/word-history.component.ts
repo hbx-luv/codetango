@@ -18,6 +18,9 @@ export class WordHistoryComponent implements OnInit {
   clues$: Observable<Clue[]>;
 
   latestClue?: Clue;
+  // false until the first batch of clues arrives, so clues that already
+  // existed when the page loaded don't trigger a toast or sound
+  private initialLoadDone = false;
 
   constructor(
       private readonly clueService: ClueService,
@@ -28,12 +31,14 @@ export class WordHistoryComponent implements OnInit {
   ngOnInit() {
     this.clues$ = this.clueService.getClues(this.game.id).pipe(tap(clues => {
       const clue = clues[0] as Clue;
+      const isInitialLoad = !this.initialLoadDone;
+      this.initialLoadDone = true;
       const uniqueClue = this.notEqual(clue, this.latestClue);
 
       // toast when we have a unique clue and the game isn't over
       if (clue && uniqueClue && !this.game.completedAt) {
         // but don't toast and play sound when refreshing mid game
-        if (!this.isRefreshingMidGame(clues, this.latestClue)) {
+        if (!isInitialLoad) {
           this.soundService.play(Sound.NEW_CLUE);
 
           this.utilService.showToast(
@@ -78,10 +83,6 @@ export class WordHistoryComponent implements OnInit {
         TeamType.RED :
         this.game?.status === GameStatus.BLUES_TURN ? TeamType.BLUE : null;
     return !!turnTeam && clue.team === turnTeam;
-  }
-
-  isRefreshingMidGame(clues: Clue[], latestClue: Clue): boolean {
-    return (clues.length > 0 && latestClue === undefined);
   }
 
   /**
