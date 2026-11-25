@@ -15,7 +15,7 @@ If you're a developer interested in contributing, read on:
 
 ### Dev setup
 
-Install Node 20 (Functions runtime) or 22 (local dev). Then:
+Install Node 22 (Functions runtime and local dev). Then:
 
 ```
 npm install

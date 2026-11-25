@@ -9,7 +9,7 @@ Auth/Firestore/Functions backend, deployed at https://codetango.web.app/.
 Originally a hackathon project, still actively developed.
 
 - Frontend: `src/` (Angular 20.3, Ionic 8, RxJS 7, chart.js 4)
-- Cloud Functions: `functions/src/` (Firebase Functions 7 v2 API, Node 20)
+- Cloud Functions: `functions/src/` (Firebase Functions 7 v2 API, Node 22)
 - Shared types: `types.ts` at repo root (imported as bare `'types'` via
   tsconfig path mapping)
 
