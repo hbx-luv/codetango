@@ -6,15 +6,15 @@
         AI theme: <strong>“{{ source.prompt }}”</strong>
       </ng-container>
       <ng-container *ngSwitchCase="Type.SAVED">
-        Community list: <strong>{{ source.listName }}</strong>
+        Community list: <strong>{{ listName }}</strong>
         <ng-container *ngIf="source.prompt"> · from the AI theme “{{ source.prompt }}”</ng-container>
       </ng-container>
       <ng-container *ngSwitchDefault>
-        Word list: <strong>{{ source.listName }}</strong>
+        Word list: <strong>{{ listName }}</strong>
       </ng-container>
     </ng-container>
     <ng-container *ngIf="source.type === Type.AI && source.listId">
-      · saved as <strong>{{ source.listName }}</strong>
+      · saved as <strong>{{ listName }}</strong>
     </ng-container>
   </span>
   <ion-button size="small" fill="outline" (click)="save()" [disabled]="saving" *ngIf="canSave">

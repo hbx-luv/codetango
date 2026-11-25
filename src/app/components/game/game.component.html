@@ -93,6 +93,10 @@
     </app-give-clue>
 
     <app-word-source [game]="game"></app-word-source>
+
+    <!-- anything the host adds under the board (the room's end-of-game
+         buttons) lines up with the board, not the whole page -->
+    <ng-content></ng-content>
   </div>
   <!-- word history on the right -->
   <app-word-history

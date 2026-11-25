@@ -39,6 +39,17 @@ export class WordSourceComponent {
     return this.game?.wordSource;
   }
 
+  /**
+   * Built-in list docs were seeded with their id as the name ('original'),
+   * so prefer the catalog's display name for those.
+   */
+  get listName(): string {
+    const {type, listId, listName} = this.source;
+    return (type === WordSourceType.BUILT_IN &&
+            this.wordListsService.getBuiltIn(listId)?.name) ||
+        listName;
+  }
+
   get icon(): string {
     switch (this.source?.type) {
       case WordSourceType.AI:
