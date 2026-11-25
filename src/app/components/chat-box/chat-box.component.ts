@@ -1,5 +1,5 @@
-import {Component, ElementRef, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Observable, Subscription} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {AuthService} from 'src/app/services/auth.service';
 import {MessageService} from 'src/app/services/message.service';
@@ -7,27 +7,81 @@ import {Sound, SoundService} from 'src/app/services/sound.service';
 import {UtilService} from 'src/app/services/util.service';
 import {Game, Message, TeamType} from 'types';
 
+// How close to the bottom (px) still counts as "at the bottom".
+const PINNED_SLACK = 24;
+
 @Component({
   standalone: false,
   selector: 'app-chat-box',
   templateUrl: './chat-box.component.html',
   styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent implements OnInit, OnChanges {
-  @ViewChild('scrollMe') private myScrollContainer: ElementRef;
+export class ChatBoxComponent implements OnInit, OnChanges, OnDestroy {
   @Input() game: Game;
 
   newMessage: string;
   messages$: Observable<Message[]>;
+
+  // The chat follows new messages while it's pinned to the bottom. Scrolling
+  // up unpins it (so reading history isn't yanked away); getting back to the
+  // bottom, by hand or with the jump button, pins it again.
+  pinned = true;
+  // messages that arrived while unpinned, shown on the jump button
+  missed = 0;
+
+  private scroller?: HTMLElement;
+  private lastScrollTop = 0;
+  private messageCount?: number;
+  private resizeObserver?: ResizeObserver;
+  private chatShownSub: Subscription;
+
+  // The scroller sits behind an *ngIf, so it shows up (and can go away)
+  // after init. Following is driven by size changes rather than by message
+  // arrival: a message isn't laid out yet when it's delivered, and its
+  // height keeps changing as avatars load and the box animates open.
+  @ViewChild('scrollMe')
+  set scrollContainer(ref: ElementRef<HTMLElement>|undefined) {
+    // Angular re-runs the query (and this setter) whenever the message list
+    // changes, handing back the same element; only a new one needs wiring.
+    if (ref?.nativeElement === this.scroller) {
+      return;
+    }
+    this.resizeObserver?.disconnect();
+    this.scroller = ref?.nativeElement;
+    if (!this.scroller) {
+      return;
+    }
+    const content = this.scroller.firstElementChild;
+    this.resizeObserver = new ResizeObserver(entries => {
+      if (!this.pinned) {
+        return;
+      }
+      // glide when the messages grew; snap when the box itself was resized
+      // (opening, closing, switching tabs) so it never trails its own
+      // animation
+      const grew = entries.every(entry => entry.target === content);
+      this.scrollToBottom(grew);
+    });
+    this.resizeObserver.observe(this.scroller);
+    this.resizeObserver.observe(content);
+    this.scrollToBottom(false);
+  }
 
   constructor(
       public readonly authService: AuthService,
       public readonly messageService: MessageService,
       private readonly utilService: UtilService,
       private readonly soundService: SoundService,
+      private readonly zone: NgZone,
   ) {
-    // scroll the chat box to the bottom when the shown state is toggled
-    this.messageService.chatShown$.subscribe(() => this.scrollToBottom(300));
+    // opening or collapsing the chat always lands on the newest message
+    this.chatShownSub =
+        this.messageService.chatShown$.subscribe(() => this.jumpToBottom(false));
+  }
+
+  ngOnDestroy() {
+    this.resizeObserver?.disconnect();
+    this.chatShownSub.unsubscribe();
   }
 
   ngOnInit() {
@@ -49,9 +103,14 @@ export class ChatBoxComponent implements OnInit, OnChanges {
                   this.messageService.unreadMessages++;
                   this.soundService.play(Sound.NEW_MESSAGE);
                 }
-
-                this.scrollToBottom();
               }
+
+              // count what piles up while they're reading older messages
+              const count = messages?.length ?? 0;
+              if (!this.pinned && this.messageCount !== undefined) {
+                this.missed += Math.max(0, count - this.messageCount);
+              }
+              this.messageCount = count;
             }));
   }
 
@@ -96,16 +155,52 @@ export class ChatBoxComponent implements OnInit, OnChanges {
     }
 
     delete this.newMessage;
+
+    // you always want to see what you just sent
+    this.jumpToBottom();
   }
 
-  scrollToBottom(timeout = 0): void {
-    setTimeout(() => {
-      try {
-        this.myScrollContainer.nativeElement.scrollTop =
-            this.myScrollContainer.nativeElement.scrollHeight;
-      } catch (_err) {
-      }
-    }, timeout);
+  // Every snapshot delivers fresh objects; without this the whole list is
+  // torn down and rebuilt per message, which collapses the scroll height
+  // for a moment and throws the reader's position away.
+  trackByMessage(_index: number, message: Message) {
+    return message.id;
+  }
+
+  /** Track whether the reader is at the bottom or has scrolled away. */
+  onScroll() {
+    const {scrollTop, scrollHeight, clientHeight} = this.scroller;
+    if (scrollHeight - scrollTop - clientHeight <= PINNED_SLACK) {
+      this.pinned = true;
+      this.missed = 0;
+    } else if (scrollTop < this.lastScrollTop) {
+      // Only moving *up* unpins. Our own smooth scroll passes through
+      // far-from-the-bottom positions too, but always heading down.
+      this.pinned = false;
+    }
+    this.lastScrollTop = scrollTop;
+  }
+
+  /** Re-pin and go to the newest message (the jump button, sending, ...). */
+  jumpToBottom(smooth = true) {
+    this.pinned = true;
+    this.missed = 0;
+    this.scrollToBottom(smooth);
+  }
+
+  private scrollToBottom(smooth: boolean) {
+    if (!this.scroller) {
+      return;
+    }
+    const reduceMotion =
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // after layout, so the height being scrolled to is the final one
+    this.zone.runOutsideAngular(() => requestAnimationFrame(() => {
+      this.scroller?.scrollTo({
+        top: this.scroller.scrollHeight,
+        behavior: smooth && !reduceMotion ? 'smooth' : 'auto',
+      });
+    }));
   }
 
   private isBiggerDevice() {

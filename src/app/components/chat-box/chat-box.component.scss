@@ -14,6 +14,56 @@
     cursor: pointer;
   }
 
+  .chat-body {
+    position: relative;
+  }
+
+  // floats over the bottom of the messages, just above the input
+  .jump-to-latest {
+    position: absolute;
+    left: 50%;
+    bottom: 46px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    // hidden: sunk slightly and faded, and out of the way of clicks
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.9);
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+
+    &.visible {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+      pointer-events: auto;
+    }
+
+    &:hover {
+      background: var(--ion-color-primary-shade);
+    }
+
+    .missed {
+      padding-left: 4px;
+    }
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+
   .chat-messages-container {
     background: var(--background);
     max-height: 40px;

@@ -237,6 +237,9 @@ export interface Message {
   // for messages created by users
   userId?: string;
   team?: TeamType;
+
+  // client fields
+  id?: string;
 }
 
 export interface UserToUserStats {

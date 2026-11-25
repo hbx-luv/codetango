@@ -42,7 +42,7 @@ export class MessageService {
         collection(this.firestore, 'games', gameId, 'spymaster-chat'),
         orderBy('timestamp'),
     );
-    return collectionData(q) as Observable<Message[]>;
+    return collectionData(q, {idField: 'id'}) as Observable<Message[]>;
   }
 
   toggleChatShown(setTo?: boolean) {

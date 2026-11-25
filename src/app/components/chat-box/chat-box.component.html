@@ -4,13 +4,16 @@
     {{ unread }}
   </ion-badge>
 
-  <div>
+  <div class="chat-body">
     <div #scrollMe
       class="chat-messages-container"
       [class.shown]="messageService.chatShown"
       (click)="toggleChat()"
+      (scroll)="onScroll()"
       *ngIf="messages$ | async as messages"
     >
+      <!-- one child, so its height is the height of the conversation -->
+      <div class="chat-messages">
       <p class="chat-message server-chat-message" *ngIf="!game.completedAt">
         This chat is secret during the game, but becomes visible to all afterward.
       </p>
@@ -21,7 +24,7 @@
         class="chat-message"
         [class.me]="message.userId && message.userId === authService.currentUserId"
         [class.server-chat-message]="message.fromServer"
-        *ngFor="let message of messages"
+        *ngFor="let message of messages; trackBy: trackByMessage"
       >
         <span class="inline-color-block {{message.team}}" *ngIf="message.team"></span>
         <app-user
@@ -33,7 +36,20 @@
         </app-user>
         {{ message.text}}
       </p>
+      </div>
     </div>
+
+    <!-- shown once they've scrolled up; brings them back to the newest -->
+    <button
+      type="button"
+      class="jump-to-latest"
+      [class.visible]="!pinned && messageService.chatShown"
+      [attr.tabindex]="pinned ? -1 : 0"
+      [attr.aria-label]="missed ? missed + ' new messages, jump to latest' : 'Jump to latest message'"
+      (click)="jumpToBottom()">
+      <span class="missed" *ngIf="missed">{{ missed }} new</span>
+      <ion-icon name="arrow-down"></ion-icon>
+    </button>
     <input
       class="chatroom-input"
       [class.shown]="messageService.chatShown"
