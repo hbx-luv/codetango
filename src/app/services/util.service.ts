@@ -89,13 +89,14 @@ export class UtilService {
       placeholder: string,
       confirmText: string,
       cancelText: string,
+      value = '',
       ): Promise<string|null> {
     return new Promise(resolve => {
       this.alertCtrl
           .create({
             header,
             message,
-            inputs: [{name: 'name', type: 'text', placeholder}],
+            inputs: [{name: 'name', type: 'text', placeholder, value}],
             buttons: [
               {
                 text: cancelText,

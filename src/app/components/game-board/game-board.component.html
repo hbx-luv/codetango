@@ -19,6 +19,7 @@
               [class.pictures]="game.hasPictures"
               [class.emojis]="game.hasEmojis"
               [class.meme-picture]="game.gameType === GameType.MEMES"
+              [class.images]="game.gameType === GameType.IMAGES"
               [color]="getColor(tile)"
               class="word {{ spymaster || game.completedAt ? tile.role : '' }}"
               (click)="selectTile(tile)"
@@ -28,8 +29,14 @@
                 <span class="legacy-emojis" *ngSwitchCase="GameType.LEGACY_EMOJIS">
                   {{ tile.word }}
                 </span>
+                <!-- player-made image list: any size or shape, so crop to fill -->
+                <img
+                  class="tile-image"
+                  alt=""
+                  *ngSwitchCase="GameType.IMAGES"
+                  [attr.src]="tile | tileSrc | async">
                 <span *ngSwitchDefault>
-                  <ion-img [src]="getPictureSrc(tile.word)"></ion-img>
+                  <ion-img [src]="tile | tileSrc: game.assetUrlPattern | async"></ion-img>
                 </span>
               </ng-container>
             </ion-button>

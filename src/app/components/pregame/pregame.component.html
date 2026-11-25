@@ -88,44 +88,12 @@
   </div>
 
   <div class="room-settings">
-    <div class="word-lists-header">
-      <h3>Choose Word List</h3>
-      <ion-button
-        size="small"
-        fill="clear"
-        (click)="promptForTheme()"
-      >
-        Custom Theme
-      </ion-button>
-    </div>
-    <div class="custom-theme" *ngIf="hasCustomTheme">
-      <p>
-        A custom board will be generated with the following theme:
-      </p>
-      <h5>
-        {{ room.aiWordlistTheme }}
-        <ion-button
-          size="small"
-          fill="clear"
-          color="danger"
-          (click)="clearTheme()"
-        >
-          Clear
-        </ion-button>
-      </h5>
-    </div>
-    <div class="word-lists" *ngIf="!hasCustomTheme">
-      <ion-card
-        *ngFor="let list of wordLists"
-        [class.selected]="list.id === room.wordList"
-        [class.soon]="list.comingSoon"
-        (click)="selectWordList(list.id)"
-      >
-        <ion-img [src]="list.url" *ngIf="list.warning" [tooltip]="list.warning"></ion-img>
-        <ion-img [src]="list.url" *ngIf="!list.warning"></ion-img>
-        <span *ngIf="list.comingSoon">COMING SOON</span>
-      </ion-card>
-    </div>
+    <app-word-list-picker
+      [wordList]="room.wordList"
+      [theme]="room.aiWordlistTheme"
+      (listSelected)="selectWordList($event)"
+      (themeSelected)="selectTheme($event)">
+    </app-word-list-picker>
     <h3>Timer Settings</h3>
     <div class="timer-settings">
       <ion-item>

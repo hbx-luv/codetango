@@ -4,7 +4,6 @@ import {ClueService} from 'src/app/services/clue.service';
 import {GameService} from 'src/app/services/game.service';
 import {Clue, Game, GameStatus, GameType, Room, TeamType, Tile, TileRole} from '../../../../types';
 import {Sound, SoundService} from '../../services/sound.service';
-import { getSrc } from '../game/tile-util';
 
 // pop out + hold + settle + flip; keep in sync with the tile-reveal
 // keyframes in the component scss
@@ -295,11 +294,6 @@ export class GameBoardComponent implements OnChanges {
 
   get isObserver(): boolean {
     return this.myTeam === TeamType.OBSERVER;
-  }
-
-  getPictureSrc(word: string) {
-    const pattern = this.game.assetUrlPattern;
-    return getSrc(pattern, word);
   }
 
   getColor(tile: Tile): string {

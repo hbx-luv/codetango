@@ -123,11 +123,57 @@ service cloud.firestore {
                                   'photoURL', 'lastActive']);
     }
 
-    // Word lists are public game content; only admins can edit.
-    // Cloud Functions read these via the admin SDK and bypass the rule.
-    match /wordlists/{document=**} {
+    // Word lists are public game content. Built-in lists (readable doc ids,
+    // no owner) are admin-only. Signed-in players can add their own under an
+    // auto id and then edit or delete only those. Cloud Functions read these
+    // via the admin SDK and re-validate every entry before dealing a board.
+    match /wordlists/{listId} {
+      function validPlayerList(list) {
+        return list.keys().hasOnly(
+                   ['name', 'words', 'gameType', 'description', 'prompt',
+                    'createdBy', 'createdAt', 'updatedAt'])
+            && list.createdBy == request.auth.uid
+            && list.name is string
+            && list.name.size() > 0 && list.name.size() <= 60
+            && list.words is list
+            && list.words.size() <= 500
+            && ((list.gameType == 'WORDS' && list.words.size() >= 25)
+                || (list.gameType == 'IMAGES' && list.words.size() >= 20))
+            && list.createdAt is number
+            && list.updatedAt is number;
+      }
+
       allow read: if true;
       allow write: if isAdmin();
+
+      // The 20-character auto-id shape keeps players out of the built-in ids.
+      allow create: if request.auth != null
+                    && listId.matches('^[A-Za-z0-9]{20}$')
+                    && validPlayerList(request.resource.data);
+      allow update: if request.auth != null
+                    && resource.data.createdBy == request.auth.uid
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && validPlayerList(request.resource.data);
+      allow delete: if request.auth != null
+                    && resource.data.createdBy == request.auth.uid;
+    }
+
+    // Images uploaded for player-made lists, one per doc (the project has no
+    // Storage bucket; Firestore's 1 MiB doc limit caps the size). Immutable
+    // once written so boards from finished games keep rendering even after
+    // the list that used them is edited or deleted.
+    match /wordlistImages/{imageId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasOnly(
+                        ['data', 'contentType', 'createdBy', 'createdAt'])
+                    && request.resource.data.createdBy == request.auth.uid
+                    && request.resource.data.data is bytes
+                    && request.resource.data.contentType in
+                        ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
+                    && request.resource.data.createdAt is number;
+      allow update: if false;
+      allow delete: if isAdmin();
     }
   }
 }

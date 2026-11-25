@@ -74,6 +74,10 @@ function isThemedWords(v: unknown): v is ThemedWords {
   return true;
 }
 
+/**
+ * Generate a pool of candidate words (at least 25) for a player-supplied
+ * theme.
+ */
 export async function getThemedWords(theme: string): Promise<string[]> {
   // Cap the untrusted, player-supplied theme before interpolating it into the
   // prompt so a huge theme string can't blow up the request.
@@ -106,5 +110,7 @@ export async function getThemedWords(theme: string): Promise<string[]> {
       ['anthropic', 'openai'],
   );
 
-  return shuffle(cleanWords(result.words)).slice(0, 25);
+  // The whole cleaned pool, shuffled. The caller deals a board from the front
+  // and keeps the rest so the list can be saved and replayed.
+  return shuffle(cleanWords(result.words));
 }

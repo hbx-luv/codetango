@@ -91,6 +91,8 @@
       [currentClueIsFromMyTeam]="currentClueIsFromMyTeam"
       *ngIf="spymaster && !game.completedAt">
     </app-give-clue>
+
+    <app-word-source [game]="game"></app-word-source>
   </div>
   <!-- word history on the right -->
   <app-word-history

@@ -1,10 +1,10 @@
 import {Component, OnDestroy} from '@angular/core';
-import {Observable, ReplaySubject} from 'rxjs';
+import {ReplaySubject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {RoomService} from 'src/app/services/room.service';
 import {UserService} from 'src/app/services/user.service';
 import {environment} from 'src/environments/environment';
-import {User, WordList} from 'types';
+import {User} from 'types';
 
 const LOCALSTORAGE_ROOMS = 'CODETANGO_LOCALSTORAGE_ROOMS';
 const LOCALSTORAGE_USER_ID = 'CODETANGO_LOCALSTORAGE_USER_ID';
@@ -20,8 +20,6 @@ export class HomePage implements OnDestroy {
 
   version = environment.version;
   roomName: string;
-  lists: Observable<WordList[]>;
-  selectedWordList: WordList;
   userHasTyped = false;
   
   // load these from cache initially
@@ -72,10 +70,6 @@ export class HomePage implements OnDestroy {
 
     // cache
     this.setLocalStorage(LOCALSTORAGE_ROOMS, this.roomIds);
-  }
-
-  selectWordList(list: WordList) {
-    this.selectedWordList = list;
   }
 
   async createRoom() {

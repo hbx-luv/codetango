@@ -1,0 +1,176 @@
+<div class="picker-header">
+  <h3>Word List</h3>
+</div>
+
+<!-- what the room is playing right now, whichever tab is open -->
+<button type="button" class="current" (click)="tab = current.tab">
+  <img class="current-art" [src]="current.cover" alt="" *ngIf="current.cover">
+  <span class="current-art icon" *ngIf="!current.cover">
+    <ion-icon [name]="current.icon"></ion-icon>
+  </span>
+  <span class="current-text">
+    <span class="eyebrow">Now playing</span>
+    <span class="title">{{ current.title }}</span>
+    <span class="subtitle" *ngIf="current.subtitle">{{ current.subtitle }}</span>
+  </span>
+</button>
+
+<ion-segment [(ngModel)]="tab">
+  <ion-segment-button value="defaults">
+    <ion-label>Defaults</ion-label>
+  </ion-segment-button>
+  <ion-segment-button value="library">
+    <ion-label>Community</ion-label>
+  </ion-segment-button>
+  <ion-segment-button value="ai">
+    <ion-label>AI Theme</ion-label>
+  </ion-segment-button>
+</ion-segment>
+
+<!-- defaults -->
+<div class="defaults" *ngIf="tab === 'defaults'">
+  <button
+    type="button"
+    class="default-card"
+    [class.selected]="isSelected(list.id)"
+    [attr.aria-pressed]="isSelected(list.id)"
+    *ngFor="let list of builtIns"
+    (click)="selectList(list.id)">
+    <img [src]="list.cover" alt="">
+    <span class="default-name">
+      {{ list.name }}
+      <ion-icon name="checkmark-circle" *ngIf="isSelected(list.id)"></ion-icon>
+    </span>
+    <span class="default-tagline">{{ list.tagline }}</span>
+  </button>
+</div>
+
+<!-- community library -->
+<div class="library" *ngIf="tab === 'library'">
+  <p class="tab-intro">
+    Lists made by players — words, or boards of images and GIFs.
+  </p>
+  <div class="library-tools">
+    <ion-searchbar
+      placeholder="Search lists"
+      [debounce]="150"
+      [(ngModel)]="search">
+    </ion-searchbar>
+    <ion-button
+      [disabled]="!authService.authenticated"
+      (click)="openEditor()">
+      <ion-icon slot="start" name="add"></ion-icon>
+      New list
+    </ion-button>
+  </div>
+  <div class="filter-chips">
+    <button
+      type="button"
+      [class.active]="filter === option.id"
+      *ngFor="let option of filters"
+      (click)="filter = option.id">
+      {{ option.label }}
+    </button>
+  </div>
+
+  <div class="spinner-container" *ngIf="!library">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <div class="empty" *ngIf="library && !visibleLibrary.length">
+    <ng-container *ngIf="library.length; else noLists">
+      No lists match — try a different search or filter.
+    </ng-container>
+    <ng-template #noLists>
+      <strong>No community lists yet</strong>
+      Make the first one: type in some words, or drop in a folder of images.
+    </ng-template>
+  </div>
+
+  <div
+    class="list-row"
+    role="button"
+    tabindex="0"
+    [class.selected]="isSelected(list.id)"
+    [attr.aria-pressed]="isSelected(list.id)"
+    *ngFor="let list of visibleLibrary; trackBy: trackById"
+    (click)="selectList(list.id)"
+    (keydown.enter)="selectList(list.id)">
+    <!-- image lists preview their first few tiles -->
+    <span class="thumb mosaic" *ngIf="isImages(list); else wordThumb">
+      <img
+        alt=""
+        loading="lazy"
+        [attr.src]="ref | tileSrc | async"
+        *ngFor="let ref of list.words | slice: 0 : 4">
+    </span>
+    <ng-template #wordThumb>
+      <span class="thumb" [class.ai]="list.prompt">
+        <ion-icon name="sparkles" *ngIf="list.prompt; else letters"></ion-icon>
+        <ng-template #letters>Aa</ng-template>
+      </span>
+    </ng-template>
+
+    <span class="row-text">
+      <span class="row-name">{{ list.name }}</span>
+      <span class="row-meta">
+        {{ describe(list) }}
+        <ng-container *ngIf="list.createdBy">
+          · by {{ isMine(list) ? "you" : (authorName(list.createdBy) | async) }}
+        </ng-container>
+      </span>
+      <span class="row-detail" *ngIf="list.prompt || list.description">
+        {{ list.prompt ? "AI theme: “" + list.prompt + "”" : list.description }}
+      </span>
+    </span>
+
+    <ion-icon class="row-check" name="checkmark-circle" *ngIf="isSelected(list.id)"></ion-icon>
+    <ion-button
+      fill="clear"
+      color="medium"
+      [attr.aria-label]="isMine(list) ? 'Edit list' : 'View list'"
+      [tooltip]="isMine(list) ? 'Edit' : 'View'"
+      (click)="openEditor(list, $event)">
+      <ion-icon slot="icon-only" [name]="isMine(list) ? 'create-outline' : 'eye-outline'"></ion-icon>
+    </ion-button>
+  </div>
+</div>
+
+<!-- AI theme -->
+<div class="ai" *ngIf="tab === 'ai'">
+  <p class="tab-intro">
+    Describe a theme and we'll generate a new board of words for it each
+    game. Like how one turned out? Save its words as a list from the game
+    afterwards.
+  </p>
+
+  <div class="active-theme" *ngIf="theme">
+    <ion-icon name="sparkles"></ion-icon>
+    <span class="theme-text">
+      <span class="eyebrow">Current theme</span>
+      {{ theme }}
+    </span>
+    <ion-button fill="clear" color="medium" (click)="clearTheme()">
+      Clear
+    </ion-button>
+  </div>
+
+  <form class="theme-form" (ngSubmit)="generateTheme()">
+    <ion-input
+      fill="outline"
+      name="theme"
+      [placeholder]="theme ? 'Try a different theme' : 'e.g. Pop culture, movies, and music'"
+      [maxlength]="themeMaxLength"
+      [(ngModel)]="themeDraft">
+    </ion-input>
+    <ion-button type="submit" [disabled]="!themeDraft.trim()">
+      <ion-icon slot="start" name="sparkles"></ion-icon>
+      Use theme
+    </ion-button>
+  </form>
+  <div class="theme-ideas">
+    <button type="button" *ngFor="let idea of themeIdeas" (click)="generateTheme(idea)">
+      {{ idea }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<div class="word-source" [class.compact]="compact" *ngIf="source">
+  <ion-icon [name]="icon" [class.ai]="source.type === Type.AI"></ion-icon>
+  <span class="label">
+    <ng-container [ngSwitch]="source.type">
+      <ng-container *ngSwitchCase="Type.AI">
+        AI theme: <strong>“{{ source.prompt }}”</strong>
+      </ng-container>
+      <ng-container *ngSwitchCase="Type.SAVED">
+        Community list: <strong>{{ source.listName }}</strong>
+        <ng-container *ngIf="source.prompt"> · from the AI theme “{{ source.prompt }}”</ng-container>
+      </ng-container>
+      <ng-container *ngSwitchDefault>
+        Word list: <strong>{{ source.listName }}</strong>
+      </ng-container>
+    </ng-container>
+    <ng-container *ngIf="source.type === Type.AI && source.listId">
+      · saved as <strong>{{ source.listName }}</strong>
+    </ng-container>
+  </span>
+  <ion-button size="small" fill="outline" (click)="save()" [disabled]="saving" *ngIf="canSave">
+    <ion-icon slot="start" name="bookmark-outline"></ion-icon>
+    Save list
+  </ion-button>
+  <ion-button size="small" fill="clear" (click)="open()" *ngIf="canOpen">
+    View list
+  </ion-button>
+</div>

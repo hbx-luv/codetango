@@ -175,6 +175,29 @@ cd functions && npm install && npm run build
   spymaster clue generation (`callable/chat-gpt.ts`). The latter is
   authenticated and restricted to the requesting team's spymaster.
 
+- **Word lists are data, not code.** A room's `wordList` is a `/wordlists`
+  doc id and `aiWordlistTheme` (when set) wins over it. Built-in lists are
+  admin-seeded docs with readable ids and no owner; player-made lists have
+  an auto id, a `createdBy`, and a `gameType` of `WORDS` or `IMAGES`. The
+  only per-list knowledge in code is `BUILT_IN_GAME_TYPES` (types.ts, both
+  copies) and the picker catalog `BUILT_IN_WORD_LISTS`
+  (`word-lists.service.ts`) — add a default list there, not in a component.
+  `games/onCreate.ts` is the single place a board is dealt: it resolves the
+  room into words + game type, re-validates player-written entries, and
+  stamps `game.wordSource` (built-in / saved list / AI theme + prompt +
+  full generated pool) so a finished game can say what it was played with
+  and an AI board can be saved as a list. The client never sets `gameType`.
+  UI: `word-list-picker` (Defaults / Community / AI Theme),
+  `word-list-editor` (modal), `word-source` (the line under a board).
+
+- **Image tiles.** An `IMAGES` list's entries are https links or
+  `ctimg:<id>` refs to uploads. Uploads are `/wordlistImages` docs (bytes in
+  Firestore — there is no Storage bucket), shrunk client-side by
+  `ImageStoreService` and immutable so old games keep rendering. Render any
+  tile image through the `tileSrc` pipe; on a plain `<img>` bind it with
+  `[attr.src]`, because the value is null until an upload resolves and
+  `[src]="null"` requests `/null`.
+
 - **Blue/green stats storage.** `eloHistory`/`userToUserHistory` (blue)
   and `eloHistoryGreen`/`userToUserHistoryGreen` (green) are interchangeable
   sets; `/system/stats.liveSet` says which one clients read (missing doc =

@@ -1,0 +1,164 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isNew ? "New list" : editable ? "Edit list" : name }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" aria-label="Close">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- someone else's list: look, don't touch -->
+  <ng-container *ngIf="!editable">
+    <div class="view-meta">
+      <app-user [userId]="list.createdBy" [navToScorecard]="false"></app-user>
+      <span class="count">{{ count }} {{ noun }}s</span>
+    </div>
+    <p class="view-description" *ngIf="description">{{ description }}</p>
+    <p class="view-prompt" *ngIf="list.prompt">
+      <ion-icon name="sparkles"></ion-icon>
+      Generated from the theme “{{ list.prompt }}”
+    </p>
+    <div class="word-chips" *ngIf="!isImages">
+      <span *ngFor="let word of list.words">{{ word }}</span>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="editable">
+    <label class="field">
+      <span class="field-label">Name</span>
+      <ion-input
+        fill="outline"
+        placeholder="e.g. Office in-jokes"
+        [maxlength]="limits.nameLength"
+        [(ngModel)]="name">
+      </ion-input>
+    </label>
+
+    <label class="field">
+      <span class="field-label">Description <em>optional</em></span>
+      <ion-input
+        fill="outline"
+        placeholder="What's on this list?"
+        [maxlength]="limits.descriptionLength"
+        [(ngModel)]="description">
+      </ion-input>
+    </label>
+
+    <!-- the type is fixed once a list exists: its entries wouldn't convert -->
+    <div class="field" *ngIf="isNew">
+      <span class="field-label">What's on the tiles?</span>
+      <ion-segment [(ngModel)]="gameType">
+        <ion-segment-button [value]="GameType.WORDS">
+          <ion-label>Words</ion-label>
+        </ion-segment-button>
+        <ion-segment-button [value]="GameType.IMAGES">
+          <ion-label>Images &amp; GIFs</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <p class="view-prompt" *ngIf="list?.prompt">
+      <ion-icon name="sparkles"></ion-icon>
+      Generated from the theme “{{ list.prompt }}”
+    </p>
+
+    <!-- words -->
+    <label class="field" *ngIf="!isImages">
+      <span class="field-label">Words <em>one per line, or separated by commas</em></span>
+      <ion-textarea
+        fill="outline"
+        class="words-input"
+        placeholder="STAPLER&#10;STANDUP&#10;COFFEE"
+        [rows]="10"
+        [(ngModel)]="wordsText">
+      </ion-textarea>
+    </label>
+
+    <!-- images -->
+    <ng-container *ngIf="isImages">
+      <div
+        class="dropzone"
+        [class.dragging]="dragging"
+        (click)="filePicker.click()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="dragging = false"
+        (drop)="onDrop($event)">
+        <ion-icon name="images-outline"></ion-icon>
+        <strong>Drop images or GIFs here</strong>
+        <span>or click to browse your files</span>
+        <input
+          #filePicker
+          type="file"
+          multiple
+          hidden
+          [accept]="acceptedImageTypes"
+          (change)="onFilesPicked(filePicker)">
+      </div>
+
+      <div class="link-adder">
+        <ion-textarea
+          fill="outline"
+          placeholder="…or paste image links, one per line (https://…)"
+          [autoGrow]="true"
+          [rows]="1"
+          [(ngModel)]="linksText">
+        </ion-textarea>
+        <ion-button
+          fill="outline"
+          [disabled]="!linksText.trim()"
+          (click)="addLinksFromInput()">
+          Add
+        </ion-button>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- image grid, shared by the editing and read-only views -->
+  <div class="image-grid" *ngIf="isImages && images.length">
+    <div class="image-cell" [class.broken]="image.broken" *ngFor="let image of images; let i = index">
+      <!-- not lazy: a link has to actually load to count, wherever it sits -->
+      <img
+        alt=""
+        [attr.src]="image.preview || (image.ref | tileSrc | async)"
+        (error)="image.broken = true">
+      <span class="broken-label" *ngIf="image.broken">Didn't load</span>
+      <button
+        type="button"
+        class="remove"
+        aria-label="Remove image"
+        *ngIf="editable"
+        (click)="removeImage(i)">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ng-container *ngIf="editable">
+      <div class="status" slot="start" [class.ok]="!problem">
+        <ion-icon [name]="problem ? 'alert-circle-outline' : 'checkmark-circle'"></ion-icon>
+        <span>{{ problem || count + " " + noun + "s — ready to play" }}</span>
+      </div>
+      <ion-buttons slot="end">
+        <ion-button color="danger" (click)="delete()" *ngIf="!isNew" [disabled]="saving">
+          Delete
+        </ion-button>
+        <ion-button fill="solid" color="primary" (click)="save()" [disabled]="!!problem || saving">
+          <ion-spinner name="crescent" *ngIf="saving"></ion-spinner>
+          <span *ngIf="!saving">{{ isNew ? "Save & use" : "Save" }}</span>
+          <span *ngIf="saving && uploadProgress">&nbsp;Uploading {{ uploadProgress }}</span>
+        </ion-button>
+      </ion-buttons>
+    </ng-container>
+    <ion-buttons slot="end" *ngIf="!editable">
+      <ion-button fill="solid" color="primary" (click)="use()" [disabled]="!authService.authenticated">
+        Play with this list
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

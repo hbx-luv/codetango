@@ -1,6 +1,5 @@
 import {Component, Input} from '@angular/core';
 import {Clue, TeamType} from 'types';
-import { getSrc } from '../game/tile-util';
 
 @Component({
   standalone: false,
@@ -30,13 +29,5 @@ export class ClueComponent {
       default:
         return '';
     }
-  }
-
-  get hasPictureSrc(): boolean {
-    return !!this.assetUrlPattern;
-  }
-
-  getPictureSrc(word: string) {
-    return getSrc(this.assetUrlPattern, word);
   }
 }

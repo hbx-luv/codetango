@@ -107,7 +107,7 @@ export interface Room {
   // seconds to increment the turn timer by after each correct guess
   guessIncrement?: number;
 
-  // word list, optional
+  // /wordlists doc id (built-in or player-made), optional
   // server defaults to 'original'
   wordList?: string;
 
@@ -134,6 +134,11 @@ export interface Game {
   gameType: GameType;
 
   roomId: string;
+
+  // where the board came from; set by the server when the game is created
+  // (absent on games older than this field)
+  wordSource?: GameWordSource;
+
   // true for games that are using pictures
   hasPictures?: boolean;
   hasEmojis?: boolean;
@@ -187,12 +192,6 @@ export interface User {
   // set by the client
   id?: string;
   rank?: number;
-}
-
-// /wordlists
-export interface WordList {
-  name: string;
-  words: string[];
 }
 
 export interface UserStats {
@@ -258,9 +257,104 @@ export enum GameType {
   EMOJIS = 'EMOJIS',
   MEMES = 'MEMES',
   EMOJI_REMIX = 'EMOJI_REMIX',
+  // player-made list of image links / uploads
+  IMAGES = 'IMAGES',
 
   // first version of emojis RIP
   LEGACY_EMOJIS = 'LEGACY_EMOJIS',
+}
+
+// ---------------------------------------------------------------------------
+// Word lists
+// ---------------------------------------------------------------------------
+
+// /wordlists
+// Built-in lists are seeded by an admin under a readable doc id ('original',
+// 'memes', ...) and carry no owner. Player-made lists get an auto id and a
+// `createdBy`.
+export interface WordList {
+  name: string;
+
+  // The pool a board is drawn from: plain words, or image refs for an IMAGES
+  // list (an https:// link, or `ctimg:<id>` for an upload — see
+  // IMAGE_REF_PREFIX).
+  words: string[];
+
+  // WORDS or IMAGES for player-made lists. Absent on built-in docs, whose
+  // type comes from BUILT_IN_GAME_TYPES.
+  gameType?: GameType;
+
+  description?: string;
+
+  // The AI theme this list was generated from, when it started life as an
+  // AI board.
+  prompt?: string;
+
+  // Owner uid. Absent on built-in lists.
+  createdBy?: string;
+  createdAt?: number;
+  updatedAt?: number;
+
+  // client fields
+  id?: string;
+}
+
+// Built-in lists whose tiles aren't plain words. Anything not listed here
+// (and without its own `gameType`) is a word list.
+export const BUILT_IN_GAME_TYPES: Record<string, GameType> = {
+  'pictures': GameType.PICTURES,
+  'memes': GameType.MEMES,
+  'emojis': GameType.EMOJIS,
+  'emoji-remix': GameType.EMOJI_REMIX,
+};
+
+// Picture boards are 5x4, everything else is 5x5.
+export function isPictureGameType(gameType: GameType): boolean {
+  return gameType === GameType.PICTURES || gameType === GameType.MEMES ||
+      gameType === GameType.IMAGES;
+}
+
+export function tileCountFor(gameType: GameType): number {
+  return isPictureGameType(gameType) ? 20 : 25;
+}
+
+// An uploaded image is stored as a /wordlistImages doc and referenced from
+// lists and tiles as `ctimg:<docId>`.
+export const IMAGE_REF_PREFIX = 'ctimg:';
+
+export const WORD_LIST_LIMITS = {
+  nameLength: 60,
+  descriptionLength: 200,
+  wordLength: 30,
+  imageRefLength: 1000,
+  maxItems: 500,
+  themeLength: 200,
+};
+
+// Where a game's board came from, recorded on the game when it's created so
+// a finished game can always say what it was played with.
+export enum WordSourceType {
+  BUILT_IN = 'builtin',
+  SAVED = 'saved',
+  AI = 'ai',
+}
+
+export interface GameWordSource {
+  type: WordSourceType;
+
+  // /wordlists doc id. Always set for BUILT_IN and SAVED; set on an AI game
+  // once someone saves its words as a list.
+  listId?: string;
+  // the list's name when the game was created (lists can be renamed/deleted)
+  listName?: string;
+
+  // The AI theme. Set for AI games, and for SAVED lists that were generated
+  // from one.
+  prompt?: string;
+
+  // AI games only: every candidate word the model produced (the board uses
+  // 25 of them), kept so the list can be saved and replayed later.
+  pool?: string[];
 }
 
 export interface CodenamesClueResponse {

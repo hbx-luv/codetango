@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import {onDocumentCreated} from 'firebase-functions/v2/firestore';
 
-import {Game, GameStatus, GameType, Room, Tile, TileRole, WordList} from '../types';
+import {BUILT_IN_GAME_TYPES, Game, GameStatus, GameType, GameWordSource, IMAGE_REF_PREFIX, isPictureGameType, Room, Tile, TileRole, tileCountFor, WORD_LIST_LIMITS, WordList, WordSourceType} from '../types';
 import {getThemedWords} from '../util/chatgpt';
 import {anthropicApiKey, chatgptApiKey} from '../util/llm';
 
@@ -22,47 +22,23 @@ try {
 
 const db = admin.firestore();
 
+const DEFAULT_WORD_LIST = 'original';
 
-function getGameType(
-    game: Game,
-    wordList: string,
-    aiWordlistTheme?: string,
-    ): GameType {
-  // if generating an AI word list, it'll always be words
-  if (aiWordlistTheme) return GameType.WORDS;
+// Last-resort board for a project whose word lists were never seeded.
+const EMERGENCY_WORDS = [
+  'AFRICA', 'AGENT',     'AIR',      'ALIEN',     'ALPS',
+  'AMAZON', 'AMBULANCE', 'AMERICA',  'ANGEL',     'ANTARCTICA',
+  'APPLE',  'ARM',       'ATLANTIS', 'AUSTRALIA', 'AZTEC',
+  'BACK',   'BALL',      'BAND',     'BANK',      'BAR',
+  'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
+];
 
-  if (game) {
-    if (game?.gameType) {
-      return game.gameType;
-    } else if (game.hasPictures) {
-      if (wordList === 'memes') {
-        return GameType.MEMES;
-      } else if (wordList === 'pictures') {
-        return GameType.PICTURES;
-      }
-    } else if (game.hasEmojis) {
-      // hardcoded legacy timestamp of the last game to play with the initial
-      // (legacy) version of codenames emojis
-      if (game.createdAt < 1604606378903) {
-        return GameType.LEGACY_EMOJIS;
-      } else {
-        if (wordList === 'emoji-remix') {
-          return GameType.EMOJI_REMIX;
-        }
-        return GameType.EMOJIS;
-      }
-    }
-  }  // else
-  if (wordList === 'pictures') {
-    return GameType.PICTURES;
-  } else if (wordList === 'memes') {
-    return GameType.MEMES;
-  } else if (wordList === 'emojis') {
-    return GameType.EMOJIS;
-  } else if (wordList === 'emoji-remix') {
-    return GameType.EMOJI_REMIX
-  }
-  return GameType.WORDS;
+// Everything needed to deal a board: the words (or image refs) on it, how
+// they render, and where they came from.
+interface Board {
+  words: string[];
+  gameType: GameType;
+  source: GameWordSource;
 }
 
 export const onCreateGame =
@@ -82,20 +58,18 @@ export const onCreateGame =
 
           const updates: Partial<Game> = {};
 
-          // Add 25 random cards to the game if there are no tiles
+          // Add random cards to the game if there are no tiles
           // If the game is created with tiles already set, this game was
           // probably migrated. Do not modify any of the other fields
           if (!game.tiles) {
-            const {wordList = 'original', aiWordlistTheme} =
-                await getRoom(game.roomId);
+            const board = await buildBoard(await getRoom(game.roomId));
 
-            updates.hasPictures =
-                (wordList === 'pictures' || wordList === 'memes');
-            updates.hasEmojis =
-                wordList === 'emojis' || wordList === 'emoji-remix';
-            updates.gameType = getGameType(game, wordList, aiWordlistTheme);
-            updates.tiles =
-                await generateNewGameTiles(wordList, aiWordlistTheme);
+            updates.gameType = board.gameType;
+            updates.hasPictures = isPictureGameType(board.gameType);
+            updates.hasEmojis = board.gameType === GameType.EMOJIS ||
+                board.gameType === GameType.EMOJI_REMIX;
+            updates.wordSource = board.source;
+            updates.tiles = dealTiles(board);
             const blueTeamTiles = updates.tiles.filter(
                 tile => tile.role === TileRole.BLUE && !tile.selected);
             const redTeamTiles = updates.tiles.filter(
@@ -116,34 +90,130 @@ export const onCreateGame =
         },
     );
 
-async function generateNewGameTiles(
-    wordList: string,
-    aiWordlistTheme?: string,
-    ): Promise<Tile[]> {
-  let words: string[];
+/**
+ * Resolve the room's settings into a board. An AI theme wins over a word
+ * list; anything that can't produce a full board falls back to the default
+ * list rather than dealing a short one.
+ */
+async function buildBoard(room: Room|undefined): Promise<Board> {
+  const {wordList, aiWordlistTheme} = room ?? {};
+
   if (aiWordlistTheme) {
+    const prompt = aiWordlistTheme.slice(0, WORD_LIST_LIMITS.themeLength);
     try {
-      words = await getThemedWords(aiWordlistTheme);
+      const pool = await getThemedWords(prompt);
+      return {
+        words: pool.slice(0, tileCountFor(GameType.WORDS)),
+        gameType: GameType.WORDS,
+        source: {type: WordSourceType.AI, prompt, pool},
+      };
     } catch (_e) {
       console.error(
-          'themed word generation failed; falling back to original list');
-      words = await getWords('original');
+          'themed word generation failed; falling back to the default list');
+      return await boardFromList(DEFAULT_WORD_LIST) ?? emergencyBoard();
     }
-  } else {
-    words = await getWords(wordList);
   }
 
-  const tiles = words.map(word => {
-    return {
-      word, role: TileRole.CIVILIAN, selected: false
+  return await boardFromList(wordList || DEFAULT_WORD_LIST) ??
+      await boardFromList(DEFAULT_WORD_LIST) ?? emergencyBoard();
+}
+
+/**
+ * Deal from a /wordlists doc, built-in or player-made. Returns null when the
+ * doc is missing or doesn't hold enough usable entries for a full board.
+ */
+async function boardFromList(listId: string): Promise<Board|null> {
+  const snapshot = await db.collection('wordlists').doc(listId).get();
+  const list = snapshot.data() as WordList | undefined;
+  if (!list) {
+    console.log(`word list "${listId}" does not exist`);
+    return null;
+  }
+
+  const builtIn = !list.createdBy;
+  // Player-made lists are only ever words or images; the asset-backed types
+  // belong to the built-in docs.
+  const gameType = builtIn ?
+      (BUILT_IN_GAME_TYPES[listId] ?? GameType.WORDS) :
+      (list.gameType === GameType.IMAGES ? GameType.IMAGES : GameType.WORDS);
+
+  const count = tileCountFor(gameType);
+  const words = shuffle(usableEntries(list.words, gameType)).slice(0, count);
+  if (words.length < count) {
+    console.log(`word list "${listId}" had only ${words.length} usable entries`);
+    return null;
+  }
+
+  const source: GameWordSource = {
+    type: builtIn ? WordSourceType.BUILT_IN : WordSourceType.SAVED,
+    listId,
+    listName: list.name || listId,
+  };
+  if (list.prompt) {
+    source.prompt = list.prompt;
+  }
+  return {words, gameType, source};
+}
+
+function emergencyBoard(): Board {
+  return {
+    words: EMERGENCY_WORDS,
+    gameType: GameType.WORDS,
+    source: {type: WordSourceType.BUILT_IN, listName: 'Original'},
+  };
+}
+
+/**
+ * Trim, drop empties and dupes (there are some in the built-in lists), and
+ * drop anything that can't safely go on a board. List docs are written by
+ * players, so this is the check that counts — the client and the security
+ * rules only do the coarse shape.
+ */
+function usableEntries(entries: unknown, gameType: GameType): string[] {
+  if (!Array.isArray(entries)) return [];
+  const isImages = gameType === GameType.IMAGES;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of entries) {
+    if (typeof raw !== 'string') continue;
+    const entry = raw.trim();
+    const key = isImages ? entry : entry.toLowerCase();
+    if (!entry || seen.has(key)) continue;
+    if (isImages ? !isImageRef(entry) :
+                   entry.length > WORD_LIST_LIMITS.wordLength) {
+      continue;
     }
+    seen.add(key);
+    out.push(entry);
+  }
+  return out;
+}
+
+// An image tile is either an upload (`ctimg:<docId>`) or an https link.
+function isImageRef(ref: string): boolean {
+  if (ref.length > WORD_LIST_LIMITS.imageRefLength) return false;
+  if (ref.startsWith(IMAGE_REF_PREFIX)) {
+    return /^[A-Za-z0-9]+$/.test(ref.slice(IMAGE_REF_PREFIX.length));
+  }
+  return /^https:\/\/\S+$/.test(ref);
+}
+
+function dealTiles({words, gameType}: Board): Tile[] {
+  const tiles: Tile[] = words.map(word => {
+    const tile: Tile = {word, role: TileRole.CIVILIAN, selected: false};
+    // `word` stays the tile's identity everywhere (guesses, clues); `image`
+    // is what tells the client to render it as a picture.
+    if (gameType === GameType.IMAGES) {
+      tile.image = word;
+    }
+    return tile;
   });
 
   // get red, blue, and assassin counts
   // assign the roles then shuffle the tiles
   // each loop is bounded by tiles.length as defense-in-depth against a short
-  // word list (the fallback normally yields a full 25-tile board)
-  const {red, blue, assassins} = getRoleCounts(wordList);
+  // board (every path above normally yields a full one)
+  const {red, blue, assassins} = getRoleCounts(gameType);
   for (let i = 0; i < red && i < tiles.length; i++) {
     tiles[i].role = TileRole.RED;
   }
@@ -157,63 +227,14 @@ async function generateNewGameTiles(
   return shuffle(tiles);
 }
 
-async function getWords(wordList: string): Promise<string[]> {
-  const snapshot = await db.collection('wordlists').doc(wordList).get();
-  if (snapshot.exists && snapshot.data()) {
-    console.log(`word list "${wordList}" exists`);
-    const newWordsForGame = [] as string[];
-    const {words = []} = snapshot.data() as WordList;
-    // copy so we can splice without mutating the fetched doc data
-    const available = [...words];
-
-    const isPictures = (wordList === 'pictures' || wordList === 'memes');
-    // in codenames pictures (and memes), you only get 20 tiles
-    const count = isPictures ? 20 : 25;
-
-    // Bound the loop on `available` so a short or empty doc terminates rather
-    // than spinning forever pushing `undefined` (the previous latent hang).
-    while (newWordsForGame.length < count && available.length > 0) {
-      const randomIndex = Math.floor(Math.random() * available.length);
-      const word = available.splice(randomIndex, 1)[0];
-
-      // ensure no dupes / empties (since there are some in the word list)
-      if (word !== undefined && word !== '' &&
-          !newWordsForGame.includes(word)) {
-        newWordsForGame.push(word);
-      }
-    }
-
-    if (newWordsForGame.length >= count) {
-      console.log('newWordsForGame has ' + newWordsForGame.length + ' words.');
-      return newWordsForGame;
-    }
-
-    // Doc existed but didn't hold enough usable words — fall through to the
-    // hardcoded default rather than returning a too-short board.
-    console.log(`word list "${wordList}" had only ${
-        newWordsForGame.length} usable words; using hardcoded default`);
-  } else {
-    console.log('defaultWords did not exist')
-  }
-
-  const hardcodedfornow = [
-    'AFRICA', 'AGENT',     'AIR',      'ALIEN',     'ALPS',
-    'AMAZON', 'AMBULANCE', 'AMERICA',  'ANGEL',     'ANTARCTICA',
-    'APPLE',  'ARM',       'ATLANTIS', 'AUSTRALIA', 'AZTEC',
-    'BACK',   'BALL',      'BAND',     'BANK',      'BAR',
-    'BARK',   'BAT',       'BATTERY',  'BEACH',     'BEAR'
-  ];
-  return hardcodedfornow;
-}
-
-async function getRoom(roomId: string): Promise<Room> {
+async function getRoom(roomId: string): Promise<Room|undefined> {
   const roomSnapshot = await db.collection('rooms').doc(roomId).get();
-  return (roomSnapshot.data() as Room);
+  return roomSnapshot.data() as Room | undefined;
 }
 
-function getRoleCounts(wordList: string) {
+function getRoleCounts(gameType: GameType) {
   const random = Math.round(Math.random());
-  if (wordList === 'pictures' || wordList === 'memes') {
+  if (isPictureGameType(gameType)) {
     return random ? {red: 7, blue: 8, assassins: 1} :
                     {red: 8, blue: 7, assassins: 1};
   } else {

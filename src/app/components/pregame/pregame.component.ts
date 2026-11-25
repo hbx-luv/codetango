@@ -7,10 +7,9 @@ import {RoomPresenceService, RoomWatchers} from 'src/app/services/room-presence.
 import {UserService} from 'src/app/services/user.service';
 import {UtilService} from 'src/app/services/util.service';
 
-import {Game, GameType, Room, RoomStatus, Team, TeamType, User} from '../../../../types';
+import {Game, Room, RoomStatus, Team, TeamType, User} from '../../../../types';
 import {GameService} from '../../services/game.service';
 import {RoomService} from '../../services/room.service';
-import {WordListsService} from '../../services/word-lists.service';
 
 @Component({
   standalone: false,
@@ -43,35 +42,12 @@ export class PregameComponent implements OnChanges, OnDestroy {
 
   lastSettings: Partial<Room>;
 
-  wordLists = [
-    {url: './assets/original.png', id: 'original'},
-    {url: './assets/emojis.png', id: 'emojis'},
-    {url: './assets/memes.png', id: 'memes'},
-    {url: './assets/pictures.png', id: 'pictures'},
-    {url: './assets/technology-words.png', id: 'technologyWords'},
-    {url: './assets/emoji-remix.png', id: 'emoji-remix'},
-  ];
-
-  hiddenWordLists = [
-    {
-      url: './assets/deep-undercover.png',
-      id: 'deepUndercover',
-      warning: 'Note: This version is NSFW. We advise playing with adults only.'
-    },
-    {url: './assets/pop-culture-words.png', id: 'popCultureWords'},
-    {url: './assets/halloween.png', id: 'halloween'},
-    {url: './assets/tv-words.png', id: 'tvWords'},
-    {url: './assets/winter.png', id: 'winter'},
-    {url: './assets/thanksgiving-words.png', id: 'thanksgiving'},
-  ];
-
   constructor(
       private readonly authService: AuthService,
       private readonly gameService: GameService,
       private readonly roomService: RoomService,
       private readonly utilService: UtilService,
       private readonly userService: UserService,
-      private readonly wordListsService: WordListsService,
       private readonly presenceService: PresenceService,
       private readonly roomPresence: RoomPresenceService,
       private readonly botService: BotService,
@@ -184,30 +160,38 @@ export class PregameComponent implements OnChanges, OnDestroy {
         (this.blueSpymaster || this.spymasterIsBot('blueTeam'));
   }
 
-  get hasCustomTheme(): boolean {
-    return !!this.room?.aiWordlistTheme;
-  }
-
+  /** Play from a word list (built-in or player-made) instead of a theme. */
   selectWordList(wordList: string) {
-    // If we're in ASSIGNING_ROLES phase and there's an existing game,
-    // we need to delete the current game and create a new one to regenerate the board
-    if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
-      this.regenerateGame({wordList});
-    } else {
-      // In PREGAME phase, just update the word list
-      this.roomService.updateRoom(this.room.id, {wordList});
-    }
+    return this.applyWordSource({wordList, aiWordlistTheme: null});
   }
 
-  async regenerateGame(updates: {wordList?: string, aiWordlistTheme?: string | null}) {
+  /** Play AI-generated boards for a theme, or (null) go back to the list. */
+  selectTheme(theme: string|null) {
+    return this.applyWordSource(
+        theme ? {aiWordlistTheme: theme, wordList: ''} :
+                {aiWordlistTheme: null});
+  }
+
+  private applyWordSource(
+      updates: {wordList?: string, aiWordlistTheme: string|null}) {
+    // Once teams are assigned there's already a dealt board, which has to be
+    // replaced; in the lobby the setting just waits for the next game.
+    if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
+      return this.regenerateGame(updates);
+    }
+    return this.roomService.updateRoom(this.room.id, updates);
+  }
+
+  private async regenerateGame(
+      updates: {wordList?: string, aiWordlistTheme: string|null}) {
     const loader = await this.utilService.presentLoader('Regenerating board...');
-    
+
     try {
       // Update the room's settings first
       await this.roomService.updateRoom(this.room.id, updates);
 
       const idToDelete = this.game?.id;
-      
+
       // Create a new game with the same teams
       await this.gameService.createGame({
         createdAt: Date.now(),
@@ -217,10 +201,10 @@ export class PregameComponent implements OnChanges, OnDestroy {
       });
 
       // Delete the old game
-      if (this.game && this.game.id) {
+      if (idToDelete) {
         await this.gameService.deleteGame(idToDelete);
       }
-      
+
       // The room will stay in ASSIGNING_ROLES status
       await loader.dismiss();
     } catch (error) {
@@ -228,21 +212,6 @@ export class PregameComponent implements OnChanges, OnDestroy {
       console.error('Error regenerating game:', error);
       this.utilService.showToast('Failed to regenerate board. Please try again.');
     }
-  }
-
-  async regenerateGameWithNewWordList(wordList: string) {
-    await this.regenerateGame({wordList});
-  }
-
-  async regenerateGameWithNewTheme(theme: string) {
-    await this.regenerateGame({
-      aiWordlistTheme: theme,
-      wordList: '',
-    });
-  }
-
-  async regenerateGameWithClearedTheme() {
-    await this.regenerateGame({aiWordlistTheme: null});
   }
 
   saveTimerSettings() {
@@ -341,16 +310,11 @@ export class PregameComponent implements OnChanges, OnDestroy {
     });
     const timer = this.room.firstTurnTimer || this.room.timer;
     if (timer) {
-      const gameType = this.wordListsService.getGameType(this.room.wordList);
-      const hasPictures =
-          (gameType === GameType.PICTURES || gameType === GameType.MEMES);
       // set spymaster to the top of the list and set timer
       await this.gameService.updateGame(this.game.id, {
         'blueTeam.userIds': this.sortSpymasterFirst(this.game.blueTeam),
         'redTeam.userIds': this.sortSpymasterFirst(this.game.redTeam),
         'turnEnds': Date.now() + (timer * 1000),
-        'gameType': gameType,
-        'hasPictures': hasPictures,
       });
     }
     await loader.dismiss();
@@ -385,44 +349,6 @@ export class PregameComponent implements OnChanges, OnDestroy {
           }
         })
         .map(user => user.id!);
-  }
-
-  async promptForTheme() {
-    const theme = await this.utilService.promptForText(
-        'Custom Theme',
-        'Enter a theme for this game, we\'ll generate a board based on your theme.',
-        'e.g. Pop culture, movies, and music',
-        'Save',
-        'Cancel',
-    );
-
-    if (theme) {
-      // If we're in ASSIGNING_ROLES phase and there's an existing game,
-      // we need to delete the current game and create a new one to regenerate the board
-      if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
-        await this.regenerateGame({
-          aiWordlistTheme: theme,
-          wordList: '',
-        });
-      } else {
-        // In PREGAME phase, just update the theme
-        await this.roomService.updateRoom(this.room.id, {
-          aiWordlistTheme: theme,
-          wordList: '',
-        });
-      }
-    }
-  }
-
-  clearTheme() {
-    // If we're in ASSIGNING_ROLES phase and there's an existing game,
-    // we need to delete the current game and create a new one to regenerate the board
-    if (this.room.status === RoomStatus.ASSIGNING_ROLES && this.game) {
-      this.regenerateGame({aiWordlistTheme: null});
-    } else {
-      // In PREGAME phase, just clear the theme
-      this.roomService.updateRoom(this.room.id, {aiWordlistTheme: null});
-    }
   }
 
   toggleRedReady() {

@@ -4,9 +4,14 @@
   <span class="guesses" slot="end">
     <div class="guess-indicator {{tile.role}}" *ngFor="let tile of clue.guessesMade">
 
-      <div class="tooltip" [tooltip]="tile.word" *ngIf="!hasPictureSrc"></div>
-      <!-- manually set width here for the tooltip to render in the correct position -->
-      <div class="tooltip" [tooltip]="getPictureSrc(tile.word)" width="85" *ngIf="hasPictureSrc"></div>
+      <!-- picture tiles show their image in the tooltip; the width is set
+           manually so it renders in the correct position -->
+      <ng-container *ngIf="tile | tileSrc: assetUrlPattern | async as src; else wordTooltip">
+        <div class="tooltip" [tooltip]="src" width="85"></div>
+      </ng-container>
+      <ng-template #wordTooltip>
+        <div class="tooltip" [tooltip]="tile.word"></div>
+      </ng-template>
       <img class="dart" src="../../../assets/{{ tile.dartedBy === 'BLUE' ? 'blue' : 'red' }}-dart.png" *ngIf="tile.dartedBy">
     </div>
   </span>

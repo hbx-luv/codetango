@@ -1,0 +1,374 @@
+:host {
+  display: block;
+  // one accent for "this is the one you picked" across all three tabs
+  --selected: var(--ion-color-primary);
+  --surface: var(--ion-color-light);
+  --hairline: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.12);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.picker-header {
+  margin: 12px 0 10px;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ion-color-medium);
+}
+
+.tab-intro {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--ion-color-medium);
+}
+
+// ---- now playing ----
+
+.current {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+
+  .current-art {
+    flex: none;
+    width: 72px;
+    height: 44px;
+    border-radius: 6px;
+    object-fit: cover;
+
+    &.icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--ion-color-primary-rgb), 0.12);
+      color: var(--ion-color-primary);
+      font-size: 22px;
+    }
+  }
+
+  .current-text {
+    min-width: 0;
+  }
+
+  .title {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .subtitle {
+    display: block;
+    font-size: 13px;
+    color: var(--ion-color-medium);
+  }
+}
+
+ion-segment {
+  margin: 14px 0;
+}
+
+// ---- defaults ----
+
+.defaults {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.default-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 10px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
+  // the ring is an outline so selecting never shifts the layout
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+  transition: outline-color 150ms, transform 150ms, box-shadow 150ms;
+
+  img {
+    width: 100%;
+    aspect-ratio: 300 / 183;
+    object-fit: cover;
+    display: block;
+  }
+
+  .default-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 8px 10px 0;
+    font-weight: 600;
+
+    ion-icon {
+      flex: none;
+      color: var(--selected);
+      font-size: 20px;
+    }
+  }
+
+  .default-tagline {
+    margin: 2px 10px 0;
+    font-size: 12px;
+    color: var(--ion-color-medium);
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  }
+
+  &.selected {
+    outline-color: var(--selected);
+  }
+}
+
+// ---- community ----
+
+.library-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  ion-searchbar {
+    flex: 1;
+    padding: 0;
+    --border-radius: 8px;
+    --box-shadow: none;
+    --background: var(--surface);
+  }
+
+  ion-button {
+    flex: none;
+    margin: 0;
+  }
+}
+
+.filter-chips,
+.theme-ideas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 12px;
+
+  button {
+    padding: 5px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    background: transparent;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 150ms, border-color 150ms, color 150ms;
+
+    &:hover {
+      border-color: var(--ion-color-primary);
+    }
+
+    &.active {
+      border-color: var(--ion-color-primary);
+      background: var(--ion-color-primary);
+      color: var(--ion-color-primary-contrast);
+    }
+  }
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.empty {
+  padding: 28px 16px;
+  border: 1px dashed var(--hairline);
+  border-radius: 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ion-color-medium);
+
+  strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--ion-text-color);
+    font-size: 15px;
+  }
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px 8px 8px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+  transition: outline-color 150ms;
+
+  &:hover {
+    outline-color: var(--hairline);
+  }
+
+  &.selected {
+    outline-color: var(--selected);
+  }
+
+  .thumb {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: rgba(var(--ion-color-primary-rgb), 0.12);
+    color: var(--ion-color-primary);
+    font-size: 20px;
+    font-weight: 700;
+    overflow: hidden;
+
+    &.ai {
+      background: rgba(var(--ion-color-tertiary-rgb), 0.14);
+      color: var(--ion-color-tertiary);
+    }
+
+    &.mosaic {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 1px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        object-fit: cover;
+      }
+    }
+  }
+
+  .row-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .row-name,
+  .row-meta,
+  .row-detail {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .row-name {
+    font-weight: 600;
+  }
+
+  .row-meta,
+  .row-detail {
+    font-size: 13px;
+    color: var(--ion-color-medium);
+  }
+
+  .row-check {
+    flex: none;
+    color: var(--selected);
+    font-size: 22px;
+  }
+
+  ion-button {
+    flex: none;
+    margin: 0;
+  }
+}
+
+// ---- AI theme ----
+
+.active-theme {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px 10px 14px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  outline: 3px solid var(--selected);
+  outline-offset: -3px;
+
+  > ion-icon {
+    flex: none;
+    color: var(--ion-color-tertiary);
+    font-size: 22px;
+  }
+
+  .theme-text {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+}
+
+.theme-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  ion-input {
+    flex: 1;
+    --border-radius: 8px;
+    min-height: 44px;
+  }
+
+  ion-button {
+    flex: none;
+    height: 44px;
+    margin: 0;
+  }
+}
+
+// in the single-column layout the settings column runs edge to edge
+@media (max-width: 650px) {
+  :host {
+    padding: 0 18px;
+  }
+
+  // three tabs have to fit a phone without truncating "Community"
+  ion-segment-button {
+    min-width: 0;
+    --padding-start: 4px;
+    --padding-end: 4px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+}

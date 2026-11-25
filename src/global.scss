@@ -48,6 +48,13 @@ ion-modal.game-stats-modal {
   }
 }
 
+// create / edit / view a player-made word list
+ion-modal.word-list-editor-modal {
+  --width: min(640px, 95vw);
+  --height: min(90vh, 820px);
+  --border-radius: 12px;
+}
+
 .space-between {
   display: flex;
   // ion-card-header's shadow :host styles set flex-direction: column

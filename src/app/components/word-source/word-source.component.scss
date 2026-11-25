@@ -1,0 +1,48 @@
+.word-source {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--ion-color-medium);
+
+  > ion-icon {
+    flex: none;
+    font-size: 16px;
+
+    &.ai {
+      color: var(--ion-color-tertiary);
+    }
+  }
+
+  .label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  strong {
+    color: var(--ion-text-color);
+    font-weight: 600;
+  }
+
+  ion-button {
+    margin: 0 0 0 4px;
+  }
+
+  &.compact {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    min-height: 0;
+    padding: 8px 0 0;
+    font-size: 13px;
+
+    .label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}

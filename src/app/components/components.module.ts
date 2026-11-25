@@ -3,6 +3,7 @@ import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
 import {DirectivesModule} from '../directives/directives.module';
+import {PipesModule} from '../pipes/pipes.module';
 import {ActionsPopoverPageComponent} from './actions-popover/actions-popover-page.component';
 import {ActionsPopoverComponent} from './actions-popover/actions-popover.component';
 import {ChatBoxComponent} from './chat-box/chat-box.component';
@@ -25,6 +26,9 @@ import {UsersComponent} from './users/user.component';
 import {VersusComponent} from './versus/versus.component';
 import {WinRecordComponent} from './win-record/win-record.component';
 import {WordHistoryComponent} from './word-history/word-history.component';
+import {WordListEditorComponent} from './word-list-editor/word-list-editor.component';
+import {WordListPickerComponent} from './word-list-picker/word-list-picker.component';
+import {WordSourceComponent} from './word-source/word-source.component';
 
 
 @NgModule({
@@ -40,12 +44,15 @@ import {WordHistoryComponent} from './word-history/word-history.component';
     VersusComponent,         WinRecordComponent,
     ActionsPopoverComponent, ActionsPopoverPageComponent,
     GameStatsComponent,      SoundSettingsComponent,
+    WordListPickerComponent, WordListEditorComponent,
+    WordSourceComponent,
   ],
   imports: [
     IonicModule,
     CommonModule,
     FormsModule,
     DirectivesModule,
+    PipesModule,
   ],
   exports: [
     GameBoardComponent,      GameComponent,

@@ -138,6 +138,11 @@
         }
         &.ASSASSIN {
           --ion-color-base: #888 !important;
+          // a full-bleed image hides the grey card, so ring it instead
+          &.images {
+            border: 6px solid #000;
+            box-shadow: 0 0 0 2px #888;
+          }
         }
       }
 
@@ -146,6 +151,23 @@
           max-width: 85px;
         }
 
+      }
+
+      // player-made image tiles fill the whole card
+      &.images {
+        --padding-start: 0;
+        --padding-end: 0;
+        --padding-top: 0;
+        --padding-bottom: 0;
+        overflow: hidden;
+
+        .tile-image {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
       }
 
       // First gen of the emojis word list was the unicode characters, but
@@ -174,6 +196,10 @@
             filter: grayscale(70%);
             opacity: 0.4;
           }
+        }
+        .tile-image {
+          filter: grayscale(70%);
+          opacity: 0.4;
         }
       }
 

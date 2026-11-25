@@ -51,7 +51,7 @@ export class TooltipDirective implements OnDestroy {
   }
 
   create() {
-    if (this.tooltip && (this.tooltip.startsWith('http') || this.tooltip.startsWith('./assets/'))) {
+    if (this.tooltip && ['http', 'blob:', './assets/'].some(prefix => this.tooltip.startsWith(prefix))) {
       this.createImg();
     } else {
       this.createText();
